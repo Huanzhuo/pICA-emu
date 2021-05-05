@@ -1,4 +1,4 @@
-# PICA IN NETWORK
+# pICA-emulator
 
 ## Description
 
