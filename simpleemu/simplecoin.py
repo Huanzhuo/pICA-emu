@@ -17,6 +17,7 @@ import time
 # Simple Computing In Network Framework
 
 
+
 class SimpleCOIN():
     '''
     Usage:
@@ -49,6 +50,7 @@ class SimpleCOIN():
     def __init__(self, ifce_name: str, buffer_size: int = 4096):
         self.IS_RUNNIG = True
         self.CHUNK_GAP = 0.001
+        self.time_packet_sent = 0
         # Network Device Settings
         self.ifce_name = ifce_name
         self.buffer_size = buffer_size
@@ -85,17 +87,20 @@ class SimpleCOIN():
         packet['Chunk'] = data[28:]
         return packet
 
-    def forward(self, af_packet: bytes):
+    def __send(self, send_func: Callable, *args, **kwargs):
         self.socket_lock.acquire()
-        self.af_socket.send(af_packet)
-        time.sleep(self.CHUNK_GAP)
+        _chunk_gap = time.time() - self.time_packet_sent
+        if _chunk_gap < self.CHUNK_GAP:
+            time.sleep(self.CHUNK_GAP - _chunk_gap)
+        send_func(*args, **kwargs)
+        self.time_packet_sent = time.time()
         self.socket_lock.release()
 
+    def forward(self, af_packet: bytes):
+        self.__send(self.af_socket.send, af_packet)
+
     def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
-        self.socket_lock.acquire()
-        self.client.sendto(data, dst_addr)
-        time.sleep(self.CHUNK_GAP)
-        self.socket_lock.release()
+        self.__send(self.client.sendto, data, dst_addr)
 
     def main(self):
         def decorator(func):
