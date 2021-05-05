@@ -144,7 +144,7 @@ class SimpleCOIN():
             for thread_func_loop in self.thread_func_loops:
                 thread_func_loop.start()
             self.thread_recv_loop.start()
-            print('*** INC Framework is running !')
+            print('*** SimpleCOIN Framework is running !')
             self.thread_main_loop.run()
         else:
             raise ValueError('The @main function is not defined!')
