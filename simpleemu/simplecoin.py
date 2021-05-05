@@ -47,9 +47,9 @@ class SimpleCOIN():
             pass
     '''
 
-    def __init__(self, ifce_name: str, buffer_size: int = 4096):
+    def __init__(self, ifce_name: str, buffer_size: int = 4096, chunk_gap: int = 0.0005):
         self.IS_RUNNIG = True
-        self.CHUNK_GAP = 0.001
+        self.CHUNK_GAP = chunk_gap
         self.time_packet_sent = 0
         # Network Device Settings
         self.ifce_name = ifce_name

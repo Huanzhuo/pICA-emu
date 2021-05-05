@@ -43,4 +43,4 @@ if __name__ == "__main__":
         if i%1==0:
             print('packet:',i,', len:',len(chunk))
         i += 1
-        time.sleep(0.001) #0.001 maybe the smallest gap for this framework with no packet lost
+        time.sleep(0.0005) #0.0005 maybe the smallest gap for this framework with no packet lost
