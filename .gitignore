@@ -1,0 +1,11 @@
+__pycache__/
+.vscode
+# .gitignore
+.mypy_cache/
+*.py[cod]
+*$py.class
+
+.vagrant/
+emulation/build/
+*.so
+# app/pICA-emu/MIMII/
