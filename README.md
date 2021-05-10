@@ -6,23 +6,25 @@ This application emulate the progressive ica in the network, it is **based on th
 
 ## How to run this example
 
-1. Install [comnetsemu](https://git.comnets.net/public-repo/comnetsemu) and copy this folder to ```$COMNETSEMU_DIR/app/pICA-emu```
+1. Setup the emulator.
+   
+2. copy this folder to ```$COMNETSEMU_DIR/app/pICA-emu```
 
-2. Run the comnetsemu, the following steps should be made in the comnetsemu
+3. Run the comnetsemu, the following steps should be made in the comnetsemu
 
-3. Move to the directory ```/pICA-emu``` and install docker pica_dev:4 for this application:
+4. Move to the directory ```/pICA-emu``` and install docker pica_dev:4 for this application:
 
     ```bash
-    $ cd $TOP_DIR/comnetsemu/app/pICA-emu
-    $ sudo ./docker/build_docker_images.sh
+    $ cd $TOP_DIR/comnetsemu/app/pICA-emu/docker
+    $ sudo ./build_docker_images.sh
     ```
-4. Run the topology at first:
+5. Run the topology in the folder ```$TOP_DIR/comnetsemu/app/pICA-emu/```:
 
     ```bash
     $ sudo python3 ./topo.py
     ```
 
-5. There will be 5 terminals on the desktop, i.e. 'c1', 's1', 'server', 'client', 'vnf'. In the following terminals run the following command:
+6. There will be 5 terminals on the desktop, i.e. 'c1', 's1', 'server', 'client', 'vnf'. In the following terminals run the following command:
 
     ```bash
     # in the server terminal

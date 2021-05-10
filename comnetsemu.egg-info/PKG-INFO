@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: comnetsemu
+Version: 0.1.12
+Summary: Emulator for Computing in Communication Networks.
+Home-page: UNKNOWN
+Author: The Deutsche Telekom Chair of Communication Networks, TU Dresden
+Author-email: zuo.xiang@tu-dresden.de
+License: UNKNOWN
+Description: 
+                A holistic testbed/emulator for the book: Computing in Communication Networks: From Theory to Practice
+                
+Keywords: networking emulator SDN NFV Docker
+Platform: UNKNOWN
+Classifier: Programming Language :: Python:: 3.6
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: System :: Emulators
+Classifier: Natural Language :: English
+Classifier: License :: MIT License
