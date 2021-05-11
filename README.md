@@ -1,38 +1,105 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # pICA-emulator
+
+## Table of Contents
+- [pICA-emulator](#pica-emulator)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Requirements](#requirements)
+  - [Getting Started](#getting-started)
+  - [Run pICA in the Emulator](#run-pica-in-the-emulator)
+  - [About Us](#about-us)
+  - [License](#license)
+
 
 ## Description
 
-This application emulate the progressive ica in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
+This application emulate the progressive ICA in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
 
-## How to run this example
+## Requirements
 
-1. Setup the emulator.
+Please install `vagrant` and `Virtualbox` on the host OS to build the testbed VM.
+
+## Getting Started
+
+Please run follow steps to setup the emulator. Assume the source directory of `pICA-emu` project is `~/pICA-emu`.
+
+1. Create the testbed VM using Vagrant on your host OS.
+
+```bash
+cd ~/pICA-emu || exit
+vagrant up testbed
+```
+
+Then run `vagrant ssh testbed` to login into the VM. Following steps should be run **inside the VM**.
+
+Install `docker-ce` and add docker into user group
+```bash
+sudo apt-get update
+sudo apt-get install  apt-transport-https  ca-certificates curl  software-properties-common
+curl -fsSL  https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
+sudo add-apt-repository "deb [arch=amd64]  https://download.docker.com/linux/ubuntu bionic stable" 
+sudo apt-get update
+sudo apt-get install docker-ce
+
+sudo groupadd docker
+sudo gpasswd -a vagrant docker
+newgrp docker
+```
+
+2. Upgrade ComNetsEmu Python module and all dependencies automatically inside VM
+```bash
+cd ~/comnetsemu/util
+bash ./install.sh -u
+```
+
+3. Run test to make sure the `ComNetsEmu` is installed correctly.
+
+```bash
+cd ~/comnetsemu
+sudo make test
+```
+
+Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
    
-2. copy this folder to ```$COMNETSEMU_DIR/app/pICA-emu```
-
-3. Run the comnetsemu, the following steps should be made in the comnetsemu
-
-4. Move to the directory ```/pICA-emu``` and install docker pica_dev:4 for this application:
+4. Install docker `pica_dev:4`:
 
     ```bash
-    $ cd $TOP_DIR/comnetsemu/app/pICA-emu/docker
+    $ cd /vagrant
     $ sudo ./build_docker_images.sh
     ```
-5. Run the topology in the folder ```$TOP_DIR/comnetsemu/app/pICA-emu/```:
+
+## Run pICA in the Emulator
+
+1. Run the topology in the folder ```$TOP_DIR/vagrant/emulator```:
 
     ```bash
-    $ sudo python3 ./topo.py
+    cd /vagrant/emulator
+    sudo python3 ./topo.py
     ```
+You should see the prompt `mininet>` when the network configuration is finished.
+And five terminals are popped up, you can identify client, server, VNF, swich, and a controller by looking at the host name (e.g. `@client`) in the shell.
 
-6. There will be 5 terminals on the desktop, i.e. 'c1', 's1', 'server', 'client', 'vnf'. In the following terminals run the following command:
+2. Please firstly run `server.py` inside the server's shell, then the rest:
 
     ```bash
     # in the server terminal
-    $ sudo python3 ./server.py
+    sudo python3 ./server.py
 
     # in the vnf terminal
-    $ sudo python3 ./vnf.py
+    sudo python3 ./vnf.py
 
     # in the client terminal
-    $ sudo python3 ./client.py
+    sudo python3 ./client.py
     ```
+## About Us
+
+We are researchers at the Deutsche Telekom Chair of Communication Networks (ComNets) at TU Dresden, Germany. Our focus is on in-network computing.
+
+* **Huanzhuo Wu** - huanzhuo.wu@tu-dresden.de or wuhuanzhuo@gmail.com
+* **Yunbin Shen** - yunbin.shen@mailbox.tu-dresden.de or shenyunbin@outlook.com
+
+## License
+
+This project is licensed under the [MIT license](./LICENSE).
