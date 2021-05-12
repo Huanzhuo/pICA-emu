@@ -25,50 +25,32 @@ Please install `vagrant` and `Virtualbox` on the host OS to build the testbed VM
 
 Please run follow steps to setup the emulator. Assume the source directory of `pICA-emu` project is `~/pICA-emu`.
 
-1. Create the testbed VM using Vagrant on your host OS.
+1. Create the testbed VM using Vagrant on your host OS, the docker image `pica_dev:4` will automatically intalled in this step:.
 
-```bash
-cd ~/pICA-emu || exit
-vagrant up testbed
-```
+    ```bash
+    cd ~/pICA-emu || exit
+    vagrant up testbed
+    ```
 
 Then run `vagrant ssh testbed` to login into the VM. Following steps should be run **inside the VM**.
 
-Install `docker-ce` and add docker into user group
-```bash
-sudo apt-get update
-sudo apt-get install  apt-transport-https  ca-certificates curl  software-properties-common
-curl -fsSL  https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
-sudo add-apt-repository "deb [arch=amd64]  https://download.docker.com/linux/ubuntu bionic stable" 
-sudo apt-get update
-sudo apt-get install docker-ce
 
-sudo groupadd docker
-sudo gpasswd -a vagrant docker
-newgrp docker
-```
-
-2. Upgrade ComNetsEmu Python module and all dependencies automatically inside VM
-```bash
-cd ~/comnetsemu/util
-bash ./install.sh -u
-```
-
-3. Run test to make sure the `ComNetsEmu` is installed correctly.
-
-```bash
-cd ~/comnetsemu
-sudo make test
-```
-
-Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
+2. Upgrade ComNetsEmu Python module and all dependencies automatically inside VM (optional).
    
-4. Install docker `pica_dev:4`:
+    ```bash
+    cd ~/comnetsemu/util
+    bash ./install.sh -u
+    ```
+
+3. Run test to make sure the `ComNetsEmu` is installed correctly (optional).
 
     ```bash
-    $ cd /vagrant
-    $ sudo ./build_docker_images.sh
+    cd ~/comnetsemu
+    sudo make test
     ```
+
+Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
+
 
 ## Run pICA in the Emulator
 
