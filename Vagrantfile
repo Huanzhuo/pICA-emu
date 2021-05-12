@@ -68,8 +68,22 @@ cp /home/vagrant/comnetsemu/util/Xresources /home/vagrant/.Xresources
 # xrdb can not run directly during vagrant up. Auto-works after reboot.
 xrdb -merge /home/vagrant/.Xresources
 
+# Install docker-ce instead of the docker in comnetsemu.
+sudo apt-get update
+sudo apt-get install -y apt-transport-https  ca-certificates curl  software-properties-common
+curl -fsSL  https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
+sudo add-apt-repository "deb [arch=amd64]  https://download.docker.com/linux/ubuntu bionic stable" 
+sudo apt-get update
+sudo apt-get install -y docker-ce
+sudo groupadd docker
+sudo gpasswd -a vagrant docker
+newgrp docker
+
+# Install comnetsemu. Docker in comnetsemu is now invalid.
 cd /home/vagrant/comnetsemu/util || exit
-PYTHON=python3 ./install.sh -a || true
+PYTHON=python3 ./install.sh -a
+bash ./install.sh -v
+bash ./install.sh -c
 
 cd /home/vagrant/comnetsemu/ || exit
 # setup.py develop installs the package (typically just a source folder)
@@ -82,8 +96,8 @@ sudo make develop
 cd /home/vagrant/comnetsemu/test_containers || exit
 sudo bash ./build.sh
 
-cd /vagrant/emulator || exit
-sudo ./setup_host_os.sh
+cd /vagrant
+sudo bash ./build_docker_images.sh
 SCRIPT
 
 ####################
@@ -123,11 +137,13 @@ VM already started! Run "$ vagrant ssh testbed" to ssh into the runnung VM.
     testbed.vm.provision :shell, inline: $bootstrap, privileged: true
     testbed.vm.provision :shell, inline: $setup_x11_server, privileged: true
     testbed.vm.provision :shell, inline: $install_comnetsemu, privileged: false
+
     # Make the maketerm of Mininet works in VirtualBox.
     testbed.vm.provision :shell, privileged: true, run: "always", inline: <<-SHELL
       sed -i 's/X11UseLocalhost no/X11UseLocalhost yes/g' /etc/ssh/sshd_config
       systemctl restart sshd.service
     SHELL
+
     testbed.vm.provision :shell, inline: $post_installation, privileged: true
 
     testbed.vm.network "forwarded_port", guest: 8080, host: 8080, host_ip: "127.0.0.1"
@@ -139,8 +155,9 @@ VM already started! Run "$ vagrant ssh testbed" to ssh into the runnung VM.
     # Always run this when use `vagrant up`
     testbed.vm.provision :shell, privileged: true, run: "always", inline: <<-SHELL
       echo 3 | tee /proc/sys/vm/drop_caches
-      cd /vagrant/emulator/ || exit
+      cd /vagrant || exit
       bash ./setup_always.sh
+      
     SHELL
   end
 end

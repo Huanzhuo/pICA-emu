@@ -10,3 +10,4 @@ emulation/build/
 *.so
 emulator/S.npy
 # app/pICA-emu/MIMII/
+.DS_Store
