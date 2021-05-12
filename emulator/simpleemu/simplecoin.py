@@ -47,7 +47,7 @@ class SimpleCOIN():
             pass
     '''
 
-    def __init__(self, ifce_name: str, buffer_size: int = 4096, chunk_gap: int = 0.0005):
+    def __init__(self, ifce_name: str, buffer_size: int = 4096, chunk_gap: int = 0.0004):
         self.IS_RUNNIG = True
         self.CHUNK_GAP = chunk_gap
         self.time_packet_sent = 0

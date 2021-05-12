@@ -43,8 +43,9 @@ class ICABuffer():
         self.lock.acquire()
         m = np.shape(self.buffer)[1]
         mid_ack_n = self.ack_n - m // 2
-        proc_indexs = np.linspace(0, m, n, endpoint=False, dtype=np.int)
-        out = self.buffer[:, proc_indexs]
+        # proc_indexs = np.linspace(0, m, n, endpoint=False, dtype=np.int)
+        # out = self.buffer[:, proc_indexs]
+        out = self.buffer[:, :int(n)]
         self.lock.release()
         return mid_ack_n, out.astype(np.float64)
 

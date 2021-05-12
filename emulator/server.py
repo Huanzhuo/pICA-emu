@@ -98,6 +98,7 @@ def evaluation():
     print('*** server separation eval:', eval_db)
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
+    app.sendto(b'finished',('10.0.0.12',1000))
 
 
 if __name__ == "__main__":
