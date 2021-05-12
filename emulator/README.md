@@ -1,4 +1,21 @@
-# Emulation of Distributed IA-Net-Lite
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+# pICA-emulator
+
+## Table of Contents
+- [pICA-emulator](#pica-emulator)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Requirements](#requirements)
+  - [Getting Started](#getting-started)
+  - [Run pICA in the Emulator](#run-pica-in-the-emulator)
+  - [About Us](#about-us)
+  - [License](#license)
+
+
+## Description
+
+This application emulate the progressive ICA in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
 
 ## Requirements
 
@@ -6,114 +23,64 @@ Please install `vagrant` and `Virtualbox` on the host OS to build the testbed VM
 
 ## Getting Started
 
-Please run follow steps to setup the emulator and  run a simple store and forward example.
+Please run follow steps to setup the emulator. Assume the source directory of `pICA-emu` project is `~/pICA-emu`.
 
-Assume the source directory of `ia-net-lite-emu` project is `~/ia-net-lite-emu`.
-
-1. Create the testbed VM using Vagrant on your host OS.
+1. Create the testbed VM using Vagrant on your host OS, the docker image `pica_dev:4` will automatically intalled in this step:.
 
 ```bash
-cd ~/ia-net-lite-emu || exit
+cd ~/pICA-emu || exit
 vagrant up testbed
 ```
 
-Then run `vagrant ssh testbed` to login into the VM.
+Then run `vagrant ssh testbed` to login into the VM. Following steps should be run **inside the VM**.
 
-Following steps should be run **inside the VM**.
 
-Install `docker-ce` and add docker into user group
-```bash
-sudo apt-get update
-sudo apt-get install  apt-transport-https  ca-certificates curl  software-properties-common
-curl -fsSL  https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
-sudo add-apt-repository "deb [arch=amd64]  https://download.docker.com/linux/ubuntu bionic stable" 
-sudo apt-get update
-sudo apt-get install docker-ce
-
-sudo groupadd docker
-sudo gpasswd -a vagrant docker
-newgrp docker
-```
-
-Upgrade ComNetsEmu Python module and all dependencies automatically inside VM
+2. Upgrade ComNetsEmu Python module and all dependencies automatically inside VM (optional).
 ```bash
 cd ~/comnetsemu/util
 bash ./install.sh -u
 ```
 
-2. Run test to make sure the `ComNetsEmu` is installed correctly.
+3. Run test to make sure the `ComNetsEmu` is installed correctly (optional).
 
 ```bash
 cd ~/comnetsemu
 sudo make test
 ```
 
-Only run following steps when all tests passed without any errors.
-Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) or send Emails to Zuo Xiang.
-
-3. Build the Docker image for `ia-net-lite-emu`
-
-```bash
-cd /vagrant
-chmod u+x build.sh
-./build.sh
-```
-
-After this step, you should see the image with name `ia-net-lite-emu` when running `docker image ls`.
-
-You should change your current path to `/vagrant/emulator` (inside the VM, of course) for following steps.
+Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
 
 
-4. Run the multi-hop network emulation script.
+## Run pICA in the Emulator
 
-```bash
-sudo python3 ./topology.py
-```
+1. Run the topology in the folder ```$TOP_DIR/vagrant/emulator```:
 
-Now you should see the pop-up window for logs of the Ryu SDN controller running the application `./multi_hop_controller.py`.
-And you should also see the prompt `mininet>` when the network configuration is finished.
-If you check the CPU usage inside the VM using `htop`, two VNF processes are heavily using the second CPU core.
+    ```bash
+    cd /vagrant/emulator
+    sudo python3 ./topo.py
+    ```
+You should see the prompt `mininet>` when the network configuration is finished.
+And five terminals are popped up, you can identify client, server, VNF, swich, and a controller by looking at the host name (e.g. `@client`) in the shell.
 
-5. Login server, client, vnf1, and vnf2 inside the corresponded container.
+2. Please firstly run `server.py` inside the server's shell, then the rest:
 
-```bash
-mininet> xterm client server vnf1 vnf2
-```
+    ```bash
+    # in the server terminal
+    sudo python3 ./server.py
 
-Then four windows are popped up, you can identify client, server and two VNFs by looking at the host name (e.g. `@client`) in the shell.
+    # in the vnf terminal
+    sudo python3 ./vnf.py
 
-Then please firstly run `server.py` inside the server's shell and then `client.py` in the clients shell (use `-h` to check the CLI options).
+    # in the client terminal
+    sudo python3 ./client.py
+    ```
+## About Us
 
-Run server, vnf1, vnf2, and client with compute-and-forward mode (the default option). Currently, this order must be kept manually. Please use the following sequence:
+We are researchers at the Deutsche Telekom Chair of Communication Networks (ComNets) at TU Dresden, Germany. Our focus is on in-network computing.
 
-```bash
-root@server# python3 ./server.py
+* **Huanzhuo Wu** - huanzhuo.wu@tu-dresden.de or wuhuanzhuo@gmail.com
+* **Yunbin Shen** - yunbin.shen@mailbox.tu-dresden.de or shenyunbin@outlook.com
 
-root@vnf1# python3 ./vnf.py --id 1
+## License
 
-root@vnf2# python3 ./vnf.py --id 2
-# change epochs to modify running rounds (e.g. 60)
-root@client# python3 ./client.py --epochs 60
-```
-
-
-Run server, vnf1, vnf2, and client with store-and-forward mode, please use the following sequence:
-
-```bash
-root@server# python3 ./server.py -m 0
-
-root@vnf1# python3 ./vnf.py --id 1 -m 0
-
-root@vnf2# python3 ./vnf.py --id 2 -m 0
-# change epochs to modify running rounds (e.g. 60)
-root@client# python3 ./client.py -m 0 --epochs 60
-```
-
-Run ia-net with store-and-forward:
-simply change IA_NET = True in file: emulator_utils.py
-change LENGTH can modify the input length
-
-Results will store in latency_results
-
-## Todo
-1. Configure the links in the network and the computing power of nodes.
+This project is licensed under the [MIT license](./LICENSE).
