@@ -27,26 +27,27 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
 
 1. Create the testbed VM using Vagrant on your host OS, the docker image `pica_dev:4` will automatically intalled in this step:.
 
-```bash
-cd ~/pICA-emu || exit
-vagrant up testbed
-```
+    ```bash
+    cd ~/pICA-emu || exit
+    vagrant up testbed
+    ```
 
 Then run `vagrant ssh testbed` to login into the VM. Following steps should be run **inside the VM**.
 
 
 2. Upgrade ComNetsEmu Python module and all dependencies automatically inside VM (optional).
-```bash
-cd ~/comnetsemu/util
-bash ./install.sh -u
-```
+   
+    ```bash
+    cd ~/comnetsemu/util
+    bash ./install.sh -u
+    ```
 
 3. Run test to make sure the `ComNetsEmu` is installed correctly (optional).
 
-```bash
-cd ~/comnetsemu
-sudo make test
-```
+    ```bash
+    cd ~/comnetsemu
+    sudo make test
+    ```
 
 Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
 
