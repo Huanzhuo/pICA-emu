@@ -7,6 +7,7 @@
 # @desc. : [description]
 
 import os
+import copy
 from shlex import split
 from subprocess import check_output
 from comnetsemu.cli import CLI
@@ -26,18 +27,28 @@ class SimpleTopo():
         info("*** Adding controller "+node_name+"\n")
         self.net.addController(node_name)
 
-    def addHostNode(self, node_name, dimage, ip, volume=None, docker_args={}):
+    def addHostNode(self, node_name, ip, dimage, volume=None, docker_args={}, **params):
         info("*** Adding host "+node_name+"\n")
+        docker_args = copy.copy(docker_args)
         docker_args.update({"hostname": node_name,"volumes": {volume: {"bind": '/volume', "mode": "rw"}},"working_dir": '/volume'})
         if volume is None:
             volume = os.path.abspath(os.path.join(os.path.curdir, os.pardir))
-        node = self.net.addDockerHost(name=node_name, dimage=dimage, ip=ip, docker_args=docker_args)
+        node = self.net.addDockerHost(name=node_name, dimage=dimage, ip=ip, docker_args=docker_args, **params)
         self.nodes[node_name] = {'node':node,'type':'host','ports':[]}
+
+    def addHostNodes(self, node_names, ip_prefix, ip_suffixes, dimage, volume=None, docker_args={}, **params):
+        for node_name, ip_suffix in zip(node_names, ip_suffixes):
+            ip = ip_prefix + str(ip_suffix)
+            self.addHostNode(node_name, ip, dimage, volume, docker_args, **params)
 
     def addSwitchNode(self, node_name):
         info("*** Adding switch "+node_name+"\n")
         node = self.net.addSwitch(node_name)
         self.nodes[node_name] = {'node':node,'type':'switch','ports':[]}
+    
+    def addSwitchNodes(self, node_names):
+        for node_name in node_names:
+            self.addSwitchNode(node_name)
 
     def addLink(self, src, dst, *args, **kwargs):
         info("*** Adding link "+src+"-"+dst+"\n")
@@ -90,10 +101,19 @@ class SimpleNet():
         info("*** Deleting flow on switch " + node_name + "\n")
         check_output(split("ovs-ofctl del-flows "+node_name))
 
-    def disableNodeCksum(self, node_name, port):
+    def delFlowsOnSwitches(self, node_names):
+        for node_name in node_names:
+            self.delFlowsOnSwitch(node_name)
+
+    def disableSwitchCksum(self, node_name, port):
         info("*** Disabling flow on switch " + node_name + "\n")
         check_output(
             split("sudo ethtool --offload " + node_name + '-' + port + " rx off tx off" ))
+    
+    def disableSwitchCksums(self, node_nameports):
+        for node_nameport in node_nameports:
+            node_name, port = node_nameport.split(':')
+            self.disableSwitchCksum(node_name, port)
 
     def enterCLI(self):
         info("*** Enter CLI\n")

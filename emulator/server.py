@@ -89,6 +89,7 @@ def pica_service():
 @app.func('evaluation')
 def evaluation():
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
+    app.sendto(b'finished',('10.0.0.12',1000))
     print('*** server separating the matrix X!')
     W = init_settings['W']
     X = ica_buf.buffer
@@ -98,7 +99,7 @@ def evaluation():
     print('*** server separation eval:', eval_db)
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
-    app.sendto(b'finished',('10.0.0.12',1000))
+    
 
 
 if __name__ == "__main__":

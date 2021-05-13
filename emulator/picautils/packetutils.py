@@ -15,7 +15,7 @@ HEADER_DATA = 1
 HEADER_FINISH = 3
 HEADER_CLEAR_CACHE = 4
 
-MTU = 1400 - 1
+MTU = 1500 - 1
 
 class PacketUtils():
     def serialize_data(self, header, data=None):

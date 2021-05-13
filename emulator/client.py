@@ -17,6 +17,7 @@ import time
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
+import sys
 
 # read wavs
 n = 4
@@ -28,11 +29,25 @@ W = np.random.random_sample((n, n))
 
 # settings
 serverAddressPort   = ("10.0.0.15", 9999)
-INIT_SETTINGS = {'is_finish':False,'m':160000,'W':W,'proc_len':120,'proc_len_multiplier':2,'node_max_ext_nums':[30,30],'node_max_lens':[8000,160000]}
+INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[30,30],'node_max_lens':[8000,160000]}
+INIT_SETTINGS_StoreForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[8000,160000]}
 
 if __name__ == "__main__":
 
-    chunk_arr = pktutils.get_chunks(init_settings=INIT_SETTINGS,X=X,m_substream=75,dtype=np.float32)
+    if len(sys.argv) == 1:
+        INIT_SETTINGS = INIT_SETTINGS_ComputeForward
+        print("*** Mode: Compute Forward")
+    elif sys.argv[1] =='computefwd':
+        INIT_SETTINGS = INIT_SETTINGS_ComputeForward
+        print("*** Mode: Compute Forward")
+    elif sys.argv[1] =='storefwd':
+        INIT_SETTINGS = INIT_SETTINGS_StoreForward
+        print("*** Mode: Store Forward")
+    else:
+        print("Invalid argument. The argument must be 'computefwd' or 'storefwd'.")
+
+    chunk_arr = pktutils.get_chunks(init_settings=INIT_SETTINGS,X=X,m_substream=80,dtype=np.float32)
+
     # send clear cache command
     print(pktutils.serialize_data(HEADER_CLEAR_CACHE))
     simpleudp.sendto(pktutils.serialize_data(HEADER_CLEAR_CACHE),serverAddressPort)
@@ -46,5 +61,5 @@ if __name__ == "__main__":
         i += 1
         time.sleep(0.01) #0.0005 maybe the smallest gap for this framework with no packet lost
     for i in range(2):
-        simpleudp.recvfrom(1000)
+        print(simpleudp.recvfrom(1000))
         print('usd time:',time.time()-t)
