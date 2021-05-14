@@ -21,16 +21,19 @@ import sys
 
 # read wavs
 n = 4
+l = 4
+m = l * 16000
+delta = 4
 folder_address = '/volume/MIMII/mix_type'
 S, A, X = pybss_tb.generate_matrix_S_A_X(
-        folder_address, wav_range=10, source_number=n, mixing_type="normal", max_min=(1, 0.01), mu_sigma=(0, 1))
+        folder_address, wav_range=l, source_number=n, mixing_type="normal", max_min=(1, 0.01), mu_sigma=(0, 1))
 np.save("S.npy",S)
 W = np.random.random_sample((n, n))
 
 # settings
 serverAddressPort   = ("10.0.0.15", 9999)
-INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[30,30],'node_max_lens':[8000,160000]}
-INIT_SETTINGS_StoreForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[8000,160000]}
+INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':m,'W':W,'proc_len':1600,'proc_len_multiplier':2,'node_max_ext_nums':[delta,delta],'node_max_lens':[m,m]}
+INIT_SETTINGS_StoreForward = {'is_finish':False,'m':m,'W':W,'proc_len':1600,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[8000,m]}
 
 if __name__ == "__main__":
 
