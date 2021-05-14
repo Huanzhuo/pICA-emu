@@ -29,8 +29,8 @@ W = np.random.random_sample((n, n))
 
 # settings
 serverAddressPort   = ("10.0.0.15", 9999)
-INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[30,30],'node_max_lens':[8000,160000]}
-INIT_SETTINGS_StoreForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[8000,160000]}
+INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[4,4],'node_max_lens':[160000,160000]}
+INIT_SETTINGS_StoreForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[160000,160000]}
 
 if __name__ == "__main__":
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         if i%200==0:
             print('packet:',i,', len:',len(chunk))
         i += 1
-        time.sleep(0.01) #0.0005 maybe the smallest gap for this framework with no packet lost
+        time.sleep(0.001) #0.0005 maybe the smallest gap for this framework with no packet lost
     for i in range(2):
         print(simpleudp.recvfrom(1000))
         print('usd time:',time.time()-t)

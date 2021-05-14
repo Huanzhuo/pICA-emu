@@ -17,7 +17,7 @@ import numpy as np
 import time
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
-from simpleemu.simplecoin import SimpleCOIN
+from simpleemu.simplecoin2 import SimpleCOIN
 import socket
 
 # get ifce name and node ip automatically
@@ -67,10 +67,17 @@ def main(af_packet):
                 app.call_func('evaluation')
         elif header == HEADER_DATA or header == HEADER_FINISH:
             if ica_processed == False:
-                ica_buf.put(pickle.loads(chunk[1:]))
-                app.call_func('fastica_service')
+                app.call_func('put_ica_buf',chunk[1:])
+            if header == HEADER_FINISH:
+                app.sendto(b'finished',('10.0.0.12',1000))
+                print('icabuf:',ica_buf.size())
         else:
             pass
+
+@app.func('put_ica_buf')
+def ica_buf_put(data):
+    ica_buf.put(pickle.loads(data))
+    app.call_func('fastica_service')
 
 
 @app.func('fastica_service')

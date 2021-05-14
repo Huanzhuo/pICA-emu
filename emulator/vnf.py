@@ -17,7 +17,7 @@ import numpy as np
 import time
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
-from simpleemu.simplecoin import SimpleCOIN
+from simpleemu.simplecoin2 import SimpleCOIN
 import socket
 
 # get ifce name and node ip automatically
@@ -73,14 +73,18 @@ def main(af_packet):
                 app.forward(af_packet)
         elif header == HEADER_DATA or header == HEADER_FINISH:
             if ica_processed == False:
-                ica_buf.put(pickle.loads(chunk[1:]))
-                # to call the function 'pica_service' and the function will run at once in another thread, 
-                # when the previous call of 'pica_service' is still not finished, 
-                # it will not start until the previous call of 'pica_service' finished.
-                app.call_func('pica_service')
+                app.call_func('put_ica_buf',chunk[1:])
             app.forward(af_packet)
         else:
             app.forward(af_packet)
+
+@app.func('put_ica_buf')
+def ica_buf_put(data):
+    ica_buf.put(pickle.loads(data))
+    # to call the function 'pica_service' and the function will run at once in another thread, 
+    # when the previous call of 'pica_service' is still not finished, 
+    # it will not start until the previous call of 'pica_service' finished.
+    app.call_func('pica_service')
 
 # the function app.func('xxx') will create a new thread to run the function
 @app.func('pica_service')

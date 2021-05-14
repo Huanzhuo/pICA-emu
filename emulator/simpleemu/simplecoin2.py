@@ -9,6 +9,7 @@
 import queue
 import socket
 import threading
+import multiprocessing
 from typing import Any, Callable, Tuple
 import time
 
@@ -47,7 +48,7 @@ class SimpleCOIN():
             pass
     '''
 
-    def __init__(self, ifce_name: str, buffer_size: int = 4096, chunk_gap: int = 0.0004):
+    def __init__(self, ifce_name: str, buffer_size: int = 4096, chunk_gap: int = 0.0008):
         self.IS_RUNNIG = True
         self.CHUNK_GAP = chunk_gap
         self.time_packet_sent = 0
@@ -61,15 +62,14 @@ class SimpleCOIN():
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket_lock = threading.Lock()
         # Network Service and User Defined Packet Processing Program
+        self.packet_queue = multiprocessing.Queue()
+        self.process_recv_loop = multiprocessing.Process(target=self.__recv_loop, args=(self.packet_queue,))
         self.main_processing = None
-        self.packet_queue = queue.Queue()
-        self.thread_recv_loop = threading.Thread(
-            target=self.__recv_loop, args=(self.packet_queue,))
-        self.thread_main_loop = threading.Thread(
-            target=self.__main_loop, args=(self.packet_queue,))
+        self.thread_main_loop = threading.Thread(target=self.__main_loop, args=(self.packet_queue,))
         # User Defined Muti-threading Program
-        self.func_params_queue_map = {}
-        self.thread_func_loops = []
+        self.func_map = {}
+        self.func_params_queue = queue.Queue()
+        self.thread_func_loop = threading.Thread(target=self.__func_loop, args=(self.func_params_queue,))
 
     def parse_af_packet(self, af_packet: bytes, frame_len: int = 0):
         if frame_len > 14:
@@ -110,20 +110,16 @@ class SimpleCOIN():
 
     def func(self, id: Any):
         def decorator(func):
-            if id in self.func_params_queue_map:
+            if id in self.func_map:
                 raise ValueError(
                     'The function id with the same name already exists!')
-            params_queue = queue.Queue()
-            self.func_params_queue_map[id] = (func, params_queue)
-            self.thread_func_loops.append(threading.Thread(
-                target=self.__create_func_loop, args=(func, params_queue)))
+            self.func_map[id] = func
             return func
         return decorator
 
     def call_func(self, id: Any, *args, **kwargs):
-        if id in self.func_params_queue_map:
-            _, params_queue = self.func_params_queue_map[id]
-            params_queue.put((args, kwargs), block=False)
+        if id in self.func_map:
+            self.func_params_queue.put((id, args, kwargs), block=False)
 
     def __recv_loop(self, packet_queue: queue.Queue):
         while(self.IS_RUNNIG):
@@ -134,17 +130,17 @@ class SimpleCOIN():
         while(self.IS_RUNNIG):
             self.main_processing(packet_queue.get())
 
-    def __create_func_loop(self, func: Callable, params_queue: queue.Queue):
+    def __func_loop(self, func_params_queue: queue.Queue):
         while(self.IS_RUNNIG):
-            args, kwargs = params_queue.get()
+            id, args, kwargs = func_params_queue.get()
+            func = self.func_map[id]
             func(*args, **kwargs)
 
     def run(self):
         if self.main_processing is not None:
-            for thread_func_loop in self.thread_func_loops:
-                thread_func_loop.start()
-            self.thread_recv_loop.start()
-            print('*** SimpleCOIN Framework is running !')
+            self.process_recv_loop.start()
+            self.thread_func_loop.start()
+            print('*** SimpleCOIN v2.0 Framework is running !')
             self.thread_main_loop.run()
         else:
             raise ValueError('The @main function is not defined!')
@@ -156,7 +152,6 @@ class SimpleCOIN():
     def exit(self):
         self.IS_RUNNIG = False
         self.af_socket.close()
-        for thread_func_loop in self.thread_func_loops:
-            self.__thread_join(thread_func_loop)
-        self.__thread_join(self.thread_recv_loop)
+        self.__thread_join(self.thread_func_loop)
         self.__thread_join(self.thread_main_loop)
+        self.process_recv_loop.terminate()
