@@ -112,8 +112,7 @@ class SimpleCOIN():
         ```
         @app.main
         def user_defined_function(simplecoin:SimpleCOIN.IPC, af_packet:bytes):
-        ````
-
+        
             # call user defined function, where pid is the id of `func_prcess`
             simplecoin.submit(id:Any,pid:int,args,kwargs)
 
@@ -122,6 +121,9 @@ class SimpleCOIN():
 
             # send data by udp
             simplecoin.sendto(data:bytes,dst_addr:Tuple[str,int])
+
+            pass
+        ````
 
         The first argument of the `user_defined_function` must be reserved for 
         `simplecoin:SimpleCOIN.IPC`, which is a Interprocess Communication 
@@ -136,6 +138,7 @@ class SimpleCOIN():
         def user_defined_function(simplecoin:SimpleCOIN.IPC, *args,**kwargs)
             pass
         ```
+
         The first argument of the `user_defined_function` must be reserved for 
         `simplecoin:SimpleCOIN.IPC`, which is a Interprocess Communication 
         Framework and has several important function for calling function and
