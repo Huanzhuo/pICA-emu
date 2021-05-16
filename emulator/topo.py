@@ -22,7 +22,7 @@ if __name__ == "__main__":
     mytopo.addHostNodes(node_names=['client', 'vnf1', 'vnf2', 'server'],
                         ip_prefix='10.0.0.', ip_suffixes=['12', '13', '14', '15'],
                         dimage='pica_dev:4', volume='/vagrant/emulator',
-                        docker_args={"cpuset_cpus": '0-1', 'cpu_quota': 15000})
+                        docker_args={"cpuset_cpus": '1', 'cpu_quota': 25000})
     mytopo.addSwitchNodes(node_names=['s1', 's2'])
     # create links
     mytopo.addLinks(links=['client - s1 - s2 - server', 's1 - vnf1',

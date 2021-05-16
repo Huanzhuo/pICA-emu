@@ -25,7 +25,6 @@ class SimpleUDP():
             _socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             _socket.bind(('',port))
             self.recv_sockets[port] = _socket
-            return 
         return self.recv_sockets[port].recvfrom(self.BUFFER_SIZE)
 
     def close(self):
