@@ -29,8 +29,8 @@ W = np.random.random_sample((n, n))
 
 # settings
 serverAddressPort   = ("10.0.0.15", 9999)
-INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[4,4],'node_max_lens':[160000,160000]}
-INIT_SETTINGS_StoreForward = {'is_finish':False,'m':160000,'W':W,'proc_len':80,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[160000,160000]}
+INIT_SETTINGS_ComputeForward = {'is_finish':False,'m':160000,'W':W,'proc_len':1000,'proc_len_multiplier':2,'node_max_ext_nums':[4,4],'node_max_lens':[160000,160000]}
+INIT_SETTINGS_StoreForward = {'is_finish':False,'m':160000,'W':W,'proc_len':1000,'proc_len_multiplier':2,'node_max_ext_nums':[0,0],'node_max_lens':[160000,160000]}
 
 if __name__ == "__main__":
 
@@ -49,17 +49,19 @@ if __name__ == "__main__":
     chunk_arr = pktutils.get_chunks(init_settings=INIT_SETTINGS,X=X,m_substream=80,dtype=np.float32)
 
     # send clear cache command
-    print(pktutils.serialize_data(HEADER_CLEAR_CACHE))
+    print('*** send clear cache command')
     simpleudp.sendto(pktutils.serialize_data(HEADER_CLEAR_CACHE),serverAddressPort)
     time.sleep(1)
+    print('*** send data')
     t = time.time()
     i = 0
     for chunk in chunk_arr:
         simpleudp.sendto(chunk, serverAddressPort)
-        if i%200==0:
+        if i%500==0:
             print('packet:',i,', len:',len(chunk))
         i += 1
-        time.sleep(0.001) #0.0005 maybe the smallest gap for this framework with no packet lost
-    for i in range(2):
-        print(simpleudp.recvfrom(1000))
-        print('usd time:',time.time()-t)
+        time.sleep(0.002) #0.0005 maybe the smallest gap for this framework with no packet lost
+    print('*** last_pkt:',time.strftime("%H:%M:%S", time.localtime()))
+    print('*** time sent all pkg     : ',time.time()-t)
+    print(simpleudp.recvfrom(1000)[0],time.time()-t)
+    print(simpleudp.recvfrom(1000)[0],time.time()-t)
