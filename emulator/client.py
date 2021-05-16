@@ -60,7 +60,7 @@ if __name__ == "__main__":
         if i%500==0:
             print('packet:',i,', len:',len(chunk))
         i += 1
-        time.sleep(0.002) #0.0005 maybe the smallest gap for this framework with no packet lost
+        time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
     print('*** last_pkt:',time.strftime("%H:%M:%S", time.localtime()))
     print('*** time sent all pkg     : ',time.time()-t)
     print(simpleudp.recvfrom(1000)[0],time.time()-t)

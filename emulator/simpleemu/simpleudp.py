@@ -48,5 +48,17 @@ class SimpleUDP():
         packet['Chunk'] = data[28:]
         return packet
 
+    # get ifce name and node ip automatically
+    def get_local_ifce_ip(self, ip_prefix):
+        from subprocess import Popen, PIPE
+        ifconfig_output = Popen('ifconfig', stdout=PIPE).stdout.read()
+        for paragraph in ifconfig_output.split(b'\n\n'):
+            paragraph = paragraph.split()
+            if len(paragraph)>6 and len(paragraph[0])>1:
+                ifce_name = paragraph[0][:-1].decode("utf-8")
+                ip = paragraph[5].decode("utf-8")
+                if ip_prefix in ip:
+                    return ifce_name,ip
+        raise ValueError('ip not detected!')
 
 simpleudp = SimpleUDP()
