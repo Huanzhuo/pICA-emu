@@ -207,7 +207,9 @@ class SimpleCOIN():
             n_submit += 1
             print(myvalue, n_submit)
             if n_submit == 1:
+                print('before submit in func')
                 simplecoin.submit_func(id='submit_count',pid=-1,args=('pid=-1 @ func',))
+                print('after submit in func')
 
 
         if __name__ == "__main__":
@@ -219,12 +221,16 @@ class SimpleCOIN():
 
         ```
         pid=0 @ main 1
+        before submit in func
         pid=-1 @ func 2
+        after submit in func
 
         *** sleep 1s
 
         pid=1 @ main 1
+        before submit in func
         pid=-1 @ func 2
+        after submit in func
 
         *** sleep 1s
 
