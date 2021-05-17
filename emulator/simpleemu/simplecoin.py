@@ -17,7 +17,6 @@ from functools import wraps
 # Simple Computing In Network Framework
 
 
-
 class SimpleCOIN():
     """
     ### Description:
@@ -27,7 +26,7 @@ class SimpleCOIN():
         recv_process --> main_process --> func_process, func_process, ...
                             |                         |
                             ∨                         ∨
-        send_process <-- -- -- <-- -- -- <-- -- -- <-- 
+        send_process <-------------------------------- 
 
         The SimpleCOIN is a mutliproccessing framework, it includes a
         process for receving data, a process for sending data, a process
@@ -74,7 +73,7 @@ class SimpleCOIN():
                     |function, process_id, args, kwargs        |
                     ∨                                          |
             function(args, kwargs) ----------------------------
-        
+
         User can use `simplecoin.submit_func(id,pid,args,kwargs)` to put 
         the data into the `func_params_queue[process_id]`. Once the 
         `func_params_queue[process_id]` has values, the func_process 
@@ -112,7 +111,7 @@ class SimpleCOIN():
         ```
         @app.main
         def user_defined_function(simplecoin:SimpleCOIN.IPC, af_packet:bytes):
-        
+
             # Call user defined function, where `pid` is the id of `func_prcess`.
             # When pid is `-1`, that means the function will run at the local
             # process. When the `pid` is in the interval [0,n_func_process), 
@@ -142,7 +141,7 @@ class SimpleCOIN():
         ```
         @app.func(id:Any)
         def user_defined_function(simplecoin:SimpleCOIN.IPC, *args,**kwargs)
-        
+
             # Call user defined function, where `pid` is the id of `func_prcess`.
             # When pid is `-1`, that means the function will run at the local
             # process. When the `pid` is in the interval [0,n_func_process), 
@@ -164,7 +163,7 @@ class SimpleCOIN():
         `simplecoin:SimpleCOIN.IPC`, which is a Interprocess Communication 
         Framework and has several important function for calling function and
         networking.
-    
+
     4. Run the SimpleCOIN Framework:
 
         ```
@@ -223,12 +222,12 @@ class SimpleCOIN():
         pid=-1 @ func 2
 
         *** sleep 1s
-        
+
         pid=1 @ main 1
         pid=-1 @ func 2
-        
+
         *** sleep 1s
-        
+
         pid=0 @ main 3
 
         ```
@@ -246,12 +245,13 @@ class SimpleCOIN():
             self.func_params_queues = func_params_queues
             self.func_map = func_map
 
-        def submit_func(self, pid: int, id: Any, args = (), kwargs = {}):
+        def submit_func(self, pid: int, id: Any, args=(), kwargs={}):
             if pid < 0:
                 func = self.func_map[id]
                 func(self, *args, **kwargs)
             elif id in self.func_map:
-                self.func_params_queues[pid].put((id, args, kwargs), block=False)
+                self.func_params_queues[pid].put(
+                    (id, args, kwargs), block=False)
 
         def forward(self, af_packet: bytes):
             self.send_queue.put(('raw', af_packet, None), block=False)
@@ -265,7 +265,8 @@ class SimpleCOIN():
         self.CHUNK_GAP = chunk_gap
         self.buffer_size = mtu
         self.buf = bytearray(self.buffer_size)
-        self.af_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
+        self.af_socket = socket.socket(
+            socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
         self.af_socket.bind((ifce_name, 0))
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -275,25 +276,28 @@ class SimpleCOIN():
         self.recv_queue = multiprocessing.Queue()
         self.send_queue = multiprocessing.Queue()
         if n_func_process > 0:
-            self.func_params_queues = [multiprocessing.Queue() for _ in range(n_func_process)]
+            self.func_params_queues = [
+                multiprocessing.Queue() for _ in range(n_func_process)]
         else:
             raise ValueError('The value of n_func_process must bigger than 0.')
         # Recv and Send Service
-        self.process_send_loop = multiprocessing.Process(target=self.__send_loop, args=(self.send_queue,))
-        self.process_recv_loop = multiprocessing.Process(target=self.__recv_loop, args=(self.recv_queue,))
+        self.process_send_loop = multiprocessing.Process(
+            target=self.__send_loop, args=(self.send_queue,))
+        self.process_recv_loop = multiprocessing.Process(
+            target=self.__recv_loop, args=(self.recv_queue,))
         # User Defined Main Processing PRogram
-        self.process_main_loop = multiprocessing.Process(target=self.__main_loop, args=(self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
+        self.process_main_loop = multiprocessing.Process(target=self.__main_loop, args=(
+            self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
         # User Defined Muti-processing Program
-        self.process_func_loops = []
-        for pid in range(n_func_process):
-            self.process_func_loops.append(multiprocessing.Process(target=self.__func_loop, args=(self.send_queue, self.func_map, self.func_params_queues, pid,)))
+        self.process_func_loops = [multiprocessing.Process(target=self.__func_loop, args=(
+            self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(n_func_process)]
 
     def main(self):
         def decorator(func: Callable):
             self.main_processing = func
             @wraps(func)
-            def wrapper(*args,**kwargs):
-                return func(*args,**kwargs)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
             return wrapper
         return decorator
 
@@ -304,8 +308,8 @@ class SimpleCOIN():
                     'The function id with the same name already exists!')
             self.func_map[id] = func
             @wraps(func)
-            def wrapper(*args,**kwargs):
-                return func(*args,**kwargs)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
             return wrapper
         return decorator
 
@@ -342,7 +346,7 @@ class SimpleCOIN():
             for process_func_loop in self.process_func_loops:
                 process_func_loop.start()
             self.process_recv_loop.start()
-            print('///////////////////////////////////////////////\n')
+            print('\n///////////////////////////////////////////////\n')
 
             print('*** SimpleCOIN v3.2 Framework is running !')
             print('*** press enter to exit')
