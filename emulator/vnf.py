@@ -35,7 +35,6 @@ app = SimpleCOIN(ifce_name=IFCE_NAME,n_func_process=1)
 # af_packet is the raw af_packet from the socket
 @app.main()
 def main(simplecoin, af_packet):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     # parse the raw packet to get the ip/udp infomations like ip, port, protocol, data
     packet = simpleudp.parse_af_packet(af_packet)
     # if prorocol is 17, that means is udp
@@ -45,25 +44,25 @@ def main(simplecoin, af_packet):
         header = int(chunk[0])
         if header == HEADER_CLEAR_CACHE:
             print('*** vnf clearing cache!')
-            simplecoin.submit_func(id='clear_cache', pid=0)
+            simplecoin.submit_func(pid=0, id='clear_cache')
             print('*** vnf transmiting clearing message to next node!')
             simplecoin.forward(af_packet)
         elif header == HEADER_INIT:
             init_settings.update(pickle.loads(chunk[1:]))
             if init_settings['is_finish'] == False:
                 print('*** vnf initializing!')
-                simplecoin.submit_func(id='set_init_settings', pid=0, args=(init_settings,(packet['IP_dst'],packet['Port_dst']),))
+                simplecoin.submit_func(pid=0, id='set_init_settings', args=(init_settings,(packet['IP_dst'],packet['Port_dst']),))
             else:
                 print('*** vnf transmit init_settings!')
                 simplecoin.forward(af_packet)
         elif header == HEADER_DATA or header == HEADER_FINISH:
-            simplecoin.submit_func(id='put_ica_buf', pid=0, args=(pickle.loads(chunk[1:]),))
+            simplecoin.submit_func(pid=0, id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
             simplecoin.forward(af_packet)
             if header == HEADER_FINISH:
                 t = time.localtime()
                 print('*** last_pkt:',time.strftime("%H:%M:%S", t))
         else:
-            simplecoin.forward(af_packet)
+            pass
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
@@ -79,7 +78,8 @@ def set_init_settings(simplecoin, _init_settings, _dst_ip_addr):
     init_settings.update(_init_settings)
     dst_ip_addr = _dst_ip_addr
     if ica_buf.size() >= init_settings['proc_len']:
-        simplecoin.submit_func(id='pica_service', pid=0)
+        print('call pica')
+        simplecoin.submit_func(pid=-1, id='pica_service')
 
 @app.func('put_ica_buf')
 def ica_buf_put(simplecoin, data):
@@ -87,7 +87,7 @@ def ica_buf_put(simplecoin, data):
     if ica_processed == False:
         ica_buf.put(data)
         if ica_buf.size() >= init_settings['proc_len']:
-            simplecoin.submit_func(id='pica_service', pid=0)
+            simplecoin.submit_func(pid=-1, id='pica_service')
 
 # the function app.func('xxx') will create a new thread to run the function
 @app.func('pica_service')
@@ -98,7 +98,6 @@ def pica_service(simplecoin):
             if init_settings['is_finish'] == True or init_settings['node_max_ext_nums'][0] == 0 or init_settings['proc_len'] > init_settings['node_max_lens'][0]:
                 del init_settings['node_max_lens'][0]
                 del init_settings['node_max_ext_nums'][0]
-                print('*** vnf pica processing finished!')
                 simplecoin.sendto(pktutils.serialize_data(HEADER_INIT, init_settings),dst_ip_addr)
                 ica_processed = True
                 ica_buf.init()

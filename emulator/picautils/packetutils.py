@@ -10,12 +10,12 @@ import numpy as np
 import pickle
 
 # HEADER DEF
-HEADER_INIT = 0
-HEADER_DATA = 1
-HEADER_FINISH = 3
-HEADER_CLEAR_CACHE = 4
+HEADER_INIT = 4
+HEADER_DATA = 5
+HEADER_FINISH = 6
+HEADER_CLEAR_CACHE = 7
 
-MTU = 1500 - 1
+MTU = 1500 - 1 - 14
 
 class PacketUtils():
     def serialize_data(self, header, data=None):

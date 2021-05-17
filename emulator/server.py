@@ -42,18 +42,13 @@ def main(simplecoin, af_packet: bytes):
         header = int(chunk[0])
         if header == HEADER_CLEAR_CACHE:
             print('*** server clearing cache!')
-            simplecoin.submit_func(id='clear_cache')
+            simplecoin.submit_func(pid = 0, id='clear_cache')
         elif header == HEADER_INIT:
             print('*** server initializing!')
-            init_settings = pickle.loads(chunk[1:])
-            simplecoin.submit_func(id='set_init_settings',
-                                  args=(init_settings,))
-            if init_settings['is_finish'] == True:
-                print('*** no further ica process on server!')
-                simplecoin.sendto(b'*** time server ica finish: ', ('10.0.0.12', 1000))
-                simplecoin.submit_func(id='evaluation')
+            simplecoin.submit_func(pid = 0, id='set_init_settings',
+                                  args=(pickle.loads(chunk[1:]),))
         elif header == HEADER_DATA or header == HEADER_FINISH:
-            simplecoin.submit_func(
+            simplecoin.submit_func(pid = 0,
                 id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
             if header == HEADER_FINISH:
                 t = time.localtime()
@@ -78,7 +73,7 @@ def set_init_settings(simplecoin, _init_settings):
     if init_settings['is_finish'] == True:
         print('*** no further ica process on server!')
         simplecoin.sendto(b'*** time server ica finish: ', ('10.0.0.12', 1000))
-        simplecoin.submit_func(id='evaluation')
+        simplecoin.submit_func(pid=-1,id='evaluation')
 
 
 @app.func('put_ica_buf')
@@ -87,7 +82,7 @@ def ica_buf_put(simplecoin, data):
     if ica_processed == False:
         ica_buf.put(data)
         if ica_buf.size() >= init_settings['m']:
-            simplecoin.submit_func(id='fastica_service')
+            simplecoin.submit_func(pid=-1,id='fastica_service')
 
 
 @app.func('fastica_service')
@@ -100,13 +95,14 @@ def fastica_service(simplecoin):
         print('*** server fastica processing finished!')
         ica_processed = True
         simplecoin.sendto(b'finished', ('10.0.0.12', 1000))
-        simplecoin.submit_func(id='evaluation')
+        simplecoin.submit_func(pid=-1,id='evaluation')
 
 
 @app.func('evaluation')
 def evaluation(simplecoin):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     print('*** server separating the matrix X!')
+    # print(ica_buf.size())
     if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
         W = init_settings['W']
         X = ica_buf.buffer
