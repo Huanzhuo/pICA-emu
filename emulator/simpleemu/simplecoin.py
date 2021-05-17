@@ -180,7 +180,7 @@ class SimpleCOIN():
         from simpleemu.simplecoin import SimpleCOIN
         from simpleemu.simpleudp import simpleudp
 
-        # network interface: 'vnf-s1'
+        # network interface: 'vnf1-s1'
         # device ip: '10.0.0.13'
 
         n_submit = 0
