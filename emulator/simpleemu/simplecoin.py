@@ -3,8 +3,8 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-05-16
-# @desc. : SimpleCOIN 3.1
+# @modify: 2021-05-17
+# @desc. : SimpleCOIN 3.2
 
 
 import socket
