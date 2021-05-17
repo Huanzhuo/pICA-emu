@@ -54,12 +54,13 @@ if __name__ == "__main__":
     simpleudp.sendto(pktutils.serialize_data(HEADER_CLEAR_CACHE),serverAddressPort)
     time.sleep(1)
     print('*** send data')
-    t = time.time()
+    
     i = 0
-    time_packet_sent = 0
+    t = time.time()
+    time_packet_sent = t
     for chunk in chunk_arr:
-        time.sleep(max(0, time_packet_sent + 0.002 -time.time()))
-        time_packet_sent = time.time()
+        time.sleep(max(0, time_packet_sent - time.time()))
+        time_packet_sent += 0.002
         simpleudp.sendto(chunk, serverAddressPort)
         if i%500==0:
             print('packet:',i,', len:',len(chunk))
