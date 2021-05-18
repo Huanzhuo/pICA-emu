@@ -77,7 +77,7 @@ class SimpleCOIN():
         User can use `simplecoin.submit_func(id,pid,args,kwargs)` to put 
         the data into the `func_params_queue[process_id]`. Once the 
         `func_params_queue[process_id]` has values, the func_process 
-        will fun the `function(args, kwargs)` immediately.
+        will run the `function(args, kwargs)` immediately.
 
     ### Getting Started:
 
@@ -101,7 +101,7 @@ class SimpleCOIN():
             n_func_process: is the number of processes to run 'user 
                 defined functions', which are the functions defined by 
                 `@app.func(id)`. These 'user defined functions' runs 
-                one by one in one particular process when they submitted
+                one by one in one particular process when they are submitted
                 by `simpcoin.submit(id,pid,args,keargs)`. And the value 
                 of `pid` is the process id, the value should be an integer 
                 in the interval [0,n_func_process).
@@ -301,6 +301,7 @@ class SimpleCOIN():
     def main(self):
         def decorator(func: Callable):
             self.main_processing = func
+
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
@@ -313,6 +314,7 @@ class SimpleCOIN():
                 raise ValueError(
                     'The function id with the same name already exists!')
             self.func_map[id] = func
+
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
