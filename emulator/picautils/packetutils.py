@@ -19,10 +19,10 @@ MTU = 1500 - 1 - 14
 
 class PacketUtils():
     def serialize_data(self, header, data=None):
-        byte_arr = pickle.dumps(data)
+        byte_arr = pickle.dumps(data,protocol=-1)
         if len(byte_arr) >= MTU:
             raise ValueError('package size is bigger than MTU !')
-        return bytes([header])+pickle.dumps(data)
+        return bytes([header])+pickle.dumps(data,protocol=-1)
 
     def _get_substream_chunks(self, substream_arr):
         chunks_arr = []

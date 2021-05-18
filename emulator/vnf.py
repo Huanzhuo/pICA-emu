@@ -10,7 +10,9 @@
 """
 Forwarding VNF via packet socket.
 """
+
 import numpy as np
+import pickle
 import time
 from picautils.icanetwork import icanetwork
 from picautils.icabuffer import ICABuffer
@@ -27,7 +29,7 @@ init_settings.update(DEF_INIT_SETTINGS)
 dst_ip_addr = None
 ica_processed = False
 
-ica_buf = ICABuffer(max_size=16e4) 
+ica_buf = ICABuffer(max_size=(4,160000)) 
 
 app = SimpleCOIN(ifce_name=IFCE_NAME,n_func_process=1)
 

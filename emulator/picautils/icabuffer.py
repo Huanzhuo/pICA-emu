@@ -11,26 +11,26 @@ import threading
 
 class ICABuffer():
     def __init__(self, max_size):
-        self.max_size = max_size
-        self.buffer = None
+        self.length = 0
+        self.buffer = np.zeros(max_size)
         self.lock = threading.Lock()
 
     def init(self):
         self.lock.acquire()
-        self.buffer = None
+        self.length = 0
         self.lock.release()
 
     def clear_buffer(self):
         self.lock.acquire()
-        self.buffer = None
+        self.length = 0
+        self.buffer = np.zeros_like(self.buffer)
         self.lock.release()
 
     def put(self, x):
         self.lock.acquire()
-        if self.buffer is None:
-            self.buffer = x
-        else:
-            self.buffer = np.concatenate([self.buffer, x], axis=1)
+        _size = self.length + x.shape[1]
+        self.buffer[:,self.length:_size] = x
+        self.length = _size
         self.lock.release()
 
     def extract_n(self, n):
@@ -40,10 +40,4 @@ class ICABuffer():
         return out
 
     def size(self):
-        self.lock.acquire()
-        if self.buffer is None:
-            out = 0
-        else:
-            out = np.shape(self.buffer)[1]
-        self.lock.release()
-        return out
+        return self.length

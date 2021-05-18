@@ -4,11 +4,11 @@
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
 # @modify: 2021-05-17
-# @desc. : SimpleCOIN 3.2
+# @desc. : SimpleCOIN 0.3.3
 
 
 import socket
-import multiprocessing
+import multiprocessing as mp
 from typing import Any, Callable, Tuple
 import time
 from functools import wraps
@@ -246,7 +246,7 @@ class SimpleCOIN():
 
     # Interprocess communication
     class IPC():
-        def __init__(self, send_queue: multiprocessing.Queue, func_map: dict, func_params_queues: list):
+        def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
             self.send_queue = send_queue
             self.func_params_queues = func_params_queues
             self.func_map = func_map
@@ -256,8 +256,7 @@ class SimpleCOIN():
                 func = self.func_map[id]
                 func(self, *args, **kwargs)
             elif id in self.func_map:
-                self.func_params_queues[pid].put(
-                    (id, args, kwargs), block=False)
+                self.func_params_queues[pid].put((id, args, kwargs), block=False)
 
         def forward(self, af_packet: bytes):
             self.send_queue.put(('raw', af_packet, None), block=False)
@@ -266,7 +265,7 @@ class SimpleCOIN():
             self.send_queue.put(('udp', data, dst_addr), block=False)
 
     # The body
-    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0004, n_func_process: int = 1):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0012, n_func_process: int = 1):
         # Network Device Settings
         self.CHUNK_GAP = chunk_gap
         self.buffer_size = mtu
@@ -279,23 +278,23 @@ class SimpleCOIN():
         # Network Service and User Defined Packet Processing Program
         self.main_processing = None
         self.func_map = {}
-        self.recv_queue = multiprocessing.Queue()
-        self.send_queue = multiprocessing.Queue()
+        self.recv_queue = mp.Queue()
+        self.send_queue = mp.Queue()
         if n_func_process > 0:
             self.func_params_queues = [
-                multiprocessing.Queue() for _ in range(n_func_process)]
+                mp.Queue() for _ in range(n_func_process)]
         else:
             raise ValueError('The value of n_func_process must bigger than 0.')
         # Recv and Send Service
-        self.process_send_loop = multiprocessing.Process(
+        self.process_send_loop = mp.Process(
             target=self.__send_loop, args=(self.send_queue,))
-        self.process_recv_loop = multiprocessing.Process(
+        self.process_recv_loop = mp.Process(
             target=self.__recv_loop, args=(self.recv_queue,))
         # User Defined Main Processing PRogram
-        self.process_main_loop = multiprocessing.Process(target=self.__main_loop, args=(
+        self.process_main_loop = mp.Process(target=self.__main_loop, args=(
             self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
         # User Defined Muti-processing Program
-        self.process_func_loops = [multiprocessing.Process(target=self.__func_loop, args=(
+        self.process_func_loops = [mp.Process(target=self.__func_loop, args=(
             self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(n_func_process)]
 
     def main(self):
@@ -321,26 +320,29 @@ class SimpleCOIN():
             return wrapper
         return decorator
 
-    def __send_loop(self, send_queue: multiprocessing.Queue):
+    def __send_loop(self, send_queue: mp.Queue):
+        time_packet_sent = time.time()
         while True:
-            typ, data, dst_addr = send_queue.get()
-            if typ == 'raw':
-                self.af_socket.send(data)
-            elif typ == 'udp':
-                self.client.sendto(data, dst_addr)
-            time.sleep(self.CHUNK_GAP)
+            time.sleep(max(0, time_packet_sent - time.time()))
+            time_packet_sent += self.CHUNK_GAP
+            if not send_queue.empty():
+                typ, data, dst_addr = send_queue.get()
+                if typ == 'raw':
+                    self.af_socket.send(data)
+                elif typ == 'udp':
+                    self.client.sendto(data, dst_addr)
 
-    def __recv_loop(self, recv_queue: multiprocessing.Queue):
+    def __recv_loop(self, recv_queue: mp.Queue):
         while True:
             frame_len = self.af_socket.recv_into(self.buf, self.buffer_size)
             recv_queue.put(self.buf[:frame_len], block=False)
 
-    def __main_loop(self, recv_queue: multiprocessing.Queue, send_queue: multiprocessing.Queue, func_map: dict, func_params_queues: list):
+    def __main_loop(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
         ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
         while True:
             self.main_processing(ipc, recv_queue.get())
 
-    def __func_loop(self, send_queue: multiprocessing.Queue, func_map: dict, func_params_queues: list, pid: int):
+    def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
         ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
         while True:
             id, args, kwargs = func_params_queues[pid].get()
@@ -356,7 +358,7 @@ class SimpleCOIN():
             self.process_recv_loop.start()
             print('\n///////////////////////////////////////////////\n')
 
-            print('*** SimpleCOIN v3.2 Framework is running !')
+            print('*** SimpleCOIN v0.3.3 Framework is running !')
             print('*** press enter to exit')
             print('-----------------------------------------------')
             input()
