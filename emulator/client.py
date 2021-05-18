@@ -60,7 +60,7 @@ if __name__ == "__main__":
     time_packet_sent = t
     for chunk in chunk_arr:
         time.sleep(max(0, time_packet_sent - time.time()))
-        time_packet_sent += 0.002
+        time_packet_sent += 0.0015
         simpleudp.sendto(chunk, serverAddressPort)
         if i%500==0:
             print('packet:',i,', len:',len(chunk))

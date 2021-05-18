@@ -16,22 +16,26 @@ class SimpleUDP():
         self.recv_sockets = {}
         pass
 
+    # send udp packet
     def sendto(self,data:bytes,dst_addr:Tuple[str,int]):  
         self.client.sendto(data, dst_addr)
         
-
+    # recv udp packet
     def recvfrom(self,port:int):
         if port not in self.recv_sockets:
             _socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             _socket.bind(('',port))
             self.recv_sockets[port] = _socket
-        return self.recv_sockets[port].recvfrom(self.BUFFER_SIZE)
+        dst_addr, data =  self.recv_sockets[port].recvfrom(self.BUFFER_SIZE)
+        return dst_addr, data
 
+    # close the socket
     def close(self):
         self.client.close()
         for _socket in self.recv_sockets.keys():
             _socket.close()
 
+    # parse the udp raw packet
     def parse_af_packet(self,af_packet:bytes,frame_len:int=0):
         if frame_len>14:
             af_packet = af_packet[:frame_len]

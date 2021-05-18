@@ -24,7 +24,7 @@ if __name__ == "__main__":
                         dimage='pica_dev:4', volume='/vagrant/emulator',
                         docker_args={"cpuset_cpus": '1', 'cpu_quota': 25000})
     mytopo.addSwitchNodes(node_names=['s1', 's2'])
-    # create links
+    # create links, `bw` is bandwith, unit of bandwith is 'Mbit/s'
     mytopo.addLinks(links=['client - s1 - s2 - server', 's1 - vnf1',
                            's2 - vnf2'], bw=1000, delay='10ms', use_htb=True)
     mynet = mytopo.startNetwork()
@@ -34,6 +34,6 @@ if __name__ == "__main__":
     # add flows
     mynet.addFlowsOnSwitch(proto='udp', flows=[
                            'client - s1 - vnf1 - s1 - s2 - vnf2 - s2 - server', 'server - s2 - s1 - client'])
-    # disable checksum
+    # disable checksum, `node_nameports = ['switch_name:port_name',...]``
     mynet.disableSwitchCksums(node_nameports=['s1:vnf1', 's2:vnf2'])
     mynet.enterCLI()

@@ -10,7 +10,9 @@
 Server for pica in network
 all functions are similiar to vnf.py 
 """
+
 import numpy as np
+import pickle
 import time
 from picautils.icanetwork import icanetwork
 from picautils.icabuffer import ICABuffer
@@ -29,7 +31,7 @@ init_settings.update(DEF_INIT_SETTINGS)
 dst_ip_addr = None
 ica_processed = False
 
-ica_buf = ICABuffer(max_size=16e4)
+ica_buf = ICABuffer(max_size=(4,160000))
 
 app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1)
 
@@ -102,7 +104,6 @@ def fastica_service(simplecoin):
 def evaluation(simplecoin):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     print('*** server separating the matrix X!')
-    # print(ica_buf.size())
     if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
         W = init_settings['W']
         X = ica_buf.buffer
