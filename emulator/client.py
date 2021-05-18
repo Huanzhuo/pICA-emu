@@ -27,7 +27,8 @@ n = 4
 folder_address = '/volume/MIMII/mix_type'
 S, A, X = pybss_tb.generate_matrix_S_A_X(
         folder_address, wav_range=10, source_number=n, mixing_type="normal", max_min=(1, 0.01), mu_sigma=(0, 1))
-np.save("S.npy",S)
+
+#np.save("S.npy",S)
 W = np.random.random_sample((n, n))
 
 # settings
@@ -56,14 +57,18 @@ if __name__ == "__main__":
     simpleudp.sendto(pktutils.serialize_data(HEADER_CLEAR_CACHE),serverAddressPort)
     time.sleep(1)
     print('*** send data')
-    t = time.time()
+    
     i = 0
+    t = time.time()
+    time_packet_sent = t
     for chunk in chunk_arr:
+        time.sleep(max(0, time_packet_sent - time.time()))
+        time_packet_sent += 0.002
         simpleudp.sendto(chunk, serverAddressPort)
         if i%500==0:
             print('packet:',i,', len:',len(chunk))
         i += 1
-        time.sleep(0.002) #0.0005 maybe the smallest gap for this framework with no packet lost
+        #time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
     print('*** last_pkt:',time.strftime("%H:%M:%S", time.localtime()))
     print('*** time sent all pkg     : ',time.time()-t)
     print(simpleudp.recvfrom(1000)[0],time.time()-t)

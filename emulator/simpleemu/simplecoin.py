@@ -3,79 +3,261 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-05-16
-# @desc. : SimpleCOIN 3.0
+# @modify: 2021-05-17
+# @desc. : SimpleCOIN 3.2
 
 
 import socket
 import multiprocessing
 from typing import Any, Callable, Tuple
 import time
-
-
-class SimpleCIONUtils():
-    # Parse the UDP packet
-    def parse_af_packet(self, af_packet: bytes, frame_len: int = 0):
-        if frame_len > 14:
-            af_packet = af_packet[:frame_len]
-        packet = {}
-        packet['Raw'] = af_packet
-        data = af_packet[14:]
-        packet['Protocol'] = data[9]
-        packet['IP_src'] = '.'.join(
-            map(str, [data[x] for x in range(12, 16)]))
-        packet['IP_dst'] = '.'.join(
-            map(str, [data[x] for x in range(16, 20)]))
-        packet['Port_src'] = (data[20] << 8) + data[21]
-        packet['Port_dst'] = (data[22] << 8) + data[23]
-        packet['Chunk'] = data[28:]
-        return packet
-
+from functools import wraps
 
 
 # Simple Computing In Network Framework
 
 
+class SimpleCOIN():
+    """
+    ### Description:
 
-class SimpleCOIN(SimpleCIONUtils):
-    '''
-    Usage:
-        app = SimpleCOIN(IFCE_NAME:str, BUFFER_SIZE:int)
+    1. Structure of the SimpleCOIN:
 
+        recv_process --> main_process --> func_process, func_process, ...
+                            |                         |
+                            ∨                         ∨
+        send_process <-------------------------------- 
+
+        The SimpleCOIN is a mutliproccessing framework, it includes a
+        process for receving data, a process for sending data, a process
+        for main contol function (user defined) and N processes for 
+        running user defined functions.
+
+    2. Details of recv_process:
+
+        recv_process:
+
+            network -----------> recv_queue.put()
+               ∧     af_packet       |      
+               |                     ∨
+                <--------------------      
+
+        Once received af_packet from network it will immediately put it
+        to the `recv_queue`, which is also used by main_process
+
+    3. Details of main_process:
+
+        main_process:
+
+            recv_queue.get() -----------> main(simplecoin, afpacket)
+               ∧              af_packet            |      
+               |                                   ∨
+                <----------------------------------  
+
+        Once the recv_queue has values, the main function will immediately
+        run with the paramters form the `recv_queue`, i.e. the af_apcket. The
+        main function can be defined by `@app.main()`.
+
+    4. Details of func_process:
+
+        func_process:
+
+            simplecoin.submit_func(id,pid,args,kwargs)
+                    |                  
+                    |function, process_id, args, kwargs
+                    ∨
+            func_params_queue[process_id].put()
+
+            func_params_queue[process_id=0,1,2,...,n_func_process].get()
+                    |                                          ∧
+                    |function, process_id, args, kwargs        |
+                    ∨                                          |
+            function(args, kwargs) ----------------------------
+
+        User can use `simplecoin.submit_func(id,pid,args,kwargs)` to put 
+        the data into the `func_params_queue[process_id]`. Once the 
+        `func_params_queue[process_id]` has values, the func_process 
+        will fun the `function(args, kwargs)` immediately.
+
+    ### Getting Started:
+
+    1. Initialization the SimpleCOIN Framework:
+
+        Firstly, SimpleCOIN needs to be initialized at the beginning 
+        of the program, just like some web application framework. 
+
+        ```
+        app = SimpleCOIN(ifce_name: str, mtu: int = 1500, 
+                chunk_gap: int = 0.0004, n_func_process: int = 1)
+        ````
+
+            ifce_name: is the network interface name, which is used to 
+                receive raw packet from the network device. 
+
+            mtu: is the value of the MTU.
+
+            chunk_gap: is the time interval for sending data.
+
+            n_func_process: is the number of processes to run 'user 
+                defined functions', which are the functions defined by 
+                `@app.func(id)`. These 'user defined functions' runs 
+                one by one in one particular process when they submitted
+                by `simpcoin.submit(id,pid,args,keargs)`. And the value 
+                of `pid` is the process id, the value should be an integer 
+                in the interval [0,n_func_process).
+
+    2. Define the main processing function:
+
+        ```
         @app.main
-        def func(af_packet):
-            pass
+        def user_defined_function(simplecoin:SimpleCOIN.IPC, af_packet:bytes):
 
-        @app.func(rule:Any)
-        def func(*args,**kwargs)
-            pass
+            # Call user defined function, where `pid` is the id of `func_prcess`.
+            # When pid is `-1`, that means the function will run at the local
+            # process. When the `pid` is in the interval [0,n_func_process), 
+            # that means the submitted function will run in the `pid`-th 
+            # `func_prcess`. The global value between different processes is
+            # not shared.
+            simplecoin.submit(pid:int,id:Any,args,kwargs)
 
-        app.call_func(rule:Any,*args,**kwargs):
-            pass
+            # Forward the raw packet
+            simplecoin.forward(af_packet:bytes)
 
-        app.forward(af_packet:bytes):
-            pass
+            # Send data by udp
+            simplecoin.sendto(data:bytes,dst_addr:Tuple[str,int])
 
-        app.sendto(data:bytes,dst_addr:Tuple[str,int]):
-            pass
 
-        app.run():
             pass
+        ````
 
-        app.exit():
+        The first argument of the `user_defined_function` must be reserved for 
+        `simplecoin:SimpleCOIN.IPC`, which is a Interprocess Communication 
+        Framework and has several important function for calling function and
+        networking. The `af_apcket` is the raw packet received from the nework
+        device.
+
+    3. Define the user defined function:
+
+        ```
+        @app.func(id:Any)
+        def user_defined_function(simplecoin:SimpleCOIN.IPC, *args,**kwargs)
+
+            # Call user defined function, where `pid` is the id of `func_prcess`.
+            # When pid is `-1`, that means the function will run at the local
+            # process. When the `pid` is in the interval [0,n_func_process), 
+            # that means the submitted function will run in the `pid`-th 
+            # `func_prcess`. The global value between different processes is
+            # not shared.
+            simplecoin.submit(pid:int,id:Any,args,kwargs)
+
+            # Forward the raw packet
+            simplecoin.forward(af_packet:bytes)
+
+            # Send data by udp
+            simplecoin.sendto(data:bytes,dst_addr:Tuple[str,int])
+
             pass
-    '''
+        ```
+
+        The first argument of the `user_defined_function` must be reserved for 
+        `simplecoin:SimpleCOIN.IPC`, which is a Interprocess Communication 
+        Framework and has several important function for calling function and
+        networking.
+
+    4. Run the SimpleCOIN Framework:
+
+        ```
+        if __name__ == "__main__":
+        app.run()
+        ```
+
+    ### Example:
+
+    program:
+
+        ```
+        import time
+        from simpleemu.simplecoin import SimpleCOIN
+        from simpleemu.simpleudp import simpleudp
+
+        # network interface: 'vnf1-s1'
+        # device ip: '10.0.0.13'
+
+        n_submit = 0
+
+        app = SimpleCOIN(ifce_name='vnf1-s1',n_func_process=2)
+
+        @app.main()
+        def main(simplecoin, af_packet):
+            # parse the raw packet to get the ip/udp infomations like ip, port, protocol, data
+            packet = simpleudp.parse_af_packet(af_packet)
+            if packet['Protocol'] == 17 and packet['IP_src'] != '10.0.0.13':
+                simplecoin.submit_func(id='submit_count',pid=0,args=('pid=0 @ main',))
+                time.sleep(1)
+                print('*** sleep 1s')
+                simplecoin.submit_func(id='submit_count',pid=1,args=('pid=1 @ main',))
+                time.sleep(1)
+                print('*** sleep 1s')
+                simplecoin.submit_func(id='submit_count',pid=0,args=('pid=0 @ main',))
+
+
+        @app.func('submit_count')
+        def submit_count(simplecoin, myvalue):
+            global n_submit
+            n_submit += 1
+            print(myvalue, n_submit)
+            if n_submit == 1:
+                print('before submit in func')
+                simplecoin.submit_func(id='submit_count',pid=-1,args=('pid=-1 @ func',))
+                print('after submit in func')
+
+
+        if __name__ == "__main__":
+            app.run()
+
+        ```
+
+    output:
+
+        ```
+        pid=0 @ main 1
+        before submit in func
+        pid=-1 @ func 2
+        after submit in func
+
+        *** sleep 1s
+
+        pid=1 @ main 1
+        before submit in func
+        pid=-1 @ func 2
+        after submit in func
+
+        *** sleep 1s
+
+        pid=0 @ main 3
+
+        ```
+
+        When `pid=-1` the submitted function will run immediately in the
+        local process, without put the parameters to the `func_params_queue`.
+        The global valves between different processes are independent.
+
+    """
 
     # Interprocess communication
-    class IPC(SimpleCIONUtils):
+    class IPC():
         def __init__(self, send_queue: multiprocessing.Queue, func_map: dict, func_params_queues: list):
             self.send_queue = send_queue
             self.func_params_queues = func_params_queues
             self.func_map = func_map
 
-        def submit_func(self, id: Any, pid: int = 0, args = (), kwargs = {}):
-            if id in self.func_map:
-                self.func_params_queues[pid].put((id, args, kwargs), block=False)
+        def submit_func(self, pid: int, id: Any, args=(), kwargs={}):
+            if pid < 0:
+                func = self.func_map[id]
+                func(self, *args, **kwargs)
+            elif id in self.func_map:
+                self.func_params_queues[pid].put(
+                    (id, args, kwargs), block=False)
 
         def forward(self, af_packet: bytes):
             self.send_queue.put(('raw', af_packet, None), block=False)
@@ -84,12 +266,13 @@ class SimpleCOIN(SimpleCIONUtils):
             self.send_queue.put(('udp', data, dst_addr), block=False)
 
     # The body
-    def __init__(self, ifce_name: str, buffer_size: int = 1500, chunk_gap: int = 0.0005, n_func_process: int = 1):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0004, n_func_process: int = 1):
         # Network Device Settings
         self.CHUNK_GAP = chunk_gap
-        self.buffer_size = buffer_size
+        self.buffer_size = mtu
         self.buf = bytearray(self.buffer_size)
-        self.af_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
+        self.af_socket = socket.socket(
+            socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
         self.af_socket.bind((ifce_name, 0))
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -99,23 +282,29 @@ class SimpleCOIN(SimpleCIONUtils):
         self.recv_queue = multiprocessing.Queue()
         self.send_queue = multiprocessing.Queue()
         if n_func_process > 0:
-            self.func_params_queues = [multiprocessing.Queue()] * n_func_process
+            self.func_params_queues = [
+                multiprocessing.Queue() for _ in range(n_func_process)]
         else:
             raise ValueError('The value of n_func_process must bigger than 0.')
         # Recv and Send Service
-        self.process_send_loop = multiprocessing.Process(target=self.__send_loop, args=(self.send_queue,))
-        self.process_recv_loop = multiprocessing.Process(target=self.__recv_loop, args=(self.recv_queue,))
+        self.process_send_loop = multiprocessing.Process(
+            target=self.__send_loop, args=(self.send_queue,))
+        self.process_recv_loop = multiprocessing.Process(
+            target=self.__recv_loop, args=(self.recv_queue,))
         # User Defined Main Processing PRogram
-        self.process_main_loop = multiprocessing.Process(target=self.__main_loop, args=(self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
+        self.process_main_loop = multiprocessing.Process(target=self.__main_loop, args=(
+            self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
         # User Defined Muti-processing Program
-        self.process_func_loops = []
-        for func_params_queue in self.func_params_queues:
-            self.process_func_loops.append(multiprocessing.Process(target=self.__func_loop, args=(self.send_queue, self.func_map, func_params_queue, self.func_params_queues,)))
+        self.process_func_loops = [multiprocessing.Process(target=self.__func_loop, args=(
+            self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(n_func_process)]
 
     def main(self):
         def decorator(func: Callable):
             self.main_processing = func
-            return func
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return wrapper
         return decorator
 
     def func(self, id: Any):
@@ -124,19 +313,20 @@ class SimpleCOIN(SimpleCIONUtils):
                 raise ValueError(
                     'The function id with the same name already exists!')
             self.func_map[id] = func
-            return func
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return wrapper
         return decorator
 
     def __send_loop(self, send_queue: multiprocessing.Queue):
-        time_packet_sent = 0
         while True:
             typ, data, dst_addr = send_queue.get()
-            time.sleep(max(0, time_packet_sent+self.CHUNK_GAP-time.time()))
             if typ == 'raw':
                 self.af_socket.send(data)
             elif typ == 'udp':
                 self.client.sendto(data, dst_addr)
-            time_packet_sent = time.time()
+            time.sleep(self.CHUNK_GAP)
 
     def __recv_loop(self, recv_queue: multiprocessing.Queue):
         while True:
@@ -148,10 +338,10 @@ class SimpleCOIN(SimpleCIONUtils):
         while True:
             self.main_processing(ipc, recv_queue.get())
 
-    def __func_loop(self, send_queue: multiprocessing.Queue, func_map: dict, func_params_queue: multiprocessing.Queue, func_params_queues: list):
+    def __func_loop(self, send_queue: multiprocessing.Queue, func_map: dict, func_params_queues: list, pid: int):
         ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
         while True:
-            id, args, kwargs = func_params_queue.get()
+            id, args, kwargs = func_params_queues[pid].get()
             func = self.func_map[id]
             func(ipc, *args, **kwargs)
 
@@ -162,9 +352,9 @@ class SimpleCOIN(SimpleCIONUtils):
             for process_func_loop in self.process_func_loops:
                 process_func_loop.start()
             self.process_recv_loop.start()
-            print('///////////////////////////////////////////////\n')
+            print('\n///////////////////////////////////////////////\n')
 
-            print('*** SimpleCOIN v3.0 Framework is running !')
+            print('*** SimpleCOIN v3.2 Framework is running !')
             print('*** press enter to exit')
             print('-----------------------------------------------')
             input()

@@ -29,7 +29,8 @@ class ICABuffer():
         self.lock.acquire()
         if self.buffer is None:
             self.buffer = x
-        self.buffer = np.concatenate([self.buffer, x], axis=1)
+        else:
+            self.buffer = np.concatenate([self.buffer, x], axis=1)
         self.lock.release()
 
     def extract_n(self, n):
