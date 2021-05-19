@@ -23,10 +23,12 @@ class SimpleCOIN():
 
     1. Structure of the SimpleCOIN:
 
-        recv_process --> main_process --> func_process, func_process, ...
-                            |                         |
-                            ∨                         ∨
-        send_process <-------------------------------- 
+                                                      |--(func_queues[0])--> func_process[0]|
+        recv_process --(recv_queue)--> main_process --|--(func_queues[1])--> func_process[1]|----
+                                           |          |--(...           )--> ...            |    |
+                                           |                                                     |
+                                           ∨                                                     ∨
+        send_process <--(send_queue)------------------------------------------------------------- 
 
         The SimpleCOIN is a mutliproccessing framework, it includes a
         process for receving data, a process for sending data, a process
@@ -60,24 +62,32 @@ class SimpleCOIN():
 
     4. Details of func_process:
 
-        func_process:
+        `id` is the id of user defined functions, which is defined by 
+        `@app.func(id:Any)`
 
-            simplecoin.submit_func(id,pid,args,kwargs)
-                    |                  
-                    |function, process_id, args, kwargs
-                    ∨
-            func_params_queue[process_id].put()
+        `pid = 0,1,2,...,n_func_process-1`, is the id of `func_process`. The 
+        structure of `func_process` with id `pid` is shown as follows.
 
-            func_params_queue[process_id=0,1,2,...,n_func_process].get()
-                    |                                          ∧
-                    |function, process_id, args, kwargs        |
-                    ∨                                          |
-            function(args, kwargs) ----------------------------
+                                 ----------------------------------------------
+                                |    simplecoin.submit_func(pid,id,args,kwargs)
+                                |            |                  
+        #in other processes  :  |            |user_function, pid, args, kwargs
+                                |            ∨
+                                |    func_params_queue[pid].put()
+                                 ----------  |  -------------------------------
+                                             |  
+                                 ----------  v  -------------------------------
+                                |    func_params_queue[pid].get() <--------
+        #in func_process[pid]:  |            |                             ∧
+                                |            |user_function, args, kwargs  |
+                                |            ∨                             |
+                                |    function(args, kwargs) ---------------
+                                 ----------------------------------------------
 
-        User can use `simplecoin.submit_func(id,pid,args,kwargs)` to put 
+        User can use `simplecoin.submit_func(pid,id,args,kwargs)` to put 
         the data into the `func_params_queue[process_id]`. Once the 
-        `func_params_queue[process_id]` has values, the func_process 
-        will fun the `function(args, kwargs)` immediately.
+        `func_params_queue[id]` has values, the func_process will run the 
+        `user_function(args, kwargs)` immediately.
 
     ### Getting Started:
 
@@ -88,7 +98,7 @@ class SimpleCOIN():
 
         ```
         app = SimpleCOIN(ifce_name: str, mtu: int = 1500, 
-                chunk_gap: int = 0.0004, n_func_process: int = 1)
+                chunk_gap: int = 0.0012, n_func_process: int = 1)
         ````
 
             ifce_name: is the network interface name, which is used to 
@@ -102,7 +112,7 @@ class SimpleCOIN():
                 defined functions', which are the functions defined by 
                 `@app.func(id)`. These 'user defined functions' runs 
                 one by one in one particular process when they submitted
-                by `simpcoin.submit(id,pid,args,keargs)`. And the value 
+                by `simpcoin.submit(pid,id,args,keargs)`. And the value 
                 of `pid` is the process id, the value should be an integer 
                 in the interval [0,n_func_process).
 
@@ -125,7 +135,6 @@ class SimpleCOIN():
 
             # Send data by udp
             simplecoin.sendto(data:bytes,dst_addr:Tuple[str,int])
-
 
             pass
         ````
@@ -192,13 +201,13 @@ class SimpleCOIN():
             # parse the raw packet to get the ip/udp infomations like ip, port, protocol, data
             packet = simpleudp.parse_af_packet(af_packet)
             if packet['Protocol'] == 17 and packet['IP_src'] != '10.0.0.13':
-                simplecoin.submit_func(id='submit_count',pid=0,args=('pid=0 @ main',))
+                simplecoin.submit_func(pid=0,id='submit_count',args=('pid=0 @ main',))
                 time.sleep(1)
                 print('*** sleep 1s')
-                simplecoin.submit_func(id='submit_count',pid=1,args=('pid=1 @ main',))
+                simplecoin.submit_func(pid=1,id='submit_count',args=('pid=1 @ main',))
                 time.sleep(1)
                 print('*** sleep 1s')
-                simplecoin.submit_func(id='submit_count',pid=0,args=('pid=0 @ main',))
+                simplecoin.submit_func(pid=0,id='submit_count',args=('pid=0 @ main',))
 
 
         @app.func('submit_count')
@@ -208,7 +217,7 @@ class SimpleCOIN():
             print(myvalue, n_submit)
             if n_submit == 1:
                 print('before submit in func')
-                simplecoin.submit_func(id='submit_count',pid=-1,args=('pid=-1 @ func',))
+                simplecoin.submit_func(pid=-1,id='submit_count',args=('pid=-1 @ func',))
                 print('after submit in func')
 
 

@@ -20,7 +20,9 @@ from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simplecoin import SimpleCOIN
 from simpleemu.simpleudp import simpleudp
+from measure.measure import measure_write
 
+EVAL_TIMES = []
 
 
 IFCE_NAME, NODE_IP = simpleudp.get_local_ifce_ip('10.0.')
@@ -62,7 +64,8 @@ def main(simplecoin, af_packet: bytes):
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
+    EVAL_TIMES = []
     ica_processed = False
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
@@ -89,10 +92,12 @@ def ica_buf_put(simplecoin, data):
 
 @app.func('fastica_service')
 def fastica_service(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
     if (not ica_processed) and ica_buf.size() >= init_settings['m']:
         print('*** server fastica processing!')
+        EVAL_TIMES += ['fica_start',time.time()]
         icanetwork.fastica_nw(init_settings, ica_buf)
+        EVAL_TIMES += ['fica_end',time.time()]
         init_settings['is_finish'] = True
         print('*** server fastica processing finished!')
         ica_processed = True
@@ -102,7 +107,9 @@ def fastica_service(simplecoin):
 
 @app.func('evaluation')
 def evaluation(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
+    EVAL_TIMES += ['all_finish',time.time()]
+    measure_write('server',EVAL_TIMES)
     print('*** server separating the matrix X!')
     if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
         W = init_settings['W']
