@@ -81,9 +81,11 @@ class SimpleCOIN():
         #in func_process[pid]:  |            |                             ∧
                                 |            |user_function, args, kwargs  |
                                 |            ∨                             |
-                                |    function(args, kwargs) ---------------
+                                |    user_function(args, kwargs) ----------
                                  ----------------------------------------------
 
+        The `user_function` is the function defined by `@app.func(id)` with the 
+        same value of `id` as in `simplecoin.submit_func(pid,id,args,kwargs)`.
         User can use `simplecoin.submit_func(pid,id,args,kwargs)` to put 
         the data into the `func_params_queue[process_id]`. Once the 
         `func_params_queue[id]` has values, the func_process will run the 
@@ -255,6 +257,8 @@ class SimpleCOIN():
 
     # Interprocess communication
     class IPC():
+        local_shared_dict = {}
+
         def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
             self.send_queue = send_queue
             self.func_params_queues = func_params_queues
@@ -286,6 +290,7 @@ class SimpleCOIN():
 
         # Network Service and User Defined Packet Processing Program
         self.main_processing = None
+        self.func_init_processing = lambda ipc:None
         self.func_map = {}
         self.recv_queue = mp.Queue()
         self.send_queue = mp.Queue()
@@ -309,6 +314,15 @@ class SimpleCOIN():
     def main(self):
         def decorator(func: Callable):
             self.main_processing = func
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return wrapper
+        return decorator
+
+    def func_init(self):
+        def decorator(func: Callable):
+            self.func_init_processing = func
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
@@ -351,6 +365,7 @@ class SimpleCOIN():
 
     def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
         ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+        self.func_init_processing(ipc)
         while True:
             id, args, kwargs = func_params_queues[pid].get()
             func = self.func_map[id]
