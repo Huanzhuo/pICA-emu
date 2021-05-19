@@ -3,7 +3,7 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-05-17
+# @modify: 2021-05-19
 # @desc. : SimpleCOIN 0.3.3
 
 
@@ -257,7 +257,7 @@ class SimpleCOIN():
 
     # Interprocess communication
     class IPC():
-        local_shared_dict = {}
+        shared_val = None
 
         def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
             self.send_queue = send_queue
