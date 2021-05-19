@@ -257,19 +257,26 @@ class SimpleCOIN():
 
     # Interprocess communication
     class IPC():
-        shared_val = None
 
         def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
             self.send_queue = send_queue
             self.func_params_queues = func_params_queues
             self.func_map = func_map
 
+            class NameSpace():
+                pass
+            self.namespace = NameSpace()
+
+        def shared_namespace(self):
+            return self.namespace
+
         def submit_func(self, pid: int, id: Any, args=(), kwargs={}):
             if pid < 0:
                 func = self.func_map[id]
                 func(self, *args, **kwargs)
             elif id in self.func_map:
-                self.func_params_queues[pid].put((id, args, kwargs), block=False)
+                self.func_params_queues[pid].put(
+                    (id, args, kwargs), block=False)
 
         def forward(self, af_packet: bytes):
             self.send_queue.put(('raw', af_packet, None), block=False)
@@ -290,7 +297,7 @@ class SimpleCOIN():
 
         # Network Service and User Defined Packet Processing Program
         self.main_processing = None
-        self.func_init_processing = lambda ipc:None
+        self.func_init_processing = lambda ipc: None
         self.func_map = {}
         self.recv_queue = mp.Queue()
         self.send_queue = mp.Queue()
