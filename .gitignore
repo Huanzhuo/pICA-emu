@@ -8,6 +8,7 @@ __pycache__/
 .vagrant/
 emulation/build/
 *.so
-emulator/S.npy
+# emulator/S.npy
 # app/pICA-emu/MIMII/
 .DS_Store
+emulator/measure/*.csv

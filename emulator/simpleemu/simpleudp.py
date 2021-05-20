@@ -53,7 +53,7 @@ class SimpleUDP():
         return packet
 
     # get ifce name and node ip automatically
-    def get_local_ifce_ip(self, ip_prefix):
+    def get_local_ifce_ip(self, ip_prefix: str):
         from subprocess import Popen, PIPE
         ifconfig_output = Popen('ifconfig', stdout=PIPE).stdout.read()
         for paragraph in ifconfig_output.split(b'\n\n'):
