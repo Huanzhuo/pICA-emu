@@ -8,6 +8,8 @@
   - [Description](#description)
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
+    - [Option1: Install in a Vagrant managed VM (Highly Recommended)](#option1-install-in-a-vagrant-managed-vm-highly-recommended)
+    - [Option2: Install on user's custom VM or directly on host OS (Ubuntu20.04)](#option2-install-on-users-custom-vm-or-directly-on-host-os-ubuntu2004)
   - [Run pICA in the Emulator](#run-pica-in-the-emulator)
   - [About Us](#about-us)
   - [License](#license)
@@ -24,6 +26,8 @@ Please install `vagrant` and `Virtualbox` on the host OS to build the testbed VM
 ## Getting Started
 
 Please run follow steps to setup the emulator. Assume the source directory of `pICA-emu` project is `~/pICA-emu`.
+
+### Option1: Install in a Vagrant managed VM (Highly Recommended)
 
 1. Create the testbed VM using Vagrant on your host OS.
     ```bash
@@ -62,6 +66,19 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     ```
     Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
 
+### Option2: Install on user's custom VM or directly on host OS (Ubuntu20.04)
+
+1. Install the comnetsemu and simpleemu on your host OS.
+    ```bash
+    cd ~/pICA-emu/installer || exit
+    bash ./install_all.sh
+    ```
+
+2. Install the docker image for pICA.
+    ```bash
+    cd ~/pICA-emu || exit
+    sudo bash ./build_docker_images.sh
+    ```
 
 ## Run pICA in the Emulator
 
