@@ -22,6 +22,10 @@ from measure.measure import measure_write
 
 # read wavs
 n = 4
+# l = 4
+# m = l * 16000
+# number of iteration rounds on every node
+delta = 2
 folder_address = '/volume/MIMII/mix_type'
 # S, A, X = pybss_tb.generate_matrix_S_A_X(
 #         folder_address, wav_range=10, source_number=n, mixing_type="normal", max_min=(1, 0.01), mu_sigma=(0, 1))

@@ -68,22 +68,11 @@ cp /home/vagrant/comnetsemu/util/Xresources /home/vagrant/.Xresources
 # xrdb can not run directly during vagrant up. Auto-works after reboot.
 xrdb -merge /home/vagrant/.Xresources
 
-# Install docker-ce instead of the docker in comnetsemu.
-sudo apt-get update
-sudo apt-get install -y apt-transport-https  ca-certificates curl  software-properties-common
-curl -fsSL  https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
-sudo add-apt-repository "deb [arch=amd64]  https://download.docker.com/linux/ubuntu bionic stable" 
-sudo apt-get update
-sudo apt-get install -y docker-ce
-sudo groupadd docker
-sudo gpasswd -a vagrant docker
-newgrp docker
-
 # Install comnetsemu. Docker in comnetsemu is now invalid.
 cd /home/vagrant/comnetsemu/util || exit
 PYTHON=python3 ./install.sh -a
-bash ./install.sh -v
-bash ./install.sh -c
+# bash ./install.sh -v
+# bash ./install.sh -c
 
 cd /home/vagrant/comnetsemu/ || exit
 # setup.py develop installs the package (typically just a source folder)
@@ -92,12 +81,6 @@ cd /home/vagrant/comnetsemu/ || exit
 # effect immediately. Convinient for development
 sudo make develop
 
-# Build images for Docker hosts
-cd /home/vagrant/comnetsemu/test_containers || exit
-sudo bash ./build.sh
-
-cd /vagrant
-sudo bash ./build_docker_images.sh
 SCRIPT
 
 ####################

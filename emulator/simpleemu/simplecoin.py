@@ -321,6 +321,7 @@ class SimpleCOIN():
     def main(self):
         def decorator(func: Callable):
             self.main_processing = func
+
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
@@ -342,6 +343,7 @@ class SimpleCOIN():
                 raise ValueError(
                     'The function id with the same name already exists!')
             self.func_map[id] = func
+
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
