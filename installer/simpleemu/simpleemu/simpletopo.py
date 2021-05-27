@@ -87,10 +87,10 @@ class SimpleTopo():
 
     def addHostNode(self, node_name, ip, dimage, volume=None, docker_args={}, **params):
         info("*** Adding host "+node_name+"\n")
-        docker_args = copy.copy(docker_args)
-        docker_args.update({"hostname": node_name,"volumes": {volume: {"bind": '/volume', "mode": "rw"}},"working_dir": '/volume'})
         if volume is None:
             volume = os.path.abspath(os.path.join(os.path.curdir, os.pardir))
+        docker_args = copy.copy(docker_args)
+        docker_args.update({"hostname": node_name,"volumes": {volume: {"bind": '/volume', "mode": "rw"}},"working_dir": '/volume'})
         node = self.net.addDockerHost(name=node_name, dimage=dimage, ip=ip, docker_args=docker_args, **params)
         self.nodes[node_name] = {'node':node,'type':'host','ports':[]}
 
