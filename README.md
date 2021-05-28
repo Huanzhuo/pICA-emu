@@ -70,8 +70,8 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
 
 1. Install the comnetsemu and simpleemu on your host OS.
     ```bash
-    cd ~/pICA-emu/installer || exit
-    bash ./install_all.sh
+    cd ~/pICA-emu/emu-installer || exit
+    bash ./install.sh
     ```
 
 2. Install the docker image for pICA.
@@ -79,6 +79,13 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     cd ~/pICA-emu || exit
     sudo bash ./build_docker_images.sh
     ```
+
+3. Run the topology in the folder ```~/pICA-emu/emulator```:
+    ```bash
+    cd ~/pICA-emu/emulator
+    sudo python3 ./topo.py
+    ```
+    Then, the next steps are the same as below
 
 ## Run pICA in the Emulator
 
