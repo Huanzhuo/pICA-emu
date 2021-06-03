@@ -114,15 +114,23 @@ def pica_service(simplecoin):
             elif ica_buf.size() >= init_settings['proc_len']:
                 if init_settings['proc_len'] == init_settings['m']:
                     print('*** vnf pica processing!')
+                    overall_time = time.time()
                     EVAL_TIMES += ['fica_start',time.time()]
                     icanetwork.fastica_nw(init_settings, ica_buf)
                     EVAL_TIMES += ['fica_end',time.time()]
+                    overall_time = time.time() - overall_time
+                    EVAL_TIMES += ['fica_overall_time',overall_time]
+                    del overall_time
                     init_settings['is_finish'] = True
                 else:
                     print('*** vnf pica processing!')
+                    overall_time = time.time()
                     EVAL_TIMES += ['pica_start',time.time()]
                     icanetwork.pica_nw(init_settings, ica_buf)
                     EVAL_TIMES += ['pica_end',time.time()]
+                    overall_time = time.time() - overall_time
+                    EVAL_TIMES += ['pica_overall_time',overall_time]
+                    del overall_time
                     init_settings['node_max_ext_nums'][0] -= 1
                     if init_settings['proc_len'] > init_settings['m']:
                         init_settings['proc_len'] = init_settings['m']
