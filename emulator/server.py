@@ -23,8 +23,6 @@ from simpleemu.simpleudp import simpleudp
 from measure.measure import measure_write
 
 EVAL_TIMES = []
-index_EVAL_1 = 1
-overall_time = 0
 
 IFCE_NAME, NODE_IP = simpleudp.get_local_ifce_ip('10.0.')
 DEF_INIT_SETTINGS = {'is_finish': False, 'm': np.inf, 'W': None, 'proc_len': np.inf,
@@ -65,12 +63,11 @@ def main(simplecoin, af_packet: bytes):
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES, overall_time
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
     EVAL_TIMES = []
     ica_processed = False
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
-    overall_time = 0
 
 
 @app.func('set_init_settings')
@@ -94,13 +91,12 @@ def ica_buf_put(simplecoin, data):
 
 @app.func('fastica_service')
 def fastica_service(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES, overall_time
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
     if (not ica_processed) and ica_buf.size() >= init_settings['m']:
         print('*** server fastica processing!')
         EVAL_TIMES += ['fica_start',time.time()]
         icanetwork.fastica_nw(init_settings, ica_buf)
         EVAL_TIMES += ['fica_end',time.time()]
-        overall_time += EVAL_TIMES[index_EVAL_1]
         init_settings['is_finish'] = True
         print('*** server fastica processing finished!')
         ica_processed = True
@@ -110,11 +106,10 @@ def fastica_service(simplecoin):
 
 @app.func('evaluation')
 def evaluation(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES, overall_time
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
     EVAL_TIMES += ['all_finish',time.time()]
-    overall_time = EVAL_TIMES[index_EVAL_1 + 4] - overall_time
+    overall_time = EVAL_TIMES[5] - EVAL_TIMES[1]
     EVAL_TIMES += ['overall_time',overall_time]
-    measure_write('server',EVAL_TIMES)
     print('*** server separating the matrix X!')
     if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
         W = init_settings['W']
@@ -122,9 +117,16 @@ def evaluation(simplecoin):
         hat_S = np.dot(W, X)
         S = np.load("S.npy")
         eval_db = pybss_tb.bss_evaluation(S, hat_S, 'psnr')
+        EVAL_TIMES += ['SNR_latency', eval_db]
+        measure_write('server',EVAL_TIMES)
         print('*** server separation eval:', eval_db)
         ica_buf.init()
         init_settings.update(DEF_INIT_SETTINGS)
+    else:
+        measure_write('server',EVAL_TIMES)
+    del overall_time
+        
+
 
 
 if __name__ == "__main__":

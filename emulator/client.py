@@ -82,7 +82,10 @@ if __name__ == "__main__":
             print('packet:',i,', len:',len(chunk))
         i += 1
         #time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
-    measure_write('client',[EVAL_MODE,t])
+    measure_write('client',[])
+    t2 = time.time() - t
+    measure_write('client', [EVAL_MODE, t, 'overall', t2])
+    del t2
     print('*** last_pkt:',time.strftime("%H:%M:%S", time.localtime()))
     print('*** time sent all pkg     : ',time.time()-t)
     print(simpleudp.recvfrom(1000)[0],time.time()-t)
