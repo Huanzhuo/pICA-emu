@@ -4,12 +4,12 @@ import json
 
 def measure_write(filename,times):
     try:
-        f = open("measure/"+filename+".csv","r")
+        f = open("measurement/"+filename+".csv","r")
         data = f.read()
     except Exception:
         data = ''
     data = data + ','.join(map(str,times)) + ',\n'
-    with open("measure/"+filename+".csv",'w') as f:
+    with open("measurement/"+filename+".csv",'w') as f:
         f.write(data)
     f.close()
 

@@ -8,6 +8,8 @@
   - [Description](#description)
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
+    - [Option1: Install in a Vagrant managed VM (Highly Recommended)](#option1-install-in-a-vagrant-managed-vm-highly-recommended)
+    - [Option2: Install on user's custom VM or directly on host OS (Ubuntu20.04)](#option2-install-on-users-custom-vm-or-directly-on-host-os-ubuntu2004)
   - [Run pICA in the Emulator](#run-pica-in-the-emulator)
   - [About Us](#about-us)
   - [License](#license)
@@ -24,6 +26,8 @@ Please install `vagrant` and `Virtualbox` on the host OS to build the testbed VM
 ## Getting Started
 
 Please run follow steps to setup the emulator. Assume the source directory of `pICA-emu` project is `~/pICA-emu`.
+
+### Option1: Install in a Vagrant managed VM (Highly Recommended)
 
 1. Create the testbed VM using Vagrant on your host OS.
     ```bash
@@ -62,6 +66,26 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     ```
     Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
 
+### Option2: Install on user's custom VM or directly on host OS (Ubuntu20.04)
+
+1. Install the comnetsemu and simpleemu on your host OS.
+    ```bash
+    cd ~/pICA-emu/emu-installer || exit
+    bash ./install.sh
+    ```
+
+2. Install the docker image for pICA.
+    ```bash
+    cd ~/pICA-emu || exit
+    sudo bash ./build_docker_images.sh
+    ```
+
+3. Run the topology in the folder ```~/pICA-emu/emulator```:
+    ```bash
+    cd ~/pICA-emu/emulator
+    sudo python3 ./topo.py
+    ```
+    Then, the next steps are the same as below
 
 ## Run pICA in the Emulator
 
@@ -81,7 +105,9 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     You should see the prompt `mininet>` when the network configuration is finished.
     And five terminals are popped up, you can identify client, server, VNF, swich, and a controller by looking at the host name (e.g., `@client`) in the shell.
 
-3. Please firstly run `server.py` inside the server's shell, then the rest. The default work mode is ```compute-and-forward```, with the flag ``` storefwd``` on the client, the work mode will be changed to ```store-and-forward```.
+    The number of VNFs is defined as 2 in ```topo.py```. For an arbitary number of VNFs, please define the value of ```n_vnf``` in ```topo_n_vnf.py``` and run ```topo_n_vnf.py``` instead of ```topo.py```.
+
+3. Please firstly run `server.py` inside the server's shell, then the rest. The default work mode is ```compute-and-forward``` (```cf```). With the flag ``` sf``` on the client, the work mode will be changed to ```store-and-forward```.
     ```bash
     # in the server terminal
     sudo python3 ./server.py
