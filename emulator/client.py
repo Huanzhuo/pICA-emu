@@ -18,7 +18,7 @@ from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
 import sys
-from measure.measure import measure_write
+from measurement.measure import measure_write
 
 # read wavs
 n = 4
@@ -44,9 +44,9 @@ time.sleep(0.5)
 # settings
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_ComputeForward = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1000,
-                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'node_max_lens': [160000]*10}
+                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'node_max_lens': [160000]*10, 'mode': 'cf'}
 INIT_SETTINGS_StoreForward = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1000,
-                              'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'node_max_lens': [160000]*10}
+                              'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'node_max_lens': [160000]*10, 'mode': 'sf'}
 
 if __name__ == "__main__":
 
@@ -92,4 +92,4 @@ if __name__ == "__main__":
     transmission_latency = time.time() - t
     print(simpleudp.recvfrom(1000)[0], time.time()-t)
     service_latency = time.time() - t
-    measure_write('client_'+EVAL_MODE, [transmission_latency, service_latency])
+    measure_write('client_'+INIT_SETTINGS['mode'], [transmission_latency, service_latency])

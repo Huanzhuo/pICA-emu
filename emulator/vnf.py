@@ -20,9 +20,10 @@ from picautils.icabuffer import ICABuffer
 from picautils.packetutils import *
 from simpleemu.simplecoin import SimpleCOIN
 from simpleemu.simpleudp import simpleudp
-from measure.measure import measure_write
+from measurement.measure import measure_write
 
 EVAL_TIMES = []
+process_time = 0
 
 IFCE_NAME, NODE_IP = simpleudp.get_local_ifce_ip('10.0.')
 DEF_INIT_SETTINGS = {'is_finish': False, 'm': np.inf, 'W': None, 'proc_len': np.inf,
@@ -85,7 +86,8 @@ def clear_cache(simplecoin):
 
 @app.func('set_init_settings')
 def set_init_settings(simplecoin, _init_settings, _dst_ip_addr):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, process_time
+    process_time = 0
     init_settings.update(_init_settings)
     dst_ip_addr = _dst_ip_addr
     if ica_buf.size() >= init_settings['proc_len']:
@@ -106,7 +108,7 @@ def ica_buf_put(simplecoin, data):
 
 @app.func('pica_service')
 def pica_service(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES, process_time
     if not ica_processed:
         while True:
             if init_settings['is_finish'] == True or init_settings['node_max_ext_nums'][0] == 0 or init_settings['proc_len'] > init_settings['node_max_lens'][0]:

@@ -11,6 +11,7 @@ Server for pica in network
 all functions are similiar to vnf.py 
 """
 
+# from emulator.client import INIT_SETTINGS
 import numpy as np
 import pickle
 import time
@@ -20,7 +21,7 @@ from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simplecoin import SimpleCOIN
 from simpleemu.simpleudp import simpleudp
-from measure.measure import measure_write
+from measurement.measure import measure_write
 
 EVAL_TIMES = []
 EVAL_ACC = []
@@ -106,7 +107,7 @@ def fastica_service(simplecoin):
         process_time = time_finish - time_start
         EVAL_TIMES += [process_time]
         # TO DO: add work mode in the name of measurement files.
-        measure_write('server', EVAL_TIMES)
+        measure_write('server_'+init_settings['mode'], EVAL_TIMES)
         print('*** server fastica processing finished!')
         ica_processed = True
         simplecoin.sendto(b'finished', ('10.0.0.12', 1000))
@@ -124,7 +125,7 @@ def evaluation(simplecoin):
         S = np.load("S.npy")
         eval_db = pybss_tb.bss_evaluation(S, hat_S, 'psnr')
         EVAL_ACC += [eval_db]
-        measure_write('accuracy', EVAL_ACC)
+        measure_write('accuracy_'+init_settings['mode'], EVAL_ACC)
         print('*** server separation eval:', eval_db)
         ica_buf.init()
         init_settings.update(DEF_INIT_SETTINGS)
