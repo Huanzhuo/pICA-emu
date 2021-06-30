@@ -52,4 +52,4 @@ if __name__ == '__main__':
         ax.set_xlim([0, 30])
         ax.set_ylim([8.1, 8.2])
         ax.legend([line1, line2], ['Compute-and-Forward', 'Store-and-Forward'], loc='upper right')
-        plt.savefig('./emulator/measurementprocessing_latency_all.pdf', dpi=600, bbox_inches='tight')
+        plt.savefig('./emulator/measurement/processing_latency_all.pdf', dpi=600, bbox_inches='tight')
