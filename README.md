@@ -105,7 +105,9 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     You should see the prompt `mininet>` when the network configuration is finished.
     And five terminals are popped up, you can identify client, server, VNF, swich, and a controller by looking at the host name (e.g., `@client`) in the shell.
 
-3. Please firstly run `server.py` inside the server's shell, then the rest. The default work mode is ```compute-and-forward```, with the flag ``` storefwd``` on the client, the work mode will be changed to ```store-and-forward```.
+    The number of VNFs is defined as 2 in ```topo.py```. For an arbitary number of VNFs, please define the value of ```n_vnf``` in ```topo_n_vnf.py``` and run ```topo_n_vnf.py``` instead of ```topo.py```.
+
+3. Please firstly run `server.py` inside the server's shell, then the rest. The default work mode is ```compute-and-forward``` (```cf```). With the flag ``` sf``` on the client, the work mode will be changed to ```store-and-forward```.
     ```bash
     # in the server terminal
     sudo python3 ./server.py
