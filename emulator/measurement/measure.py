@@ -14,7 +14,10 @@ def measure_write(filename,contents):
     f.close()
 
 def measure_arr_to_jsonstr(numpy_arr):
-    return json.dumps([[y for y in x] for x in numpy_arr], separators=('|', ':'))
+    if numpy_arr is not None:
+        return json.dumps([[y for y in x] for x in numpy_arr], separators=('|', ':'))
+    else:
+        return ''
 
 def measure_jsonstr_to_arr(jsonstr):
     json.loads(jsonstr.replace('|',','))
