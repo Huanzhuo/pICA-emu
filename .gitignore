@@ -12,3 +12,4 @@ emulation/build/
 # app/pICA-emu/MIMII/
 .DS_Store
 emulator/measurement/*.csv
+emulator/saxs.pkl

@@ -285,7 +285,7 @@ class SimpleCOIN():
             self.send_queue.put(('udp', data, dst_addr), block=False)
 
     # The body
-    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0012, n_func_process: int = 1):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1):
         # Network Device Settings
         self.CHUNK_GAP = chunk_gap
         self.buffer_size = mtu

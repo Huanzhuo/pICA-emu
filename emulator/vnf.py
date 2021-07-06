@@ -22,12 +22,13 @@ from simpleemu.simplecoin import SimpleCOIN
 from simpleemu.simpleudp import simpleudp
 from measurement.measure import measure_write, measure_arr_to_jsonstr
 
-EVAL_TIMES = []
+EVALS = []
+EVAL_W = None
 process_time = 0
 
 IFCE_NAME, NODE_IP = simpleudp.get_local_ifce_ip('10.0.')
 DEF_INIT_SETTINGS = {'is_finish': False, 'm': np.inf, 'W': None, 'proc_len': np.inf,
-                     'proc_len_multiplier': 2, 'node_max_ext_nums': [np.inf], 'node_max_lens': [np.inf]}
+                     'proc_len_multiplier': 2, 'node_max_ext_nums': [np.inf]}
 init_settings = {}
 init_settings.update(DEF_INIT_SETTINGS)
 dst_ip_addr = None
@@ -63,7 +64,7 @@ def main(simplecoin, af_packet):
             else:
                 print('*** vnf transmit init_settings!')
                 simplecoin.forward(af_packet)
-                measure_write(IFCE_NAME, ['transmit', time.time()])
+            simplecoin.submit_func(pid=0, id='measure@write_mode', args=(init_settings['mode'],))
         elif header == HEADER_DATA or header == HEADER_FINISH:
             simplecoin.submit_func(
                 pid=0, id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
@@ -71,8 +72,26 @@ def main(simplecoin, af_packet):
             if header == HEADER_FINISH:
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
-        else:
+        elif header == HEADER_EVAL:
+            simplecoin.submit_func(pid=0, id='measure@write_results')
             simplecoin.forward(af_packet)
+        else:
+            #simplecoin.forward(af_packet)
+            pass
+
+@app.func('measure@write_mode')
+def write_mode(simplecoin,mode):
+    global EVALS
+    # Measurements write.
+    EVALS += ['mode',mode]
+
+@app.func('measure@write_results')
+def write_results(simplecoin):
+    global EVALS
+    # Measurements write.
+    print('*** write evaluation')
+    if EVALS[1] == 'cf':
+        measure_write(IFCE_NAME, EVALS)
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
@@ -84,10 +103,10 @@ def clear_cache(simplecoin):
 
 @app.func('set_init_settings')
 def set_init_settings(simplecoin, _init_settings, _dst_ip_addr):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     init_settings.update(_init_settings)
     dst_ip_addr = _dst_ip_addr
-    if ica_buf.size() >= init_settings['proc_len']:
+    if ica_buf.size() >= init_settings['proc_len'] or ica_buf.size() >= init_settings['m']:
         print('call pica')
         simplecoin.submit_func(pid=-1, id='pica_service')
 
@@ -97,7 +116,7 @@ def ica_buf_put(simplecoin, data):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     if ica_processed == False:
         ica_buf.put(data)
-        if ica_buf.size() >= init_settings['proc_len']:
+        if ica_buf.size() >= init_settings['proc_len'] or ica_buf.size() >= init_settings['m']:
             simplecoin.submit_func(pid=-1, id='pica_service')
 
 # the function app.func('xxx') will create a new thread to run the function
@@ -107,38 +126,35 @@ def pica_service(simplecoin):
     if not ica_processed:
         while True:
             time_finish,time_start = 0,0
-            if init_settings['is_finish'] == True or init_settings['node_max_ext_nums'][0] == 0 or init_settings['proc_len'] > init_settings['node_max_lens'][0]:
-                del init_settings['node_max_lens'][0]
+            if init_settings['is_finish'] == True or init_settings['node_max_ext_nums'][0] == 0:
                 del init_settings['node_max_ext_nums'][0]
                 simplecoin.sendto(pktutils.serialize_data(
                     HEADER_INIT, init_settings), dst_ip_addr)
-                # Measurements write.
+                # Measurements begin.
                 EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
-                measure_write(IFCE_NAME, EVALS)
+                # Measurements end.
                 ica_processed = True
                 ica_buf.init()
                 init_settings.update(DEF_INIT_SETTINGS)
                 print('*** vnf pica processing finished!')
                 break
             elif ica_buf.size() >= init_settings['proc_len']:
-                if init_settings['proc_len'] == init_settings['m']:
-                    print('*** vnf pica processing!')
-                    # Measurements begin.
-                    time_start = time.time()
-                    icanetwork.fastica_nw(init_settings, ica_buf)
-                    time_finish = time.time()
-                    # Measurements end.
-                    init_settings['is_finish'] = True
-                else:
-                    print('*** vnf pica processing!')
-                    # Measurements begin.
-                    time_start = time.time()
-                    icanetwork.pica_nw(init_settings, ica_buf)
-                    time_finish = time.time()
-                    # Measurements end.
-                    init_settings['node_max_ext_nums'][0] -= 1
-                    if init_settings['proc_len'] > init_settings['m']:
-                        init_settings['proc_len'] = init_settings['m']
+                print('*** vnf pica processing!')
+                # Measurements begin.
+                time_start = time.time()
+                icanetwork.pica_nw(init_settings, ica_buf)
+                time_finish = time.time()
+                # Measurements end.
+                init_settings['node_max_ext_nums'][0] -= 1
+            elif ica_buf.size() >= init_settings['m']:
+                print('*** vnf pica processing!')
+                # Measurements begin.
+                time_start = time.time()
+                icanetwork.fastica_nw(init_settings, ica_buf)
+                time_finish = time.time()
+                # Measurements end.
+                init_settings['node_max_ext_nums'][0] -= 1
+                init_settings['is_finish'] = True
             else:
                 break
             EVALS += ['process_time',time_finish - time_start]
