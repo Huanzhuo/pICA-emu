@@ -24,7 +24,7 @@ if __name__ == "__main__":
     mytopo.addHostNodes(node_names=['client', 'server']+list(map(lambda x: 'vnf'+str(x), range(n_vnf))),
                         ip_prefix='10.0.0.', ip_suffixes=['12', '15']+list(map(lambda x: str(100+x), range(n_vnf))),
                         dimage='pica_dev:4', volume=None,
-                        docker_args={"cpuset_cpus": '1', 'cpu_quota': 8000})
+                        docker_args={"cpuset_cpus": '1', 'cpu_quota': 10000})
     mytopo.addSwitchNodes(node_names=list(
         map(lambda x: 's'+str(x), range(n_vnf))))
     # create links, `bw` is bandwith, unit of bandwith is 'Mbit/s'

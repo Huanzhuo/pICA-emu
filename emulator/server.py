@@ -28,7 +28,7 @@ EVAL_ACC = []
 
 IFCE_NAME, NODE_IP = simpleudp.get_local_ifce_ip('10.0.')
 DEF_INIT_SETTINGS = {'is_finish': False, 'm': np.inf, 'W': None, 'proc_len': np.inf,
-                     'proc_len_multiplier': 2, 'node_max_ext_nums': [np.inf], 'node_max_lens': [np.inf]}
+                     'proc_len_multiplier': 2, 'node_max_ext_nums': [np.inf]}
 init_settings = {}
 init_settings.update(DEF_INIT_SETTINGS)
 dst_ip_addr = None

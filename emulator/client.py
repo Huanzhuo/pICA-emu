@@ -41,28 +41,28 @@ from measurement.measure import measure_write
 W = np.load("W.npy")
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
-                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'node_max_lens': [159999]*10, 'mode': 'pica'}
+                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'mode': 'cf'}
 INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
-                            'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'node_max_lens': [159999]*10, 'mode': 'normal'}
+                            'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'mode': 'sf'}
 
 if __name__ == "__main__":
     n_test = 1
     if len(sys.argv) != 3:
-        print("Invalid argument. The argument must be 'pica n_test' or 'normal n_test'.")
+        print("Invalid argument. The argument must be 'cf n_test' or 'sf n_test'.")
         sys.exit(1)
     
-    if sys.argv[1] == 'pica':
+    if sys.argv[1] == 'cf':
         INIT_SETTINGS = INIT_SETTINGS_pICA_enabled
-        print("*** Mode: pICA enabled")
-        EVAL_MODE = 'pica'
-    elif sys.argv[1] == 'normal':
+        print("*** Compute and Forward Mode: pICA enabled")
+    elif sys.argv[1] == 'sf':
         INIT_SETTINGS = INIT_SETTINGS_pICA_disabled
-        print("*** Mode: normal, pICA disabled")
-        EVAL_MODE = 'normal'
+        print("*** Store and Forward Mode: normal, pICA disabled")
     else:
-        print("Invalid argument. The argument must be 'pica n_test' or 'normal n_test'.")
+        print("Invalid argument. The argument must be 'cf n_test' or 'sf n_test'.")
+        sys.exit(1)
     
     n_test = int(sys.argv[2])
+
     print("*** N_test:",n_test)
     
     for i in range(n_test):
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         ss,aa,xx = saxs
         fr.close()
         S,A,X = ss[i],aa[i],xx[i]
-
+        
         time.sleep(0.5)
 
         chunk_arr = pktutils.get_chunks(
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         time_packet_sent = t
         for chunk in chunk_arr:
             time.sleep(max(0, time_packet_sent - time.time()))
-            time_packet_sent += 0.004
+            time_packet_sent += 0.003
             simpleudp.sendto(chunk, serverAddressPort)
             if i % 500 == 0:
                 print('packet:', i, ', len:', len(chunk))
@@ -106,3 +106,9 @@ if __name__ == "__main__":
         service_latency = time.time() - t
         measure_write('client_'+INIT_SETTINGS['mode'], 
             ['transmission_latency',transmission_latency,'service_latency',service_latency])
+        
+
+        print('*** send write evaluation results command')
+        simpleudp.sendto(pktutils.serialize_data(
+            HEADER_EVAL), serverAddressPort)
+        time.sleep(5)
