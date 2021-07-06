@@ -14,7 +14,7 @@ import sys
 from simpleemu.simpletopo import SimpleTopo
 
 if __name__ == "__main__":
-    n_vnf = 7
+    n_vnf = 4
 
     # it should at first create the network infrastructure then set the flows
     ## network infrastructure ##
@@ -37,8 +37,10 @@ if __name__ == "__main__":
         map(lambda x: 's'+str(x), range(n_vnf))))
     # add flows
     mynet.addFlowsOnSwitch(proto='udp', flows=[
-                           'client - '+''.join(list(map(lambda x: 's'+str(x)+'-vnf'+str(x)+'-s'+str(x)+'-', range(n_vnf))))+'server',
-                            'server - '+''.join(list(map(lambda x: 's'+str(x)+'-', reversed(range(n_vnf)))))+'client'])
+                           'client - ' +
+                           ''.join(list(map(lambda x: 's'+str(x)+'-vnf' +
+                                            str(x)+'-s'+str(x)+'-', range(n_vnf))))+'server',
+                           'server - '+''.join(list(map(lambda x: 's'+str(x)+'-', reversed(range(n_vnf)))))+'client'])
     # disable checksum, `node_nameports = ['switch_name:port_name',...]``
     mynet.disableSwitchCksums(node_nameports=list(
         map(lambda x: 's'+str(x)+':'+'vnf'+str(x), range(n_vnf))))

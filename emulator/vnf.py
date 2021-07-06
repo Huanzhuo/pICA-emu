@@ -64,7 +64,8 @@ def main(simplecoin, af_packet):
             else:
                 print('*** vnf transmit init_settings!')
                 simplecoin.forward(af_packet)
-            simplecoin.submit_func(pid=0, id='measure@write_mode', args=(init_settings['mode'],))
+            simplecoin.submit_func(
+                pid=0, id='measure@write_mode', args=(init_settings['mode'],))
         elif header == HEADER_DATA or header == HEADER_FINISH:
             simplecoin.submit_func(
                 pid=0, id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
@@ -76,14 +77,16 @@ def main(simplecoin, af_packet):
             simplecoin.submit_func(pid=0, id='measure@write_results')
             simplecoin.forward(af_packet)
         else:
-            #simplecoin.forward(af_packet)
+            # simplecoin.forward(af_packet)
             pass
 
+
 @app.func('measure@write_mode')
-def write_mode(simplecoin,mode):
+def write_mode(simplecoin, mode):
     global EVALS
     # Measurements write.
-    EVALS += ['mode',mode]
+    EVALS += ['mode', mode]
+
 
 @app.func('measure@write_results')
 def write_results(simplecoin):
@@ -93,6 +96,7 @@ def write_results(simplecoin):
     if EVALS[1] == 'cf':
         measure_write(IFCE_NAME, EVALS)
 
+
 @app.func('clear_cache')
 def clear_cache(simplecoin):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
@@ -100,6 +104,7 @@ def clear_cache(simplecoin):
     ica_processed = False
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
+
 
 @app.func('set_init_settings')
 def set_init_settings(simplecoin, _init_settings, _dst_ip_addr):
@@ -120,18 +125,21 @@ def ica_buf_put(simplecoin, data):
             simplecoin.submit_func(pid=-1, id='pica_service')
 
 # the function app.func('xxx') will create a new thread to run the function
+
+
 @app.func('pica_service')
 def pica_service(simplecoin):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     if not ica_processed:
         while True:
-            time_finish,time_start = 0,0
+            time_finish, time_start = 0, 0
             if init_settings['is_finish'] == True or init_settings['node_max_ext_nums'][0] == 0:
                 del init_settings['node_max_ext_nums'][0]
                 simplecoin.sendto(pktutils.serialize_data(
                     HEADER_INIT, init_settings), dst_ip_addr)
                 # Measurements begin.
-                EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
+                EVALS += ['matrix_w',
+                          measure_arr_to_jsonstr(init_settings['W'])]
                 # Measurements end.
                 ica_processed = True
                 ica_buf.init()
@@ -157,7 +165,7 @@ def pica_service(simplecoin):
                 init_settings['is_finish'] = True
             else:
                 break
-            EVALS += ['process_time',time_finish - time_start]
+            EVALS += ['process_time', time_finish - time_start]
 
 
 if __name__ == "__main__":
