@@ -10,11 +10,12 @@
 """
 PICA in Network Topo
 """
-
+import sys
 from simpleemu.simpletopo import SimpleTopo
 
 if __name__ == "__main__":
-    n_vnf = 10
+    n_vnf = 7
+
     # it should at first create the network infrastructure then set the flows
     ## network infrastructure ##
     mytopo = SimpleTopo()

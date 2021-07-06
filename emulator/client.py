@@ -13,84 +13,96 @@ generate and send udp packages
 """
 
 import numpy as np
-import time
+import time, pickle, sys
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
-import sys
 from measurement.measure import measure_write
 
 # read wavs
-n = 4
+# n = 4
 # l = 4
 # m = l * 16000
 # number of iteration rounds on every node
-delta = 2
-folder_address = '/volume/MIMII/mix_type'
+# delta = 2
+# folder_address = '/volume/MIMII/mix_type'
 # S, A, X = pybss_tb.generate_matrix_S_A_X(
 #         folder_address, wav_range=10, source_number=n, mixing_type="normal", max_min=(1, 0.01), mu_sigma=(0, 1))
-
 # #np.save("S.npy",S)
 # W = np.random.random_sample((n, n))
-
 # np.save("S.npy",S)
 # np.save("X.npy",X)
 # np.save("W.npy",W)
-S = np.load("S.npy")
-X = np.load("X.npy")
-W = np.load("W.npy")
-time.sleep(0.5)
+# S = np.load("S.npy")
+# X = np.load("X.npy")
+# W = np.load("W.npy")
 
 # settings
+W = np.load("W.npy")
 serverAddressPort = ("10.0.0.15", 9999)
-INIT_SETTINGS_ComputeForward = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1000,
-                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'node_max_lens': [160000]*10, 'mode': 'cf'}
-INIT_SETTINGS_StoreForward = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1000,
-                              'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'node_max_lens': [160000]*10, 'mode': 'sf'}
+INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
+                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'node_max_lens': [159999]*10, 'mode': 'pica'}
+INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
+                            'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'node_max_lens': [159999]*10, 'mode': 'normal'}
 
 if __name__ == "__main__":
-
-    if len(sys.argv) == 1:
-        INIT_SETTINGS = INIT_SETTINGS_ComputeForward
-        print("*** Mode: Compute Forward")
-        EVAL_MODE = 'cf'
-    elif sys.argv[1] == 'cf':
-        INIT_SETTINGS = INIT_SETTINGS_ComputeForward
-        print("*** Mode: Compute Forward")
-        EVAL_MODE = 'cf'
-    elif sys.argv[1] == 'sf':
-        INIT_SETTINGS = INIT_SETTINGS_StoreForward
-        print("*** Mode: Store Forward")
-        EVAL_MODE = 'sf'
+    n_test = 1
+    if len(sys.argv) != 3:
+        print("Invalid argument. The argument must be 'pica n_test' or 'normal n_test'.")
+        sys.exit(1)
+    
+    if sys.argv[1] == 'pica':
+        INIT_SETTINGS = INIT_SETTINGS_pICA_enabled
+        print("*** Mode: pICA enabled")
+        EVAL_MODE = 'pica'
+    elif sys.argv[1] == 'normal':
+        INIT_SETTINGS = INIT_SETTINGS_pICA_disabled
+        print("*** Mode: normal, pICA disabled")
+        EVAL_MODE = 'normal'
     else:
-        print("Invalid argument. The argument must be 'cf' or 'sf'.")
+        print("Invalid argument. The argument must be 'pica n_test' or 'normal n_test'.")
+    
+    n_test = int(sys.argv[2])
+    print("*** N_test:",n_test)
+    
+    for i in range(n_test):
+        print("*** no.:",1)
+        fr = open('saxs.pkl','rb')
+        saxs = pickle.load(fr)
+        ss,aa,xx = saxs
+        fr.close()
+        S,A,X = ss[i],aa[i],xx[i]
 
-    chunk_arr = pktutils.get_chunks(
-        init_settings=INIT_SETTINGS, X=X, m_substream=80, dtype=np.float32)
+        time.sleep(0.5)
 
-    # send clear cache command
-    print('*** send clear cache command')
-    simpleudp.sendto(pktutils.serialize_data(
-        HEADER_CLEAR_CACHE), serverAddressPort)
-    time.sleep(1)
-    print('*** send data')
+        chunk_arr = pktutils.get_chunks(
+            init_settings=INIT_SETTINGS, X=X, m_substream=80, dtype=np.float32)
 
-    i = 0
-    t = time.time()
-    time_packet_sent = t
-    for chunk in chunk_arr:
-        time.sleep(max(0, time_packet_sent - time.time()))
-        time_packet_sent += 0.004
-        simpleudp.sendto(chunk, serverAddressPort)
-        if i % 500 == 0:
-            print('packet:', i, ', len:', len(chunk))
-        i += 1
-        # time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
-    print('*** last_pkt:', time.strftime("%H:%M:%S", time.localtime()))
-    print('*** time sent all pkg     : ', time.time()-t)
-    print(simpleudp.recvfrom(1000)[0], time.time()-t)
-    transmission_latency = time.time() - t
-    print(simpleudp.recvfrom(1000)[0], time.time()-t)
-    service_latency = time.time() - t
-    measure_write('client_'+INIT_SETTINGS['mode'], 
-        ['transmission_latency',transmission_latency,'service_latency',service_latency])
+        # send clear cache command
+        print('*** send clear cache command')
+        simpleudp.sendto(pktutils.serialize_data(
+            HEADER_CLEAR_CACHE), serverAddressPort)
+        time.sleep(1)
+        print('*** send data')
+
+        i = 0
+        t = time.time()
+        time_packet_sent = t
+        for chunk in chunk_arr:
+            time.sleep(max(0, time_packet_sent - time.time()))
+            time_packet_sent += 0.004
+            simpleudp.sendto(chunk, serverAddressPort)
+            if i % 500 == 0:
+                print('packet:', i, ', len:', len(chunk))
+            i += 1
+            # time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
+        
+        
+        print('*** last_pkt:', time.strftime("%H:%M:%S", time.localtime()))
+        print('*** time sent all pkg     : ', time.time()-t)
+        print(simpleudp.recvfrom(1000)[0], time.time()-t)
+        transmission_latency = time.time() - t
+        print(simpleudp.recvfrom(1000)[0], time.time()-t)
+        service_latency = time.time() - t
+        measure_write('client_'+INIT_SETTINGS['mode'], 
+            ['transmission_latency',transmission_latency,'service_latency',service_latency])

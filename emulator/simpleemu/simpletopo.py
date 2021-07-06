@@ -143,7 +143,7 @@ class SimpleNet():
         info("*** Adding flow " + in_port + "-" + node_name + "-" + out_port + " on switch\n")
         in_port = self.getOpenFlowPort(node_name, in_port)
         out_port = self.getOpenFlowPort(node_name, out_port)
-        check_output(split('ovs-ofctl add-flow '+node_name+' "'+proto +
+        check_output(split('ovs-ofctl add-flow '+node_name+' "priority=1,'+proto +
                         ',in_port='+in_port+',actions=output='+out_port+'"'))
     
     def addFlowsOnSwitch(self, proto, flows):

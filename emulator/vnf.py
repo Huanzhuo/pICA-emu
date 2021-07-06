@@ -72,7 +72,8 @@ def main(simplecoin, af_packet):
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
         else:
-            simplecoin.forward(af_packet)
+            #simplecoin.forward(af_packet)
+            pass
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
@@ -114,7 +115,8 @@ def pica_service(simplecoin):
                     HEADER_INIT, init_settings), dst_ip_addr)
                 # Measurements write.
                 EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
-                measure_write(IFCE_NAME, EVALS)
+                if EVALS[0] == 'process_time':
+                    measure_write(IFCE_NAME, EVALS)
                 ica_processed = True
                 ica_buf.init()
                 init_settings.update(DEF_INIT_SETTINGS)

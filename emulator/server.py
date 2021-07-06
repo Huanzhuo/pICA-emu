@@ -59,7 +59,7 @@ def main(simplecoin, af_packet: bytes):
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
                 simplecoin.sendto(
-                    b'*** time server recv all  : ', ('10.0.0.12', 1000))
+                    b'### time server recv all  : ', ('10.0.0.12', 1000))
         else:
             pass
 
@@ -79,7 +79,7 @@ def set_init_settings(simplecoin, _init_settings):
     init_settings.update(_init_settings)
     if init_settings['is_finish'] == True:
         print('*** no further ica process on server!')
-        simplecoin.sendto(b'*** time server ica finish: ', ('10.0.0.12', 1000))
+        simplecoin.sendto(b'### time server ica finish: ', ('10.0.0.12', 1000))
         simplecoin.submit_func(pid=-1, id='evaluation')
 
 
@@ -103,7 +103,7 @@ def fastica_service(simplecoin):
         init_settings['is_finish'] = True
         print('*** server fastica processing finished!')
         ica_processed = True
-        simplecoin.sendto(b'finished', ('10.0.0.12', 1000))
+        simplecoin.sendto(b'### time fastica finish: ', ('10.0.0.12', 1000))
         # Measurements begin.
         EVALS += ['process_time',time_finish - time_start]
         EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
