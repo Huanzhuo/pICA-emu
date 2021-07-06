@@ -92,4 +92,5 @@ if __name__ == "__main__":
     transmission_latency = time.time() - t
     print(simpleudp.recvfrom(1000)[0], time.time()-t)
     service_latency = time.time() - t
-    measure_write('client_'+INIT_SETTINGS['mode'], [transmission_latency, service_latency])
+    measure_write('client_'+INIT_SETTINGS['mode'], 
+        ['transmission_latency',transmission_latency,'service_latency',service_latency])
