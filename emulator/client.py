@@ -78,8 +78,10 @@ if __name__ == "__main__":
         print("*** no.:",k,'-th test, no.',i,'-th mixtrue')
 
         S,A,X = ss[i],aa[i],xx[i]
-        # n = A.shape[0]
-        # INIT_SETTINGS['W'] = np.random.random_sample((n, n))
+        
+        # use random W_0
+        n = A.shape[0]
+        INIT_SETTINGS['W'] = np.random.random_sample((n, n))
         
         # time.sleep(0.5)
 
