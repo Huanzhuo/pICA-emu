@@ -13,3 +13,5 @@ emulation/build/
 .DS_Store
 emulator/measurement/*.csv
 emulator/saxs.pkl
+
+*.csv

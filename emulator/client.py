@@ -59,23 +59,27 @@ if __name__ == "__main__":
         INIT_SETTINGS = INIT_SETTINGS_pICA_disabled
         print("*** Store and Forward Mode: normal, pICA disabled")
     else:
-        print("Invalid argument. The argument must be 'cf n_test' or 'sf n_test'.")
+        print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
         sys.exit(1)
     
     n_start = int(sys.argv[2])
     n_test = int(sys.argv[3])
 
+    fr = open('saxs10.pkl','rb')
+    saxs = pickle.load(fr)
+    ss,aa,xx = saxs
+    fr.close()
 
     print("*** N_test:",n_test)
     
     for k in range(n_test):
-        i = n_start + k
-        print("*** no.:",i)
-        fr = open('saxs.pkl','rb')
-        saxs = pickle.load(fr)
-        ss,aa,xx = saxs
-        fr.close()
+        #i = n_start + k
+        i = n_start
+        print("*** no.:",k,'-th test, no.',i,'-th mixtrue')
+
         S,A,X = ss[i],aa[i],xx[i]
+        # n = A.shape[0]
+        # INIT_SETTINGS['W'] = np.random.random_sample((n, n))
         
         # time.sleep(0.5)
 
