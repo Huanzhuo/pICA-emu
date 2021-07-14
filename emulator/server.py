@@ -21,14 +21,14 @@ from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simplecoin import SimpleCOIN
 from simpleemu.simpleudp import simpleudp
-from measurement.measure import measure_write
+from measurement.measure import measure_write,measure_arr_to_jsonstr
 
 EVAL_TIMES = []
 EVAL_ACC = []
 
 IFCE_NAME, NODE_IP = simpleudp.get_local_ifce_ip('10.0.')
 DEF_INIT_SETTINGS = {'is_finish': False, 'm': np.inf, 'W': None, 'proc_len': np.inf,
-                     'proc_len_multiplier': 2, 'node_max_ext_nums': [np.inf], 'node_max_lens': [np.inf]}
+                     'proc_len_multiplier': 2, 'node_max_ext_nums': [np.inf]}
 init_settings = {}
 init_settings.update(DEF_INIT_SETTINGS)
 dst_ip_addr = None
@@ -59,16 +59,15 @@ def main(simplecoin, af_packet: bytes):
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
                 simplecoin.sendto(
-                    b'*** time server recv all  : ', ('10.0.0.12', 1000))
+                    b'### time server recv all  : ', ('10.0.0.12', 1000))
         else:
             pass
 
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES, EVAL_ACC
-    EVAL_TIMES = []
-    EVAL_ACC = []
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
+    EVALS = []
     ica_processed = False
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
@@ -80,7 +79,7 @@ def set_init_settings(simplecoin, _init_settings):
     init_settings.update(_init_settings)
     if init_settings['is_finish'] == True:
         print('*** no further ica process on server!')
-        simplecoin.sendto(b'*** time server ica finish: ', ('10.0.0.12', 1000))
+        simplecoin.sendto(b'### time server ica finish: ', ('10.0.0.12', 1000))
         simplecoin.submit_func(pid=-1, id='evaluation')
 
 
@@ -95,28 +94,27 @@ def ica_buf_put(simplecoin, data):
 
 @app.func('fastica_service')
 def fastica_service(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_TIMES
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     if (not ica_processed) and ica_buf.size() >= init_settings['m']:
         print('*** server fastica processing!')
         time_start = time.time()
-        # EVAL_TIMES += ['fica_start',time_start]
         icanetwork.fastica_nw(init_settings, ica_buf)
         time_finish = time.time()
-        # EVAL_TIMES += ['fica_end',time_finish]
         init_settings['is_finish'] = True
-        process_time = time_finish - time_start
-        EVAL_TIMES += [process_time]
-        # TO DO: add work mode in the name of measurement files.
-        measure_write('server_'+init_settings['mode'], EVAL_TIMES)
         print('*** server fastica processing finished!')
         ica_processed = True
-        simplecoin.sendto(b'finished', ('10.0.0.12', 1000))
+        simplecoin.sendto(b'### time fastica finish: ', ('10.0.0.12', 1000))
+        # Measurements begin.
+        EVALS += ['process_time',time_finish - time_start]
+        EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
+        measure_write('server_'+init_settings['mode'], EVALS)
+        # Measurements end.
         simplecoin.submit_func(pid=-1, id='evaluation')
 
 
 @app.func('evaluation')
 def evaluation(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVAL_ACC
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     print('*** server separating the matrix X!')
     if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
         W = init_settings['W']
@@ -124,8 +122,6 @@ def evaluation(simplecoin):
         hat_S = np.dot(W, X)
         S = np.load("S.npy")
         eval_db = pybss_tb.bss_evaluation(S, hat_S, 'psnr')
-        EVAL_ACC += [eval_db]
-        measure_write('accuracy_'+init_settings['mode'], EVAL_ACC)
         print('*** server separation eval:', eval_db)
         ica_buf.init()
         init_settings.update(DEF_INIT_SETTINGS)
