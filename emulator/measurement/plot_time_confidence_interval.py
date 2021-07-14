@@ -20,7 +20,7 @@ if __name__ == '__main__':
     
     vnf1_s1 = vnf1_s1[~np.isnan(vnf1_s1)]
     vnf2_s2 = vnf2_s2[~np.isnan(vnf2_s2)]
-    
+
     vnf1_s1 *= 1000
     vnf2_s2 *= 1000
 
@@ -65,27 +65,3 @@ if __name__ == '__main__':
         plt.grid(True, linestyle='--', which='major', color='lightgrey', alpha=0.5, linewidth=0.2)
         plt.ylabel('Average time per vnf (ms)')
         plt.savefig('./emulator/measurement/vnf_time.pdf', dpi=600, bbox_inches='tight')
-
-
-
-
-
-
-
-        """
-        plt.rcParams.update({'font.size': 11})
-
-        fig = plt.bar(figsize=(fig_width, fig_width / 1.618))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.yaxis.grid(True, linestyle='--', which='major', color='lightgrey', alpha=0.5, linewidth=0.2)
-        x_step = np.arange(len(vnf1_s1))
-        line1, = ax.plot(x_step, service_latency_compute_forward, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ms=3, ls='-')
-        line2, = ax.plot(x_step, service_latency_store_forward, color=colordict['store_forward'], marker=markerdict['store_forward'], ms=3, ls='-')
-        #line3, = ax.plot(x_step, processing_time_ia_net_server, color=colordict['store_forward_ia'], marker=markerdict['store_forward_ia'], ms=3, ls='--')
-        ax.set_xlabel(r'Meaurement index')
-        ax.set_ylabel(r'Processing latency ($s$)')
-        ax.set_xlim([0, 30])
-        ax.set_ylim([8.1, 8.2])
-        ax.legend([line1, line2], ['Compute-and-Forward', 'Store-and-Forward'], loc='upper right')
-        #plt.savefig('./emulator/measurement/processing_latency_all.pdf', dpi=600, bbox_inches='tight')
-        """
