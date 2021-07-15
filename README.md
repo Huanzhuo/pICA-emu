@@ -38,6 +38,20 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
 
 2. Install `docker-ce` and add docker into user group
     ```bash
+    cd ~/comnetsemu/util
+    bash ./install.sh -d
+
+    sudo groupadd docker
+    sudo gpasswd -a vagrant docker
+    newgrp docker
+    systemctl start docker
+    
+    cd /home/vagrant/comnetsemu/test_containers || exit
+    sudo bash ./build.sh
+    ```
+
+<!-- 2. 
+    ```bash
     sudo apt-get update
     sudo apt-get install  apt-transport-https  ca-certificates curl  software-properties-common
     curl -fsSL  https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
@@ -51,7 +65,7 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
 
     cd /home/vagrant/comnetsemu/test_containers || exit
     sudo bash ./build.sh
-    ```
+    ``` -->
 
 3. Upgrade ComNetsEmu Python module and all dependencies automatically inside VM
     ```bash

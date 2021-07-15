@@ -67,23 +67,21 @@ if __name__ == "__main__":
     n_start = int(sys.argv[2])
     n_test = int(sys.argv[3])
 
+    # Set input data S, A, X, W_0
     fr = open('saxs10.pkl','rb')
     saxs = pickle.load(fr)
     ss,aa,xx = saxs
     fr.close()
+    S,A,X = ss[n_start],aa[n_start],xx[n_start]
+    INIT_SETTINGS['W'] = W
 
     print("*** N_test:",n_test)
     
     for k in range(n_test):
-        #i = n_start + k
-        i = n_start
-        print("*** no.:",k,'-th test, no.',i,'-th mixtrue')
-
-        S,A,X = ss[i],aa[i],xx[i]
+        # i = n_start + k
+        print("*** no.:",k+1,'-th test, no.',n_start+1,'-th mixtrue')
         
-        # use random W_0
         n = A.shape[0]
-        INIT_SETTINGS['W'] = np.random.random_sample((n, n))
         
         # time.sleep(0.5)
 

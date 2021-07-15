@@ -11,7 +11,7 @@ matplotlib.use('TkAgg')
 print(matplotlib.get_configdir())
 
 if __name__ == '__main__':
-    number_node = 4
+    number_node = 5
     # txt paths of store-forward(client vnf1 vnf2) and compute-forward(server)
     path_time_compute_client = './emulator/measurement/' + \
         str(number_node) + 's/client_cf.csv'
@@ -19,14 +19,14 @@ if __name__ == '__main__':
         str(number_node) + 's/client_sf.csv'
 
     service_latency_compute_forward = np.loadtxt(
-        path_time_compute_client, delimiter=',', usecols=[3])
+        path_time_compute_client, delimiter=',', usecols=[5])
     service_latency_store_forward = np.loadtxt(
-        path_time_store_client, delimiter=',', usecols=[3])
+        path_time_store_client, delimiter=',', usecols=[5])
 
     transmission_latency_compute_forward = np.loadtxt(
-        path_time_compute_client, delimiter=',', usecols=[1])
+        path_time_compute_client, delimiter=',', usecols=[3])
     transmission_latency_store_forward = np.loadtxt(
-        path_time_store_client, delimiter=',', usecols=[1])
+        path_time_store_client, delimiter=',', usecols=[3])
 
     server_process_latency_compute_forward = service_latency_compute_forward - \
         transmission_latency_compute_forward
