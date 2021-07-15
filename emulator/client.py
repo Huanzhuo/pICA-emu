@@ -40,6 +40,7 @@ from measurement.measure import measure_write
 # W = np.load("W.npy")
 
 # settings
+n_vnf = 7
 W = np.load("W.npy")
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
@@ -49,8 +50,8 @@ INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_le
 
 if __name__ == "__main__":
     n_test = 1
-    if len(sys.argv) != 3:
-        print("Invalid argument. The argument must be 'cf n_test' or 'sf n_test'.")
+    if len(sys.argv) != 4:
+        print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
         sys.exit(1)
 
     if sys.argv[1] == 'cf':
@@ -60,22 +61,31 @@ if __name__ == "__main__":
         INIT_SETTINGS = INIT_SETTINGS_pICA_disabled
         print("*** Store and Forward Mode: normal, pICA disabled")
     else:
-        print("Invalid argument. The argument must be 'cf n_test' or 'sf n_test'.")
+        print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
         sys.exit(1)
+    
+    n_start = int(sys.argv[2])
+    n_test = int(sys.argv[3])
 
-    n_test = int(sys.argv[2])
+    fr = open('saxs10.pkl','rb')
+    saxs = pickle.load(fr)
+    ss,aa,xx = saxs
+    fr.close()
 
-    print("*** N_test:", n_test)
+    print("*** N_test:",n_test)
+    
+    for k in range(n_test):
+        #i = n_start + k
+        i = n_start
+        print("*** no.:",k,'-th test, no.',i,'-th mixtrue')
 
-    for i in range(n_test):
-        print("*** no.:", i+1)
-        fr = open('saxs.pkl', 'rb')
-        saxs = pickle.load(fr)
-        ss, aa, xx = saxs
-        fr.close()
-        S, A, X = ss[0], aa[0], xx[0]
-
-        time.sleep(0.5)
+        S,A,X = ss[i],aa[i],xx[i]
+        
+        # use random W_0
+        n = A.shape[0]
+        INIT_SETTINGS['W'] = np.random.random_sample((n, n))
+        
+        # time.sleep(0.5)
 
         chunk_arr = pktutils.get_chunks(
             init_settings=INIT_SETTINGS, X=X, m_substream=80, dtype=np.float32)
@@ -84,7 +94,7 @@ if __name__ == "__main__":
         print('*** send clear cache command')
         simpleudp.sendto(pktutils.serialize_data(
             HEADER_CLEAR_CACHE), serverAddressPort)
-        time.sleep(1)
+        time.sleep(0.5)
         print('*** send data')
 
         i = 0
@@ -92,7 +102,7 @@ if __name__ == "__main__":
         time_packet_sent = t
         for chunk in chunk_arr:
             time.sleep(max(0, time_packet_sent - time.time()))
-            time_packet_sent += 0.003
+            time_packet_sent += 0.004
             simpleudp.sendto(chunk, serverAddressPort)
             if i % 500 == 0:
                 print('packet:', i, ', len:', len(chunk))
@@ -105,10 +115,11 @@ if __name__ == "__main__":
         transmission_latency = time.time() - t
         print(simpleudp.recvfrom(1000)[0], time.time()-t)
         service_latency = time.time() - t
-        measure_write('client_'+INIT_SETTINGS['mode'],
-                      ['transmission_latency', transmission_latency, 'service_latency', service_latency])
+        measure_write('client_'+INIT_SETTINGS['mode'], 
+            ['n_vnf',n_vnf,'transmission_latency',transmission_latency,'service_latency',service_latency])
+        
 
         print('*** send write evaluation results command')
         simpleudp.sendto(pktutils.serialize_data(
             HEADER_EVAL), serverAddressPort)
-        time.sleep(5)
+        time.sleep(3)
