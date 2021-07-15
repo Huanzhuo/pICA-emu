@@ -11,7 +11,7 @@ matplotlib.use('TkAgg')
 print(matplotlib.get_configdir())
 
 if __name__ == '__main__':
-    number_node = 5
+    number_node = 3
     # txt paths of store-forward(client vnf1 vnf2) and compute-forward(server)
     path_time_compute_client = './emulator/measurement/' + \
         str(number_node) + 's/client_cf.csv'

@@ -44,7 +44,7 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     sudo groupadd docker
     sudo gpasswd -a vagrant docker
     newgrp docker
-    systemctl start docker
+    sudo systemctl start docker
     
     cd /home/vagrant/comnetsemu/test_containers || exit
     sudo bash ./build.sh
