@@ -121,7 +121,7 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
 
     The number of VNFs is defined as 2 in ```topo.py```. For an arbitary number of VNFs, please define the value of ```n_vnf``` in ```topo_n_vnf.py``` and run ```topo_n_vnf.py``` instead of ```topo.py```.
 
-3. Please firstly run `server.py` inside the server's shell, then the rest. The default work mode is ```compute-and-forward``` (```cf```). With the flag ``` sf``` on the client, the work mode will be changed to ```store-and-forward```. With the flag ```n_test``` on the client, an integer value is expected to set the evaluation rounds.
+3. Please firstly run `server.py` inside the server's shell, then the rest. The default work mode is ```compute-and-forward``` (```cf```). With the flag ``` sf``` on the client, the work mode will be changed to ```store-and-forward```. With the flag ```data_id``` on the client, an integer value is expected to set the id of test data set. With the flag ```n_test``` on the client, an integer value is expected to set the evaluation rounds.
     ```bash
     # in the server terminal
     sudo python3 ./server.py
@@ -130,7 +130,7 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     sudo python3 ./vnf.py
 
     # in the client terminal
-    sudo python3 ./client.py cf n_test
+    sudo python3 ./client.py cf data_id n_test
     ```
 ## About Us
 

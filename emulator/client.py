@@ -66,6 +66,7 @@ if __name__ == "__main__":
     
     n_start = int(sys.argv[2])
     n_test = int(sys.argv[3])
+    n_start = 2
 
     # Set input data S, A, X, W_0
     fr = open('saxs10.pkl','rb')
