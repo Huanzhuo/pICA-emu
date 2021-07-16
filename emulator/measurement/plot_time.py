@@ -22,40 +22,54 @@ def get_conf_interval(index, data, conf_rate):
     return np.array(data_stat)
 
 if __name__ == '__main__':
-    number_node = [1, 2, 3, 4, 5, 6, 7]
+    number_node = [0, 1, 2, 3, 4, 5, 6, 7]
     conf_rate = 0.95
-    number_test = 40
+    number_test = 50
 
     service_latency_cf = np.zeros(number_test)
     service_latency_sf = np.zeros(number_test)
     transmission_latency_cf = np.zeros(number_test)
     transmission_latency_sf = np.zeros(number_test)
+    process_server_latency_cf = np.zeros(number_test)
+    process_server_latency_sf = np.zeros(number_test)
     for node in number_node:
-        path_time_compute_client = './emulator/measurement/' + \
-            str(node)+'s/client_cf.csv'
-        path_time_store_client = './emulator/measurement/' + \
-            str(node)+'s/client_sf.csv'
+        path_client_compute_client = './emulator/measurement/' + \
+            str(node)+'/client_cf.csv'
+        path_client_store_client = './emulator/measurement/' + \
+            str(node)+'/client_sf.csv'
+        path_server_compute_client = './emulator/measurement/' + \
+            str(node)+'/client_cf.csv'
+        path_server_store_client = './emulator/measurement/' + \
+            str(node)+'/client_sf.csv'
 
-        service_latency_compute_forward = np.loadtxt(
-            path_time_compute_client, delimiter=',', usecols=[3, 5])
-        service_latency_store_forward = np.loadtxt(
-            path_time_store_client, delimiter=',', usecols=[3, 5])
+        client_compute_forward = np.loadtxt(
+            path_client_compute_client, delimiter=',', usecols=[3, 5])
+        client_store_forward = np.loadtxt(
+            path_client_store_client, delimiter=',', usecols=[3, 5])
+        server_compute_forward = np.loadtxt(
+            path_server_compute_client, delimiter=',', usecols=[1])
+        server_store_forward = np.loadtxt(
+            path_server_store_client, delimiter=',', usecols=[1])
 
         service_latency_cf = np.row_stack(
-            (service_latency_cf, service_latency_compute_forward[:, 1]))
+            (service_latency_cf, client_compute_forward[:, 1]))
         service_latency_sf = np.row_stack(
-            (service_latency_sf, service_latency_store_forward[:, 1]))
+            (service_latency_sf, client_store_forward[:, 1]))
         transmission_latency_cf = np.row_stack(
-            (transmission_latency_cf, service_latency_compute_forward[:, 0]))
+            (transmission_latency_cf, client_compute_forward[:, 0]))
         transmission_latency_sf = np.row_stack(
-            (transmission_latency_sf, service_latency_store_forward[:, 0]))
+            (transmission_latency_sf, client_store_forward[:, 0]))
+        process_server_latency_cf = np.row_stack(
+            (process_server_latency_cf, server_compute_forward))
+        process_server_latency_sf = np.row_stack(
+            (process_server_latency_sf, server_store_forward))
 
     service_latency_cf = service_latency_cf[1:, :] * 1000
     service_latency_sf = service_latency_sf[1:, :] * 1000
     transmission_latency_cf = transmission_latency_cf[1:, :] * 1000
     transmission_latency_sf = transmission_latency_sf[1:, :] * 1000
-    process_server_latency_cf = service_latency_cf - transmission_latency_cf
-    process_server_latency_sf = service_latency_sf - transmission_latency_sf
+    process_server_latency_cf = process_server_latency_cf[1:, :] * 1000
+    process_server_latency_sf = process_server_latency_sf[1:, :] * 1000
 
     ts_cf_conf = get_conf_interval(number_node, service_latency_cf, conf_rate)
     ts_sf_conf = get_conf_interval(number_node, service_latency_sf, conf_rate)
