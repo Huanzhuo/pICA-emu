@@ -19,7 +19,7 @@ import sys
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
-from measurement.measure import measure_write
+from measurement.measure import measure_write, measure_arr_to_jsonstr
 
 # read wavs
 # n = 4
@@ -43,9 +43,9 @@ from measurement.measure import measure_write
 n_vnf = 1
 W = np.load("W.npy")
 serverAddressPort = ("10.0.0.15", 9999)
-INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
-                              'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'mode': 'cf'}
-INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
+INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 80,
+                              'proc_len_multiplier': 2, 'node_max_ext_nums': [2]*10, 'mode': 'cf'}
+INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 80,
                                'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'mode': 'sf'}
 
 if __name__ == "__main__":
@@ -63,39 +63,38 @@ if __name__ == "__main__":
     else:
         print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
         sys.exit(1)
-    
+
     n_start = int(sys.argv[2])
     n_test = int(sys.argv[3])
-    n_start = 2
+    dataset_id = n_start
 
     # Set input data S, A, X, W_0
-    fr = open('saxs10.pkl','rb')
+    fr = open('saxs10.pkl', 'rb')
     saxs = pickle.load(fr)
-    ss,aa,xx = saxs
+    ss, aa, xx = saxs
     fr.close()
-    S,A,X = ss[n_start],aa[n_start],xx[n_start]
+
     INIT_SETTINGS['W'] = W
 
-    print("*** N_test:",n_test)
-    
-    for k in range(n_test):
-        # i = n_start + k
-        print("*** no.:",k+1,'-th test, no.',n_start+1,'-th mixtrue')
-        
-        n = A.shape[0]
-        
-        # time.sleep(0.5)
+    print("*** N_test:", n_test)
 
+    for k in range(n_test):
+        
+        dataset_id = n_start + k
+        S, A, X = ss[dataset_id], aa[dataset_id], xx[dataset_id]
+        n = A.shape[0]
+        print("*** no.:", k+1, '-th test, no.', dataset_id, '-th mixtrue')
+
+        # time.sleep(0.5)
         chunk_arr = pktutils.get_chunks(
             init_settings=INIT_SETTINGS, X=X, m_substream=80, dtype=np.float32)
-
         # send clear cache command
         print('*** send clear cache command')
         simpleudp.sendto(pktutils.serialize_data(
             HEADER_CLEAR_CACHE), serverAddressPort)
+
         time.sleep(0.5)
         print('*** send data')
-
         i = 0
         t = time.time()
         time_packet_sent = t
@@ -106,7 +105,6 @@ if __name__ == "__main__":
             if i % 500 == 0:
                 print('packet:', i, ', len:', len(chunk))
             i += 1
-            # time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
 
         print('*** last_pkt:', time.strftime("%H:%M:%S", time.localtime()))
         print('*** time sent all pkg     : ', time.time()-t)
@@ -114,11 +112,10 @@ if __name__ == "__main__":
         transmission_latency = time.time() - t
         print(simpleudp.recvfrom(1000)[0], time.time()-t)
         service_latency = time.time() - t
-        measure_write('client_'+INIT_SETTINGS['mode'], 
-            ['n_vnf',n_vnf,'transmission_latency',transmission_latency,'service_latency',service_latency])
-        
+        measure_write('client_'+INIT_SETTINGS['mode'],
+                      ['n_vnf', n_vnf, 'transmission_latency', transmission_latency, 'service_latency', service_latency, 'matrix_w', measure_arr_to_jsonstr(INIT_SETTINGS['W'])])
 
         print('*** send write evaluation results command')
         simpleudp.sendto(pktutils.serialize_data(
             HEADER_EVAL), serverAddressPort)
-        time.sleep(3)
+        time.sleep(2)
