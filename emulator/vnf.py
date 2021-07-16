@@ -66,7 +66,6 @@ def main(simplecoin, af_packet):
                 print('*** vnf transmit init_settings!')
                 simplecoin.forward(af_packet)
             EVAL_MODE = init_settings['mode']
-            # simplecoin.submit_func(pid=0, id='measure@write_mode', args=(init_settings['mode'],))
         elif header == HEADER_DATA or header == HEADER_FINISH:
             simplecoin.forward(af_packet)
             simplecoin.submit_func(
@@ -75,26 +74,26 @@ def main(simplecoin, af_packet):
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
         elif header == HEADER_EVAL:
-            simplecoin.submit_func(pid=0, id='measure@write_results', args=(EVAL_MODE,))
+            simplecoin.submit_func(pid=0, id='measure@write_results', args=(EVAL_MODE,init_settings['W']))
             simplecoin.forward(af_packet)
         else:
             # simplecoin.forward(af_packet)
             pass
 
-# @app.func('measure@write_mode')
-# def write_mode(simplecoin,mode):
-#     global EVAL_MODE
-#     # Measurements write.
-#     EVAL_MODE = ['mode',mode]
 
 @app.func('measure@write_results')
-def write_results(simplecoin,EVAL_MODE):
+def write_results(simplecoin,EVAL_MODE,W):
     global EVALS
     # Measurements write.
     EVALS = ['mode',EVAL_MODE] + EVALS
     print('*** write evaluation')
     if EVALS[1] == 'cf':
-        measure_write(IFCE_NAME, EVALS)
+        if len(EVALS)>=2:
+            measure_write(IFCE_NAME, EVALS)
+        else:
+            EVALS += ['process_time',0,'matrix_w',
+                        measure_arr_to_jsonstr(W)]
+            measure_write(IFCE_NAME, EVALS)
 
 
 @app.func('clear_cache')
