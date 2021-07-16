@@ -13,7 +13,9 @@ generate and send udp packages
 """
 
 import numpy as np
-import time, pickle, sys
+import time
+import pickle
+import sys
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
@@ -42,16 +44,16 @@ n_vnf = 7
 W = np.load("W.npy")
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
-                                'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'mode': 'cf'}
+                              'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'mode': 'cf'}
 INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
-                            'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'mode': 'sf'}
+                               'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'mode': 'sf'}
 
 if __name__ == "__main__":
     n_test = 1
     if len(sys.argv) != 4:
         print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
         sys.exit(1)
-    
+
     if sys.argv[1] == 'cf':
         INIT_SETTINGS = INIT_SETTINGS_pICA_enabled
         print("*** Compute and Forward Mode: pICA enabled")
@@ -64,24 +66,23 @@ if __name__ == "__main__":
     
     n_start = int(sys.argv[2])
     n_test = int(sys.argv[3])
+    n_start = 2
 
+    # Set input data S, A, X, W_0
     fr = open('saxs10.pkl','rb')
     saxs = pickle.load(fr)
     ss,aa,xx = saxs
     fr.close()
+    S,A,X = ss[n_start],aa[n_start],xx[n_start]
+    INIT_SETTINGS['W'] = W
 
     print("*** N_test:",n_test)
     
     for k in range(n_test):
-        #i = n_start + k
-        i = n_start
-        print("*** no.:",k,'-th test, no.',i,'-th mixtrue')
-
-        S,A,X = ss[i],aa[i],xx[i]
+        # i = n_start + k
+        print("*** no.:",k+1,'-th test, no.',n_start+1,'-th mixtrue')
         
-        # use random W_0
         n = A.shape[0]
-        INIT_SETTINGS['W'] = np.random.random_sample((n, n))
         
         # time.sleep(0.5)
 
@@ -106,8 +107,7 @@ if __name__ == "__main__":
                 print('packet:', i, ', len:', len(chunk))
             i += 1
             # time.sleep(0.0016) #0.0005 maybe the smallest gap for this framework with no packet lost
-        
-        
+
         print('*** last_pkt:', time.strftime("%H:%M:%S", time.localtime()))
         print('*** time sent all pkg     : ', time.time()-t)
         print(simpleudp.recvfrom(1000)[0], time.time()-t)
