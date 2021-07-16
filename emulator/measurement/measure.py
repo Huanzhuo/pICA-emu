@@ -4,12 +4,12 @@ import pickle
 
 def measure_write(filename,contents):
     try:
-        f = open("measurement/"+filename+".csv","r")
+        f = open("measurement/1s/"+filename+".csv","r")
         data = f.read()
     except Exception:
         data = ''
     data = data + ','.join(map(str,contents)) + ',\n'
-    with open("measurement/"+filename+".csv",'w') as f:
+    with open("measurement/1s/"+filename+".csv",'w') as f:
         f.write(data)
     f.close()
 
@@ -23,7 +23,7 @@ def measure_jsonstr_to_arr(jsonstr):
     json.loads(jsonstr.replace('|',','))
 
 def measure_read_csv_to_2dlist(filename):
-    f = open("measurement/"+filename+".csv",'r')
+    f = open("measurement/1s/"+filename+".csv",'r')
     lines = f.readlines()
     return [line.split(',') for line in lines]
 

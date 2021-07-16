@@ -22,7 +22,7 @@ def get_conf_interval(index, data, conf_rate):
     return np.array(data_stat)
 
 if __name__ == '__main__':
-    number_node = [3, 4, 5, 6, 7]
+    number_node = [1, 2, 3, 4, 5, 6, 7]
     conf_rate = 0.95
     number_test = 40
 

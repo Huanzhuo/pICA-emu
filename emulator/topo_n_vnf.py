@@ -14,7 +14,7 @@ import sys
 from simpleemu.simpletopo import SimpleTopo
 
 if __name__ == "__main__":
-    n_vnf = 3
+    n_vnf = 1
 
     # it should at first create the network infrastructure then set the flows
     ## network infrastructure ##

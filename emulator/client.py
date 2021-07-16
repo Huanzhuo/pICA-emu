@@ -40,7 +40,7 @@ from measurement.measure import measure_write
 # W = np.load("W.npy")
 
 # settings
-n_vnf = 7
+n_vnf = 1
 W = np.load("W.npy")
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
