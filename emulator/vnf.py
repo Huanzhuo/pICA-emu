@@ -86,14 +86,12 @@ def write_results(simplecoin,EVAL_MODE,W):
     global EVALS
     # Measurements write.
     EVALS = ['mode',EVAL_MODE] + EVALS
-    print('*** write evaluation')
+    print('*** write reults')
     if EVALS[1] == 'cf':
-        if len(EVALS)>=2:
-            measure_write(IFCE_NAME, EVALS)
-        else:
+        if len(EVALS)<=2:
             EVALS += ['process_time',0,'matrix_w',
                         measure_arr_to_jsonstr(W)]
-            measure_write(IFCE_NAME, EVALS)
+        measure_write(IFCE_NAME, EVALS)
 
 
 @app.func('clear_cache')
@@ -122,7 +120,6 @@ def ica_buf_put(simplecoin, data):
             simplecoin.submit_func(pid=-1, id='pica_service')
 
 # the function app.func('xxx') will create a new thread to run the function
-
 
 @app.func('pica_service')
 def pica_service(simplecoin):

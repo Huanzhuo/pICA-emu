@@ -118,18 +118,9 @@ def write_results(simplecoin):
     if len(EVALS)<1:
         EVALS += ['process_time',0,'matrix_w',
                     measure_arr_to_jsonstr(init_settings['W'])]
+    print('*** write reults')
     measure_write('server_'+init_settings['mode'], EVALS)
-    
-    # print('*** server separating the matrix X!')
-    # if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
-    #     W = init_settings['W']
-    #     X = ica_buf.buffer
-    #     hat_S = np.dot(W, X)
-    #     S = np.load("S.npy")
-    #     eval_db = pybss_tb.bss_evaluation(S, hat_S, 'psnr')
-    #     print('*** server separation eval:', eval_db)
-    #     ica_buf.init()
-    #     init_settings.update(DEF_INIT_SETTINGS)
+
 
 if __name__ == "__main__":
     app.run()
