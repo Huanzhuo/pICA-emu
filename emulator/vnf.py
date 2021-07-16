@@ -37,13 +37,12 @@ ica_processed = False
 ica_buf = ICABuffer(max_size=(4, 160000))
 
 app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1)
-EVAL_MODE = None
+
 
 # main function for processing the data
 # af_packet is the raw af_packet from the socket
 @app.main()
 def main(simplecoin, af_packet):
-    global EVAL_MODE
     # parse the raw packet to get the ip/udp infomations like ip, port, protocol, data
     packet = simpleudp.parse_af_packet(af_packet)
     # if prorocol is 17, that means is udp
@@ -65,33 +64,34 @@ def main(simplecoin, af_packet):
             else:
                 print('*** vnf transmit init_settings!')
                 simplecoin.forward(af_packet)
-            EVAL_MODE = init_settings['mode']
-            # simplecoin.submit_func(pid=0, id='measure@write_mode', args=(init_settings['mode'],))
+            simplecoin.submit_func(
+                pid=0, id='measure@write_mode', args=(init_settings['mode'],))
         elif header == HEADER_DATA or header == HEADER_FINISH:
-            simplecoin.forward(af_packet)
             simplecoin.submit_func(
                 pid=0, id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
+            simplecoin.forward(af_packet)
             if header == HEADER_FINISH:
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
         elif header == HEADER_EVAL:
-            simplecoin.submit_func(pid=0, id='measure@write_results', args=(EVAL_MODE,))
+            simplecoin.submit_func(pid=0, id='measure@write_results')
             simplecoin.forward(af_packet)
         else:
             # simplecoin.forward(af_packet)
             pass
 
-# @app.func('measure@write_mode')
-# def write_mode(simplecoin,mode):
-#     global EVAL_MODE
-#     # Measurements write.
-#     EVAL_MODE = ['mode',mode]
 
-@app.func('measure@write_results')
-def write_results(simplecoin,EVAL_MODE):
+@app.func('measure@write_mode')
+def write_mode(simplecoin, mode):
     global EVALS
     # Measurements write.
-    EVALS = ['mode',EVAL_MODE] + EVALS
+    EVALS += ['mode', mode]
+
+
+@app.func('measure@write_results')
+def write_results(simplecoin):
+    global EVALS
+    # Measurements write.
     print('*** write evaluation')
     if EVALS[1] == 'cf':
         measure_write(IFCE_NAME, EVALS)
@@ -112,7 +112,9 @@ def set_init_settings(simplecoin, _init_settings, _dst_ip_addr):
     init_settings.update(_init_settings)
     dst_ip_addr = _dst_ip_addr
     if ica_buf.size() >= init_settings['proc_len'] or ica_buf.size() >= init_settings['m']:
+        print('call pica')
         simplecoin.submit_func(pid=-1, id='pica_service')
+
 
 @app.func('put_ica_buf')
 def ica_buf_put(simplecoin, data):

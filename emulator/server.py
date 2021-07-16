@@ -107,15 +107,14 @@ def fastica_service(simplecoin):
         # Measurements begin.
         EVALS += ['process_time',time_finish - time_start]
         EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
+        measure_write('server_'+init_settings['mode'], EVALS)
         # Measurements end.
         simplecoin.submit_func(pid=-1, id='evaluation')
 
 
 @app.func('evaluation')
 def evaluation(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
-    # Measurements write.
-    measure_write('server_'+init_settings['mode'], EVALS)
+    global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     print('*** server separating the matrix X!')
     if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
         W = init_settings['W']
