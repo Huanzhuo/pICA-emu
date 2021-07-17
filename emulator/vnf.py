@@ -11,7 +11,6 @@
 Forwarding VNF via packet socket.
 """
 
-from server import EVAL_TIMES
 import numpy as np
 import pickle
 import time
