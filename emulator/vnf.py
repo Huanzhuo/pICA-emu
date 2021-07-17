@@ -36,7 +36,8 @@ ica_processed = False
 
 ica_buf = ICABuffer(max_size=(4, 160000))
 
-app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1)
+app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1, light_mode=True)
+
 EVAL_MODE = None
 
 # main function for processing the data
