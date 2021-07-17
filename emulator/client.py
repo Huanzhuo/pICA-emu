@@ -42,15 +42,16 @@ from measurement.measure import measure_write, measure_arr_to_jsonstr
 # settings
 n_vnf = 7
 W = np.load("W.npy")
+W = np.ones((4,4))*0.25
 serverAddressPort = ("10.0.0.15", 9999)
-INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 80,
-                              'proc_len_multiplier': 2, 'node_max_ext_nums': [2]*10, 'mode': 'cf'}
-INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 80,
+INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
+                              'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'mode': 'cf'}
+INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
                                'proc_len_multiplier': 2, 'node_max_ext_nums': [0]*10, 'mode': 'sf'}
 
 if __name__ == "__main__":
     n_test = 1
-    if len(sys.argv) != 4:
+    if len(sys.argv) < 4:
         print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
         sys.exit(1)
 
@@ -66,10 +67,13 @@ if __name__ == "__main__":
 
     n_start = int(sys.argv[2])
     n_test = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        n_vnf = int(sys.argv[4])
+
     dataset_id = n_start
 
     # Set input data S, A, X, W_0
-    fr = open('saxs10.pkl', 'rb')
+    fr = open('saxsNew.pkl', 'rb')
     saxs = pickle.load(fr)
     ss, aa, xx = saxs
     fr.close()
@@ -100,7 +104,7 @@ if __name__ == "__main__":
         time_packet_sent = t
         for chunk in chunk_arr:
             time.sleep(max(0, time_packet_sent - time.time()))
-            time_packet_sent += 0.004
+            time_packet_sent += 0.003
             simpleudp.sendto(chunk, serverAddressPort)
             if i % 500 == 0:
                 print('packet:', i, ', len:', len(chunk))
@@ -113,7 +117,7 @@ if __name__ == "__main__":
         print(simpleudp.recvfrom(1000)[0], time.time()-t)
         service_latency = time.time() - t
         measure_write('client_'+INIT_SETTINGS['mode'],
-                      ['n_vnf', n_vnf, 'transmission_latency', transmission_latency, 'service_latency', service_latency, 'matrix_w', measure_arr_to_jsonstr(INIT_SETTINGS['W'])])
+                      ['n_vnf', n_vnf, 'transmission_latency', transmission_latency, 'service_latency', service_latency, 'matrix_w', measure_arr_to_jsonstr(INIT_SETTINGS['W']), 'start_sys_time', t])
 
         print('*** send write evaluation results command')
         simpleudp.sendto(pktutils.serialize_data(
