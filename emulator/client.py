@@ -41,7 +41,7 @@ from measurement.measure import measure_write, measure_arr_to_jsonstr
 
 # settings
 n_vnf = 7
-W = np.load("W.npy")
+W = np.load("MIMII/W.npy")
 W = np.ones((4,4))*0.25
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     dataset_id = n_start
 
     # Set input data S, A, X, W_0
-    fr = open('saxsNew.pkl', 'rb')
+    fr = open('MIMII/saxsNew.pkl', 'rb')
     saxs = pickle.load(fr)
     ss, aa, xx = saxs
     fr.close()
