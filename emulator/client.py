@@ -43,6 +43,7 @@ from measurement.measure import measure_write, measure_arr_to_jsonstr
 n_vnf = 7
 W = np.load("MIMII/W.npy")
 W = np.ones((4,4))*0.25
+
 serverAddressPort = ("10.0.0.15", 9999)
 INIT_SETTINGS_pICA_enabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_len': 1280,
                               'proc_len_multiplier': 2, 'node_max_ext_nums': [1]*10, 'mode': 'cf'}
