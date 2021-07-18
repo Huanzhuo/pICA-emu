@@ -22,9 +22,9 @@ def get_conf_interval(index, data, conf_rate):
     return np.array(data_stat)
 
 if __name__ == '__main__':
-    number_node = [0, 1, 2, 3, 4, 5, 6, 7]
+    number_node = [0, 3, 5, 7]
     conf_rate = 0.95
-    number_test = 50
+    number_test = 30
 
     service_latency_cf = np.zeros(number_test)
     service_latency_sf = np.zeros(number_test)
@@ -34,13 +34,13 @@ if __name__ == '__main__':
     process_server_latency_sf = np.zeros(number_test)
     for node in number_node:
         path_client_compute_client = './emulator/measurement/' + \
-            str(node)+'/client_cf.csv'
+            str(node)+'s/client_cf.csv'
         path_client_store_client = './emulator/measurement/' + \
-            str(node)+'/client_sf.csv'
+            str(node)+'s/client_sf.csv'
         path_server_compute_client = './emulator/measurement/' + \
-            str(node)+'/client_cf.csv'
+            str(node)+'s/server_cf.csv'
         path_server_store_client = './emulator/measurement/' + \
-            str(node)+'/client_sf.csv'
+            str(node)+'s/server_sf.csv'
 
         client_compute_forward = np.loadtxt(
             path_client_compute_client, delimiter=',', usecols=[3, 5])
