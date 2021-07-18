@@ -439,7 +439,7 @@ class SimpleCOIN():
             process_func_loop.start()
         print('\n///////////////////////////////////////////////\n')
 
-        print('*** SimpleCOIN v1.0.0 Framework is running !')
+        print('*** SimpleCOIN v1.0.0 Framework is running!')
         print('*** Lightweight mode:', self.lightweight_mode)
         print('*** Press <Enter> to exit.')
         print('-----------------------------------------------')

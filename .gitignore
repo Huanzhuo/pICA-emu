@@ -15,6 +15,6 @@ emulator/measurement/*.csv
 # emulator/measurement/*.pdf
 emulator/measurement/*/*.csv
 emulator/measurement/*/*.pdf
-*/saxs.pkl
-*/saxsNew.pkl
+saxs.pkl
+saxsNew.pkl
 
