@@ -28,25 +28,17 @@ if __name__ == "__main__":
     mytopo.addHostNodes(node_names=['client', 'server'],
                         ip_prefix='10.0.0.', ip_suffixes=['12', '15'],
                         dimage='pica_dev:4', volume=None,
-                        docker_args={"cpuset_cpus": '0', 'cpu_quota': 13500})
-    mytopo.addHostNodes(node_names=['vnf'+ str(i) for i in range(n_vnf)],
-                        ip_prefix='10.0.0.', ip_suffixes=[str(i+1) for i in range(n_vnf)],
-                        dimage='pica_dev:4', volume=None,
-                        docker_args={"cpuset_cpus": '1', 'cpu_quota': 13500})
+                        docker_args={"cpuset_cpus": '0', 'cpu_quota': 30000})
+    # mytopo.addHostNodes(node_names=['vnf'+ str(i) for i in range(n_vnf)],
+    #                     ip_prefix='10.0.0.', ip_suffixes=[str(i+1) for i in range(n_vnf)],
+    #                     dimage='pica_dev:4', volume=None,
+    #                     docker_args={"cpuset_cpus": '1', 'cpu_quota': 13500})
+    for i in range(n_vnf):
+        mytopo.addHostNodes(node_names=['vnf'+ str(i)],
+                            ip_prefix='10.0.0.', ip_suffixes=[str(i+1)],
+                            dimage='pica_dev:4', volume=None,
+                            docker_args={"cpuset_cpus": str(i//3+1), 'cpu_quota': 30000})
 
-    # if n_vnf <= 4:
-    #     n_cpu1_vnf = n_vnf
-    # else:
-    #     n_cpu1_vnf = 4
-    # mytopo.addHostNodes(node_names=['vnf'+ str(i) for i in range(n_cpu1_vnf)],
-    #                     ip_prefix='10.0.0.', ip_suffixes=[str(i+1) for i in range(n_cpu1_vnf)],
-    #                     dimage='pica_dev:4', volume=None,
-    #                     docker_args={"cpuset_cpus": '2', 'cpu_quota': 22000})
-    # mytopo.addHostNodes(node_names=['vnf'+ str(i) for i in range(n_cpu1_vnf,n_vnf)],
-    #                     ip_prefix='10.0.0.', ip_suffixes=[str(i+1) for i in range(n_cpu1_vnf,n_vnf)],
-    #                     dimage='pica_dev:4', volume=None,
-    #                     docker_args={"cpuset_cpus": '3', 'cpu_quota': 22000})
-    
     mytopo.addSwitchNodes(node_names=['s'+ str(i) for i in range(n_vnf)])
     # create links, `bw` is bandwith, unit of bandwith is 'Mbit/s'
     mytopo.addLinks(links=['client' + ''.join(['-s'+ str(i) for i in range(n_vnf)]) + '-server'] + 
