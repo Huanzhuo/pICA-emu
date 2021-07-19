@@ -14,8 +14,11 @@ import sys
 from simpleemu.simpletopo import SimpleTopo
 
 if __name__ == "__main__":
-    n_vnf = 5
-
+    if len(sys.argv) == 1:
+        n_vnf = 1 # the value of n_vnf is [0,1,2,...,6,7]
+    else:
+        n_vnf = int(sys.argv[1])
+    print("*** VNF Number:",n_vnf)
     # it should at first create the network infrastructure then set the flows
     ## network infrastructure ##
     mytopo = SimpleTopo()

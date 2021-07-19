@@ -3,8 +3,8 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-05-19
-# @desc. : SimpleCOIN 0.3.3
+# @modify: 2021-07-17
+# @desc. : SimpleCOIN 1.0.0
 
 
 import socket
@@ -256,10 +256,9 @@ class SimpleCOIN():
     """
 
     # Interprocess communication
-    class IPC():
+    class IPCComm():
 
-        def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-            self.send_queue = send_queue
+        def __init__(self, func_map: dict, func_params_queues: list):
             self.func_params_queues = func_params_queues
             self.func_map = func_map
 
@@ -278,14 +277,34 @@ class SimpleCOIN():
                 self.func_params_queues[pid].put(
                     (id, args, kwargs), block=False)
 
+    class IPCStd(IPCComm):
+
+        def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
+            SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
+            self.send_queue = send_queue
+
         def forward(self, af_packet: bytes):
             self.send_queue.put(('raw', af_packet, None), block=False)
 
         def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
             self.send_queue.put(('udp', data, dst_addr), block=False)
 
+    class IPCLite(IPCComm):
+
+        def __init__(self, __send: Callable, func_map: dict, func_params_queues: list):
+            SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
+            self.__send = __send
+
+        def forward(self, af_packet: bytes):
+            self.__send('raw', af_packet, None)
+
+        def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
+            self.__send('udp', data, dst_addr)
+
     # The body
-    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, light_mode: bool = False):
+        # SimpleCOIN Settings
+        self.light_mode = light_mode
         # Network Device Settings
         self.CHUNK_GAP = chunk_gap
         self.buffer_size = mtu
@@ -299,24 +318,12 @@ class SimpleCOIN():
         self.main_processing = None
         self.func_init_processing = lambda ipc: None
         self.func_map = {}
-        self.recv_queue = mp.Queue()
-        self.send_queue = mp.Queue()
         if n_func_process > 0:
+            self.n_func_process = n_func_process
             self.func_params_queues = [
                 mp.Queue() for _ in range(n_func_process)]
         else:
             raise ValueError('The value of n_func_process must bigger than 0.')
-        # Recv and Send Service
-        self.process_send_loop = mp.Process(
-            target=self.__send_loop, args=(self.send_queue,))
-        self.process_recv_loop = mp.Process(
-            target=self.__recv_loop, args=(self.recv_queue,))
-        # User Defined Main Processing PRogram
-        self.process_main_loop = mp.Process(target=self.__main_loop, args=(
-            self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
-        # User Defined Muti-processing Program
-        self.process_func_loops = [mp.Process(target=self.__func_loop, args=(
-            self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(n_func_process)]
 
     def main(self):
         def decorator(func: Callable):
@@ -350,6 +357,12 @@ class SimpleCOIN():
             return wrapper
         return decorator
 
+    def __send(self, typ, data, dst_addr):
+        if typ == 'raw':
+            self.af_socket.send(data)
+        elif typ == 'udp':
+            self.client.sendto(data, dst_addr)
+
     def __send_loop(self, send_queue: mp.Queue):
         time_packet_sent = time.time()
         while True:
@@ -368,12 +381,26 @@ class SimpleCOIN():
             recv_queue.put(self.buf[:frame_len], block=False)
 
     def __main_loop(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         while True:
             self.main_processing(ipc, recv_queue.get())
 
+    def __main_loop_lite(self, func_map: dict, func_params_queues: list):
+        ipc = SimpleCOIN.IPCLite(self.__send, func_map, func_params_queues)
+        while True:
+            frame_len = self.af_socket.recv_into(self.buf, self.buffer_size)
+            self.main_processing(ipc, self.buf[:frame_len])
+
     def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
-        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
+        self.func_init_processing(ipc)
+        while True:
+            id, args, kwargs = func_params_queues[pid].get()
+            func = self.func_map[id]
+            func(ipc, *args, **kwargs)
+
+    def __func_loop_lite(self, func_map: dict, func_params_queues: list, pid: int):
+        ipc = SimpleCOIN.IPCLite(self.__send, func_map, func_params_queues)
         self.func_init_processing(ipc)
         while True:
             id, args, kwargs = func_params_queues[pid].get()
@@ -381,28 +408,51 @@ class SimpleCOIN():
             func(ipc, *args, **kwargs)
 
     def run(self):
-        if self.main_processing is not None:
-            self.process_send_loop.start()
-            self.process_main_loop.start()
-            for process_func_loop in self.process_func_loops:
-                process_func_loop.start()
-            self.process_recv_loop.start()
-            print('\n///////////////////////////////////////////////\n')
-
-            print('*** SimpleCOIN v0.3.3 Framework is running !')
-            print('*** press enter to exit')
-            print('-----------------------------------------------')
-            input()
-            print('*** SimpleCOIN try to shut down ...')
-            self.terminate()
-        else:
+        if self.main_processing is None:
             raise ValueError('The @main function is not defined!')
+        if self.light_mode:
+            # User Defined Main Processing Program
+            self.process_main_loop = mp.Process(target=self.__main_loop_lite, args=(
+                self.func_map, self.func_params_queues,))
+            # User Defined Muti-processing Program
+            self.process_func_loops = [mp.Process(target=self.__func_loop_lite, args=(
+                self.func_map, self.func_params_queues, pid,)) for pid in range(self.n_func_process)]
+        else:
+            self.recv_queue = mp.Queue()
+            self.send_queue = mp.Queue()
+            # Recv and Send Service
+            self.process_send_loop = mp.Process(
+                target=self.__send_loop, args=(self.send_queue,))
+            self.process_recv_loop = mp.Process(
+                target=self.__recv_loop, args=(self.recv_queue,))
+            # User Defined Main Processing Program
+            self.process_main_loop = mp.Process(target=self.__main_loop, args=(
+                self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
+            # User Defined Muti-processing Program
+            self.process_func_loops = [mp.Process(target=self.__func_loop, args=(
+                self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(self.n_func_process)]
+            self.process_send_loop.start()
+            self.process_recv_loop.start()
+
+        self.process_main_loop.start()
+        for process_func_loop in self.process_func_loops:
+            process_func_loop.start()
+        print('\n///////////////////////////////////////////////\n')
+
+        print('*** SimpleCOIN v1.0.0 Framework is running !')
+        print('*** Lightweight mode:', self.light_mode)
+        print('*** Press <Enter> to exit.')
+        print('-----------------------------------------------')
+        input()
+        print('*** SimpleCOIN try to shut down ...')
+        self.terminate()
 
     def terminate(self):
-        self.process_recv_loop.terminate()
+        if not self.light_mode:
+            self.process_recv_loop.terminate()
+            self.process_send_loop.terminate()
         for process_func_loop in self.process_func_loops:
             process_func_loop.terminate()
         self.process_main_loop.terminate()
-        self.process_send_loop.terminate()
         self.af_socket.close()
         self.client.close()

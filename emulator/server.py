@@ -36,8 +36,7 @@ ica_processed = False
 
 ica_buf = ICABuffer(max_size=(4, 160000))
 
-app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1)
-
+app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1, light_mode=True)
 
 @app.main()
 def main(simplecoin, af_packet: bytes):
@@ -80,7 +79,7 @@ def set_init_settings(simplecoin, _init_settings):
     if init_settings['is_finish'] == True:
         print('*** no further ica process on server!')
         simplecoin.sendto(b'### time server ica finish: ', ('10.0.0.12', 1000))
-        simplecoin.submit_func(pid=-1, id='evaluation')
+        simplecoin.submit_func(pid=-1, id='measure@write_results')
 
 
 @app.func('put_ica_buf')
@@ -108,24 +107,19 @@ def fastica_service(simplecoin):
         EVALS += ['process_time',time_finish - time_start]
         EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
         # Measurements end.
-        simplecoin.submit_func(pid=-1, id='evaluation')
+        simplecoin.submit_func(pid=-1, id='measure@write_results')
 
 
-@app.func('evaluation')
-def evaluation(simplecoin):
+@app.func('measure@write_results')
+def write_results(simplecoin):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     # Measurements write.
+    if len(EVALS)<1:
+        EVALS += ['process_time',0,'matrix_w',
+                    measure_arr_to_jsonstr(init_settings['W'])]
+    print('*** write reults')
     measure_write('server_'+init_settings['mode'], EVALS)
-    print('*** server separating the matrix X!')
-    if init_settings['W'] is not None and ica_buf.size() == init_settings['m']:
-        W = init_settings['W']
-        X = ica_buf.buffer
-        hat_S = np.dot(W, X)
-        S = np.load("S.npy")
-        eval_db = pybss_tb.bss_evaluation(S, hat_S, 'psnr')
-        print('*** server separation eval:', eval_db)
-        ica_buf.init()
-        init_settings.update(DEF_INIT_SETTINGS)
+
 
 if __name__ == "__main__":
     app.run()
