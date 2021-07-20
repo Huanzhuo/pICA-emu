@@ -83,7 +83,7 @@ class ICANetwork():
         else:
             warnings.warn(
                 'pICA/FastICA did not converge. Consider increasing tolerance or the maximum number of iterations.')
-        print('*** ica iter:',_)
+        print('*** ica iter:',i)
         return W, lim
 
     def pica_nw(self, init_settings, ica_buf):
