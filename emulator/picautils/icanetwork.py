@@ -89,7 +89,7 @@ class ICANetwork():
         proc_len = init_settings['proc_len']
         W = init_settings['W']
         proc_len_multiplier = init_settings['proc_len_multiplier']
-        _X = ica_buf.extract_n(proc_len)
+        _X = ica_buf.extract_n(proc_len).copy()
         _X, V, V_inv = self._whiten_with_inv_v(_X)
         W = self._sym_decorrelation(np.dot(W, V_inv))
         W, lim = self._ica_par(W, _X, self.grad_var_tol)
