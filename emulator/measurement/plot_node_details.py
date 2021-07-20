@@ -92,5 +92,5 @@ if __name__ == '__main__':
             'Subset data size', 'Processing time', 'Processing precision'], loc='upper left', ncol=1)
         plt.xticks(x_index, ['Node 1', 'Node 2', 'Node 3',
                              'Node 4', 'Node 5', 'Node 6', 'Node 7', 'Remote \n Agent'], rotation=30)
-        plt.savefig('./emulator/measurement/nodes_performance_details_emu.pdf',
+        plt.savefig('./emulator/measurement/nodes_performance_emu.pdf',
                     dpi=600, bbox_inches='tight')

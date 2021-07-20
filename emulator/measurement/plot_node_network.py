@@ -123,7 +123,7 @@ if __name__ == '__main__':
         ax.legend([line1, line2], ['pICA',
                                    'FastICA'], loc='upper right')
         plt.xticks(range(len(number_node)), number_node)
-        plt.savefig('./emulator/measurement/service_latency_all.pdf',
+        plt.savefig('./emulator/measurement/service_latency_emu.pdf',
                     dpi=600, bbox_inches='tight')
 
         fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
@@ -153,7 +153,7 @@ if __name__ == '__main__':
         # ax.legend([bar1, bar2], [
         #     'pICA', 'FastICA'], loc='upper right', ncol=1)
         plt.xticks(range(len(number_node)), number_node)
-        plt.savefig('./emulator/measurement/transmission_latency_all.pdf',
+        plt.savefig('./emulator/measurement/transmission_latency_emu.pdf',
                     dpi=600, bbox_inches='tight')
 
         fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
@@ -176,5 +176,5 @@ if __name__ == '__main__':
         ax.legend([line1, line2], ['pICA',
                                    'FastICA'], loc='upper right')
         plt.xticks(range(len(number_node)), number_node)
-        plt.savefig('./emulator/measurement/process_latency_server.pdf',
+        plt.savefig('./emulator/measurement/process_latency_server_emu.pdf',
                     dpi=600, bbox_inches='tight')
