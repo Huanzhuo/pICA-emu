@@ -43,8 +43,7 @@ if __name__ == '__main__':
         vnf_accuracy = pybss_tb.bss_evaluation(s, hat_s, type='sdr')
         separation_accuracy = np.row_stack((vnf_accuracy, separation_accuracy))
 
-    path_details_csv = './emulator/measurement/' + \
-        str(nodes)+'s/pICA_' + str(nodes)+'details.csv'
+    path_details_csv = './emulator/measurement/pICA_' + str(nodes)+'details.csv'
     len_subset = np.loadtxt(path_details_csv, delimiter=',', usecols=np.arange(
         1, len(separation_accuracy)+1, 1))
 
