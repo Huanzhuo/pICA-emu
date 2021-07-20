@@ -12,14 +12,52 @@ print(matplotlib.get_configdir())
 
 if __name__ == '__main__':
     # txt paths of store-forward(client vnf1 vnf2) and compute-forward(server)
-    path_time_compute_client = "./emulator/measurement/client_cf.csv"
-    path_time_store_client = "./emulator/measurement/client_sf.csv"
-    
-    processing_latency_compute_forward = np.loadtxt(path_time_compute_client, delimiter=',', dtype=None, usecols=[1])
-    processing_latency_compute_forward = np.resize(processing_latency_compute_forward, 31)
+    nodes_0_cf_excel = "./emulator/measurement/1s/0_nodes/client_cf.csv"
+    nodes_0_sf_excel = "./emulator/measurement/1s/0_nodes/client_sf.csv"
 
-    processing_latency_store_forward = np.loadtxt(path_time_store_client, delimiter=',', dtype=None, usecols=[1])
-    processing_latency_store_forward = np.resize(processing_latency_store_forward, 31)
+    nodes_2_cf_excel = "./emulator/measurement/client_cf.csv"
+    nodes_2_sf_excel = "./emulator/measurement/client_sf.csv"
+
+    nodes_4_cf_excel = "./emulator/measurement/1s/4_nodes/client_cf.csv"
+    nodes_4_sf_excel = "./emulator/measurement/1s/4_nodes/client_sf.csv"
+
+    nodes_6_cf_excel = "./emulator/measurement/1s/6_nodes/client_cf.csv"
+    nodes_6_sf_excel = "./emulator/measurement/1s/6_nodes/client_sf.csv"
+
+    nodes_8_cf_excel = "./emulator/measurement/1s/8_nodes/client_cf.csv"
+    nodes_8_sf_excel = "./emulator/measurement/1s/8_nodes/client_sf.csv"
+
+
+    
+    cf_service_latency_nodes_2 = np.loadtxt(nodes_2_cf_excel, delimiter=',', dtype=None, usecols=[1])
+    cf_service_latency_nodes_2 = np.resize(cf_service_latency_nodes_2, 31)
+
+    sf_service_latency_nodes_2 = np.loadtxt(nodes_2_sf_excel, delimiter=',', dtype=None, usecols=[1])
+    sf_service_latency_nodes_2 = np.resize(sf_service_latency_nodes_2, 31)
+
+    cf_service_latency_nodes_0 = np.loadtxt(nodes_0_cf_excel, delimiter=',', dtype=None, usecols=[5])
+    cf_service_latency_nodes_0 = np.resize(cf_service_latency_nodes_0, 31)
+
+    sf_service_latency_nodes_0 = np.loadtxt(nodes_0_sf_excel, delimiter=',', dtype=None, usecols=[5])
+    sf_service_latency_nodes_0 = np.resize(sf_service_latency_nodes_0, 31)    
+
+    cf_service_latency_nodes_4 = np.loadtxt(nodes_4_cf_excel, delimiter=',', dtype=None, usecols=[5])
+    cf_service_latency_nodes_4 = np.resize(cf_service_latency_nodes_4, 31)
+
+    sf_service_latency_nodes_4 = np.loadtxt(nodes_4_sf_excel, delimiter=',', dtype=None, usecols=[5])
+    sf_service_latency_nodes_4 = np.resize(sf_service_latency_nodes_4, 31)    
+
+    cf_service_latency_nodes_6 = np.loadtxt(nodes_6_cf_excel, delimiter=',', dtype=None, usecols=[5])
+    cf_service_latency_nodes_6 = np.resize(cf_service_latency_nodes_6, 31)
+
+    sf_service_latency_nodes_6 = np.loadtxt(nodes_6_sf_excel, delimiter=',', dtype=None, usecols=[5])
+    sf_service_latency_nodes_6 = np.resize(sf_service_latency_nodes_6, 31)  
+
+    cf_service_latency_nodes_8 = np.loadtxt(nodes_8_cf_excel, delimiter=',', dtype=None, usecols=[5])
+    cf_service_latency_nodes_8 = np.resize(cf_service_latency_nodes_8, 31)
+
+    sf_service_latency_nodes_8 = np.loadtxt(nodes_8_sf_excel, delimiter=',', dtype=None, usecols=[5])
+    sf_service_latency_nodes_8 = np.resize(sf_service_latency_nodes_8, 31)      
     
     #service_latency_compute_forward = np.loadtxt(path_time_compute_client, delimiter=',', dtype=None, usecols=[1])
     #service_latency_store_forward = np.loadtxt(path_time_store_client, delimiter=',', dtype=None, usecols=[1])
@@ -43,34 +81,28 @@ if __name__ == '__main__':
             'store_forward_ia': 's'
         }
 
-        average_latency_cf = np.average(processing_latency_compute_forward)
-        average_latency_sf = np.average(processing_latency_store_forward)
+        average_latency_cf = [np.average(cf_service_latency_nodes_0), np.average(cf_service_latency_nodes_2), np.average(cf_service_latency_nodes_4), np.average(cf_service_latency_nodes_6), np.average(cf_service_latency_nodes_8)]
+        average_latency_sf = [np.average(sf_service_latency_nodes_0), np.average(sf_service_latency_nodes_2), np.average(sf_service_latency_nodes_4), np.average(sf_service_latency_nodes_6), np.average(sf_service_latency_nodes_8)]
 
-        x_axis = [2]
+        average_latency_cf_array = np.array(average_latency_cf)
+        #average_latency_cf_array *= 1000
 
-        plt.scatter(x_axis, average_latency_cf, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ls='-')
-        plt.plot(x_axis, average_latency_cf, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ls='-')
+        average_latency_sf_array = np.array(average_latency_sf)
+        #average_latency_sf_array *= 1000
 
-        plt.scatter(x_axis, average_latency_sf, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-')
-        plt.plot(x_axis, average_latency_sf, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-')
+        x_axis = [0, 2, 4, 6, 8]
 
-        plt.savefig('./emulator/measurement/tester.pdf', dpi=600, bbox_inches='tight')
-        
-        """
-        plt.rcParams.update({'font.size': 11})
+        plt.scatter(x_axis, average_latency_cf_array, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ls='-')
+        plt.plot(x_axis, average_latency_cf_array, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ls='-', label="Computer Forward")
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.yaxis.grid(True, linestyle='--', which='major', color='lightgrey', alpha=0.5, linewidth=0.2)
-        x_step = np.arange(len(processing_latency_compute_forward))
-        line1, = ax.plot(x_step, average_latency_cf, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ms=3, ls='-')
-        line2, = ax.plot(x_step, average_latency_sf, color=colordict['store_forward'], marker=markerdict['store_forward'], ms=3, ls='-')
-        #line3, = ax.plot(x_step, processing_time_ia_net_server, color=colordict['store_forward_ia'], marker=markerdict['store_forward_ia'], ms=3, ls='--')
-        ax.set_xlabel(r'Number of nodes')
-        ax.set_ylabel(r'Measured service latency')
-        ax.set_xlim([0, 30])
-        ax.set_ylim([9, 10.5])
-        ax.legend([line1, line2], ['Compute-and-Forward', 'Store-and-Forward'], loc='upper right')
-        plt.savefig('./emulator/measurement/service_latency_all.pdf', dpi=600, bbox_inches='tight')
-        """
+        plt.scatter(x_axis, average_latency_sf_array, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-')
+        plt.plot(x_axis, average_latency_sf_array, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-', label="Store Forward")
+
+        plt.legend(loc="upper left")
+        plt.ylim(7, 10.5)
+
+        plt.ylabel('Service latency (s)')
+        plt.xlabel('Number of nodes ')
+
+        plt.savefig('./emulator/measurement/end-to-end-service-latency.pdf', dpi=600, bbox_inches='tight')
         

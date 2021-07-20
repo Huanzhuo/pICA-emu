@@ -15,7 +15,7 @@ from simpleemu.simpletopo import SimpleTopo
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        n_vnf = 1 # the value of n_vnf is [0,1,2,...,6,7]
+        n_vnf = 2 # the value of n_vnf is [0,1,2,...,6,7]
     else:
         n_vnf = int(sys.argv[1])
     print("*** VNF Number:",n_vnf)
