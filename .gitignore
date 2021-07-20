@@ -11,7 +11,7 @@ emulation/build/
 # emulator/S.npy
 # app/pICA-emu/MIMII/
 .DS_Store
-emulator/measurement/*.csv
+# emulator/measurement/*.csv
 emulator/measurement/*.pdf
 emulator/measurement/*/*.csv
 emulator/measurement/*/*.pdf
