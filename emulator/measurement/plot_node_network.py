@@ -117,9 +117,9 @@ if __name__ == '__main__':
         line2_fill = ax.fill_between(x_index, ts_sf_conf[:, 1],
                                      ts_sf_conf[:, 3], color=colordict['store_forward'], alpha=0.2)
         ax.set_xlabel(r'Number of nodes $k$')
-        ax.set_ylabel(r'Service latency ($ms$)')
+        ax.set_ylabel(r'Service latency ($s$)')
         # ax.set_xlim([-0.2, 4.2])
-        ax.set_yticks(np.arange(6, 12.1, 2))
+        ax.set_yticks(np.arange(6, 12.1, 1))
         ax.legend([line1, line2], ['pICA',
                                    'FastICA'], loc='upper right')
         plt.xticks(range(len(number_node)), number_node)
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         ax.set_xlabel(r'Number of nodes $k$')
         ax.set_ylabel(r'Transmission latency ($s$)')
         # ax.set_xlim([-0.2, 4.2])
-        ax.set_yticks(np.arange(6, 12.1, 3))
+        ax.set_yticks(np.arange(5, 7.1, 0.5))
         ax.legend([line1, line2], ['pICA',
                                    'FastICA'], loc='upper right')
         # ax.legend([bar1, bar2], [
