@@ -12,11 +12,17 @@ emulation/build/
 # app/pICA-emu/MIMII/
 .DS_Store
 emulator/measurement/*.csv
-# emulator/measurement/*.pdf
+emulator/measurement/*.pdf
 emulator/measurement/*/*.csv
 emulator/measurement/*/*.pdf
+
 saxs.pkl
 saxsNew.pkl
 simplecoinstd.py
 simplecoinlite.py
 
+emulator/measurement/*/*/*.csv
+
+
+emulator/MIMII/saxs.pkl
+emulator/MIMII/saxsNew.pkl
