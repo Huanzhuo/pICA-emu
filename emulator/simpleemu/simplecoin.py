@@ -302,9 +302,9 @@ class SimpleCOIN():
             self.__send('udp', data, dst_addr)
 
     # The body
-    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, light_mode: bool = False):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
         # SimpleCOIN Settings
-        self.light_mode = light_mode
+        self.lightweight_mode = lightweight_mode
         # Network Device Settings
         self.CHUNK_GAP = chunk_gap
         self.buffer_size = mtu
@@ -410,7 +410,7 @@ class SimpleCOIN():
     def run(self):
         if self.main_processing is None:
             raise ValueError('The @main function is not defined!')
-        if self.light_mode:
+        if self.lightweight_mode:
             # User Defined Main Processing Program
             self.process_main_loop = mp.Process(target=self.__main_loop_lite, args=(
                 self.func_map, self.func_params_queues,))
@@ -439,8 +439,8 @@ class SimpleCOIN():
             process_func_loop.start()
         print('\n///////////////////////////////////////////////\n')
 
-        print('*** SimpleCOIN v1.0.0 Framework is running !')
-        print('*** Lightweight mode:', self.light_mode)
+        print('*** SimpleCOIN v1.0.0 Framework is running!')
+        print('*** Lightweight mode:', self.lightweight_mode)
         print('*** Press <Enter> to exit.')
         print('-----------------------------------------------')
         input()
@@ -448,7 +448,7 @@ class SimpleCOIN():
         self.terminate()
 
     def terminate(self):
-        if not self.light_mode:
+        if not self.lightweight_mode:
             self.process_recv_loop.terminate()
             self.process_send_loop.terminate()
         for process_func_loop in self.process_func_loops:

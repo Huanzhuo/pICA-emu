@@ -21,23 +21,6 @@ from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
 from measurement.measure import measure_write, measure_arr_to_jsonstr
 
-# read wavs
-# n = 4
-# l = 4
-# m = l * 16000
-# number of iteration rounds on every node
-# delta = 2
-# folder_address = '/volume/MIMII/mix_type'
-# S, A, X = pybss_tb.generate_matrix_S_A_X(
-#         folder_address, wav_range=10, source_number=n, mixing_type="normal", max_min=(1, 0.01), mu_sigma=(0, 1))
-# #np.save("S.npy",S)
-# W = np.random.random_sample((n, n))
-# np.save("S.npy",S)
-# np.save("X.npy",X)
-# np.save("W.npy",W)
-# S = np.load("S.npy")
-# X = np.load("X.npy")
-# W = np.load("W.npy")
 
 # settings
 n_vnf = 7
@@ -53,7 +36,7 @@ INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_le
 if __name__ == "__main__":
     n_test = 1
     if len(sys.argv) < 4:
-        print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
+        print("Invalid argument. The argument must be 'cf n_start n_test [n_vnf]' or 'sf n_start n_test [n_vnf]'.")
         sys.exit(1)
 
     if sys.argv[1] == 'cf':
@@ -63,7 +46,7 @@ if __name__ == "__main__":
         INIT_SETTINGS = INIT_SETTINGS_pICA_disabled
         print("*** Store and Forward Mode: normal, pICA disabled")
     else:
-        print("Invalid argument. The argument must be 'cf n_start n_test' or 'sf n_start n_test'.")
+        print("Invalid argument. The argument must be 'cf n_start n_test [n_vnf]' or 'sf n_start n_test [n_vnf]'.")
         sys.exit(1)
 
     n_start = int(sys.argv[2])
