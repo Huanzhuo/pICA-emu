@@ -12,10 +12,11 @@ import warnings
 class ICANetwork():
     def __init__(self) -> None:
         self.max_iter = 200
-        self.tol = 1e-4
+        self.tol = 0.0001
         self.dynamic_adj_coef = 2
-        self.grad_var_tol = 0.9
+        self.grad_var_tol = 0.90
         self.proc_len_multiplier = self.dynamic_adj_coef
+        self.g = self._logcosh
         pass
 
     # Pica 改进后的矩阵白化, 多了一个V的逆矩阵, 加快后面计算
@@ -65,22 +66,23 @@ class ICANetwork():
     # Pica 带有梯度下降速率判断的GDR牛顿迭代
 
     def _ica_par(self, W, X, grad_var_tol):
-        self.Stack = []
-        _sum = 0
-        _max = 0
-        for _ in range(self.max_iter):
-            W, lim = self._newton_iteration(W, X)
-            self.Stack.append(lim)
+        lim_sum = 0
+        lim_max = 0
+        for i in range(self.max_iter):
+            gbx, g_bx = self.g(np.dot(W, X))
+            W1 = self._sym_decorrelation(np.dot(gbx, X.T) - g_bx[:, None] * W)
+            lim = max(abs(abs(np.diag(np.dot(W1, W.T))) - 1))
+            W = W1
             if lim < self.tol:
                 break
-            if lim > _max:
-                _max = lim
-            _sum += lim
-            if _sum < grad_var_tol*0.5*(_max+self.Stack[-1])*len(self.Stack):
+            if lim > lim_max:
+                lim_max = lim
+            lim_sum += lim
+            if lim_sum < grad_var_tol*0.5*(lim_max+lim)*(i+1):
                 break
         else:
             warnings.warn(
-                'PICA did not converge. Consider increasing tolerance or the maximum number of iterations.')
+                'pICA/FastICA did not converge. Consider increasing tolerance or the maximum number of iterations.')
         print('*** ica iter:',_)
         return W, lim
 
@@ -89,7 +91,7 @@ class ICANetwork():
         proc_len = init_settings['proc_len']
         W = init_settings['W']
         proc_len_multiplier = init_settings['proc_len_multiplier']
-        _X = ica_buf.extract_n(proc_len).copy()
+        _X = ica_buf.extract_n(proc_len).copy().astype(np.float32)
         _X, V, V_inv = self._whiten_with_inv_v(_X)
         W = self._sym_decorrelation(np.dot(W, V_inv))
         W, lim = self._ica_par(W, _X, self.grad_var_tol)
@@ -97,19 +99,19 @@ class ICANetwork():
         if lim < self.tol:
             proc_len_multiplier *= 2
         else:
-            proc_len_multiplier //= 2
+            proc_len_multiplier /= 2
         proc_len *= proc_len_multiplier
         if lim < self.tol:
             proc_len_multiplier *= self.dynamic_adj_coef
         else:
             proc_len_multiplier = max(
-                self.dynamic_adj_coef, proc_len_multiplier//self.dynamic_adj_coef)
+                self.dynamic_adj_coef, proc_len_multiplier/self.dynamic_adj_coef)
         proc_len *= proc_len_multiplier
         # save settings
         init_settings['proc_len'] = proc_len
         init_settings['proc_len_multiplier'] = proc_len_multiplier
         init_settings['W'] = W
-        
+
 
     def fastica_nw(self, init_settings, ica_buf):
         W = init_settings['W']
@@ -119,6 +121,5 @@ class ICANetwork():
         W, _ = self._ica_par(W, _X, 0)
         init_settings['W'] = np.dot(W, V)
         
-
 
 icanetwork = ICANetwork()
