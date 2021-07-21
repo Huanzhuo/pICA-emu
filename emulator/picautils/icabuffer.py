@@ -12,7 +12,7 @@ import threading
 class ICABuffer():
     def __init__(self, max_size):
         self.length = 0
-        self.buffer = np.zeros(max_size,dtype=np.float32)
+        self.buffer = np.zeros(max_size, dtype=np.float32)
         self.lock = threading.Lock()
 
     def init(self):
