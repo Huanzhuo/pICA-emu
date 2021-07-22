@@ -115,7 +115,7 @@ class ICANetwork():
 
     def fastica_nw(self, init_settings, ica_buf):
         W = init_settings['W']
-        _X =  getattr(ica_buf,'buffer')
+        _X =  getattr(ica_buf,'buffer').copy().astype(np.float32)
         _X, V, V_inv = self._whiten_with_inv_v(_X)
         W = self._sym_decorrelation(np.dot(W, V_inv))
         W, _ = self._ica_par(W, _X, 0)
