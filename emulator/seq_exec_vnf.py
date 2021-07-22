@@ -134,6 +134,7 @@ def pica_service(simplecoin):
             # Measurements end.
             init_settings['node_max_ext_nums'][0] -= 1
         elif ica_buf.size() >= init_settings['m']:
+            break
             print('*** vnf pica processing!')
             # Measurements begin.
             time_start = time.time()
