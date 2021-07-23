@@ -80,6 +80,8 @@ def set_init_settings(simplecoin, _init_settings):
         print('*** no further ica process on server!')
         simplecoin.sendto(b'### time server ica finish: ', ('10.0.0.12', 1000))
         simplecoin.submit_func(pid=-1, id='measure@write_results')
+    elif ica_buf.size() >= init_settings['m']:
+        simplecoin.submit_func(pid=-1, id='fastica_service')    
 
 
 @app.func('put_ica_buf')
@@ -87,7 +89,7 @@ def ica_buf_put(simplecoin, data):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     if ica_processed == False:
         ica_buf.put(data)
-        if ica_buf.size() >= init_settings['m']:
+        if ica_buf.size() >= init_settings['m'] and init_settings['W'] is not None:
             simplecoin.submit_func(pid=-1, id='fastica_service')
 
 
