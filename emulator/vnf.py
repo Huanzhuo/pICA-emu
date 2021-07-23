@@ -67,7 +67,10 @@ def main(simplecoin, af_packet):
                 simplecoin.forward(af_packet)
             EVAL_MODE = init_settings['mode']
         elif header == HEADER_DATA or header == HEADER_FINISH:
+            # ####################################
+            # simplecoin.sendto(chunk,(packet['IP_dst'], packet['Port_dst']))
             simplecoin.forward(af_packet)
+            # ####################################  
             simplecoin.submit_func(
                 pid=0, id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
             if header == HEADER_FINISH:
@@ -89,7 +92,7 @@ def write_results(simplecoin,EVAL_MODE,W):
     print('*** write reults')
     if EVALS[1] == 'cf':
         if len(EVALS)<=2:
-            EVALS += ['process_time',0,'matrix_w',
+            EVALS += ['time_start',time.time(),'process_time',0,'matrix_w',
                         measure_arr_to_jsonstr(W)]
         measure_write(IFCE_NAME, EVALS)
 
@@ -131,10 +134,6 @@ def pica_service(simplecoin):
                 del init_settings['node_max_ext_nums'][0]
                 simplecoin.sendto(pktutils.serialize_data(
                     HEADER_INIT, init_settings), dst_ip_addr)
-                # Measurements begin.
-                EVALS += ['matrix_w',
-                          measure_arr_to_jsonstr(init_settings['W'])]
-                # Measurements end.
                 ica_processed = True
                 ica_buf.init()
                 init_settings.update(DEF_INIT_SETTINGS)
@@ -147,6 +146,11 @@ def pica_service(simplecoin):
                 icanetwork.pica_nw(init_settings, ica_buf)
                 time_finish = time.time()
                 # Measurements end.
+                # Measurements begin.
+                EVALS += ['time_start',time_start,'process_time', time_finish - time_start]
+                EVALS += ['matrix_w',
+                            measure_arr_to_jsonstr(init_settings['W'])]
+                # Measurements end.
                 init_settings['node_max_ext_nums'][0] -= 1
             elif ica_buf.size() >= init_settings['m']:
                 # break
@@ -156,11 +160,15 @@ def pica_service(simplecoin):
                 icanetwork.fastica_nw(init_settings, ica_buf)
                 time_finish = time.time()
                 # Measurements end.
+                # Measurements begin.
+                EVALS += ['time_start',time_start,'process_time', time_finish - time_start]
+                EVALS += ['matrix_w',
+                            measure_arr_to_jsonstr(init_settings['W'])]
+                # Measurements end.
                 init_settings['node_max_ext_nums'][0] -= 1
                 init_settings['is_finish'] = True
             else:
                 break
-            EVALS += ['process_time', time_finish - time_start]
 
 
 if __name__ == "__main__":

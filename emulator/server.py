@@ -100,13 +100,16 @@ def fastica_service(simplecoin):
         print('*** server fastica processing!')
         time_start = time.time()
         icanetwork.fastica_nw(init_settings, ica_buf)
+        hat_S = np.dot(init_settings['W'], ica_buf.buffer)
+        check_hat_s = hat_S.shape[0]
         time_finish = time.time()
+        print(check_hat_s)
         init_settings['is_finish'] = True
         print('*** server fastica processing finished!')
         ica_processed = True
         simplecoin.sendto(b'### time fastica finish: ', ('10.0.0.12', 1000))
         # Measurements begin.
-        EVALS += ['process_time',time_finish - time_start]
+        EVALS += ['time_start',time_start,'process_time',time_finish - time_start]
         EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
         # Measurements end.
         simplecoin.submit_func(pid=-1, id='measure@write_results')
@@ -117,7 +120,7 @@ def write_results(simplecoin):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     # Measurements write.
     if len(EVALS)<1:
-        EVALS += ['process_time',0,'matrix_w',
+        EVALS += ['time_start', time.time(), 'process_time',0,'matrix_w',
                     measure_arr_to_jsonstr(init_settings['W'])]
     print('*** write reults')
     measure_write('server_'+init_settings['mode'], EVALS)
