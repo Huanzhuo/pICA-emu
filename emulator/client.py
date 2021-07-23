@@ -23,8 +23,8 @@ from measurement.measure import measure_write, measure_arr_to_jsonstr
 
 
 # settings
-n_vnf = 7
-W = np.load("MIMII/W.npy")
+n_vnf = 1
+# W = np.load("MIMII/W.npy")
 W = np.ones((4,4))*0.25
 
 serverAddressPort = ("10.0.0.15", 9999)
