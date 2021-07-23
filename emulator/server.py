@@ -39,7 +39,7 @@ ica_buf = ICABuffer(max_size=(4, 160000))
 app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1, lightweight_mode=False)
 
 @app.main()
-def main(simplecoin, af_packet: bytes):
+def main(simplecoin: SimpleCOIN.IPC, af_packet: bytes):
     packet = simpleudp.parse_af_packet(af_packet)
     if packet['Protocol'] == 17 and packet['IP_src'] != NODE_IP:
         chunk = packet['Chunk']
@@ -64,7 +64,7 @@ def main(simplecoin, af_packet: bytes):
 
 
 @app.func('clear_cache')
-def clear_cache(simplecoin):
+def clear_cache(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     EVALS = []
     ica_processed = False
@@ -73,7 +73,7 @@ def clear_cache(simplecoin):
 
 
 @app.func('set_init_settings')
-def set_init_settings(simplecoin, _init_settings):
+def set_init_settings(simplecoin: SimpleCOIN.IPC, _init_settings):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     init_settings.update(_init_settings)
     if init_settings['is_finish'] == True:
@@ -85,7 +85,7 @@ def set_init_settings(simplecoin, _init_settings):
 
 
 @app.func('put_ica_buf')
-def ica_buf_put(simplecoin, data):
+def ica_buf_put(simplecoin: SimpleCOIN.IPC, data):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     if ica_processed == False:
         ica_buf.put(data)
@@ -94,7 +94,7 @@ def ica_buf_put(simplecoin, data):
 
 
 @app.func('fastica_service')
-def fastica_service(simplecoin):
+def fastica_service(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     if (not ica_processed) and ica_buf.size() >= init_settings['m']:
         print('*** server fastica processing!')
@@ -116,7 +116,7 @@ def fastica_service(simplecoin):
 
 
 @app.func('measure@write_results')
-def write_results(simplecoin):
+def write_results(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     # Measurements write.
     if len(EVALS)<1:

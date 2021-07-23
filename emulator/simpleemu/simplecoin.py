@@ -3,8 +3,8 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-07-17
-# @desc. : SimpleCOIN 1.0.1
+# @modify: 2021-07-23
+# @desc. : SimpleCOIN 1.0.2
 
 
 import socket
@@ -12,6 +12,7 @@ import multiprocessing as mp
 from typing import Any, Callable, Tuple
 import time
 from functools import wraps
+from abc import ABC, abstractmethod
 
 
 # Simple Computing In Network Framework
@@ -256,7 +257,7 @@ class SimpleCOIN():
     """
 
     # Interprocess communication
-    class IPCComm():
+    class IPC(ABC):
 
         def __init__(self, func_map: dict, func_params_queues: list):
             self.func_params_queues = func_params_queues
@@ -277,10 +278,16 @@ class SimpleCOIN():
                 self.func_params_queues[pid].put(
                     (id, args, kwargs), block=False)
 
-    class IPC(IPCComm):
+        @abstractmethod
+        def forward(self, af_packet: bytes): pass
+
+        @abstractmethod
+        def sendto(self, data: bytes, dst_addr: Tuple[str, int]): pass
+
+    class IPCStd(IPC):
 
         def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-            SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
+            SimpleCOIN.IPC.__init__(self, func_map, func_params_queues)
             self.send_queue = send_queue
 
         def forward(self, af_packet: bytes):
@@ -289,10 +296,12 @@ class SimpleCOIN():
         def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
             self.send_queue.put(('udp', data, dst_addr), block=False)
 
-    class IPCLite(IPCComm):
+    IPC.register(IPCStd)
+
+    class IPCLite(IPC):
 
         def __init__(self, __send: Callable, func_map: dict, func_params_queues: list):
-            SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
+            SimpleCOIN.IPC.__init__(self, func_map, func_params_queues)
             self.__send = __send
 
         def forward(self, af_packet: bytes):
@@ -300,6 +309,8 @@ class SimpleCOIN():
 
         def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
             self.__send('udp', data, dst_addr)
+    
+    IPC.register(IPCLite)
 
     # The body
     def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
@@ -374,7 +385,7 @@ class SimpleCOIN():
             recv_queue.put(self.buf[:frame_len], block=False)
 
     def __main_loop(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         while True:
             self.main_processing(ipc, recv_queue.get())
 
@@ -385,7 +396,7 @@ class SimpleCOIN():
             self.main_processing(ipc, self.buf[:frame_len])
 
     def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
-        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         self.func_init_processing(ipc)
         while True:
             id, args, kwargs = func_params_queues[pid].get()
@@ -432,7 +443,7 @@ class SimpleCOIN():
             process_func_loop.start()
         print('\n///////////////////////////////////////////////\n')
 
-        print('*** SimpleCOIN v1.0.1 Framework is running!')
+        print('*** SimpleCOIN v1.0.2 Framework is running!')
         print('*** Lightweight mode:', self.lite_mode)
         print('*** Press <Enter> to exit.')
         print('-----------------------------------------------')
