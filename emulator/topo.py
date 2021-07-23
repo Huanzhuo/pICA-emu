@@ -26,7 +26,7 @@ if __name__ == "__main__":
     mytopo.addSwitchNodes(node_names=['s1', 's2'])
     # create links, `bw` is bandwith, unit of bandwith is 'Mbit/s'
     mytopo.addLinks(links=['client - s1 - s2 - server', 's1 - vnf1',
-                           's2 - vnf2'], bw=1000, delay='10ms', use_htb=True)
+                           's2 - vnf2'], bw=1, delay='10ms', use_htb=True)
     mynet = mytopo.startNetwork()
     ## network settings ##
     # delete default flows

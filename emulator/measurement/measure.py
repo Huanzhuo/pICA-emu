@@ -3,14 +3,14 @@ import json
 import pickle
 
 def measure_write(filename,contents):
-    filename = '' + filename
+    filename = 'tmp/' + filename
     try:
-        f = open("measurement/1s/"+filename+".csv","r")
+        f = open("measurement/"+filename+".csv","r")
         data = f.read()
     except Exception:
         data = ''
     data = data + ','.join(map(str,contents)) + ',\n'
-    with open("measurement/1s/"+filename+".csv",'w') as f:
+    with open("measurement/"+filename+".csv",'w') as f:
         f.write(data)
     f.close()
 

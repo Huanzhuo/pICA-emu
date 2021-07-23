@@ -16,6 +16,7 @@ emulator/measurement/*.pdf
 emulator/measurement/*/*.csv
 emulator/measurement/*/*.pdf
 
+
 saxs.pkl
 saxsNew.pkl
 simplecoinstd.py
