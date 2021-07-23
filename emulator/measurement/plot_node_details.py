@@ -15,7 +15,7 @@ print(matplotlib.get_configdir())
 
 if __name__ == '__main__':
     nodes = 6
-    number_test = 0
+    number_test = 1
 
     fr = open('./emulator/MIMII/saxsNew.pkl', 'rb')
     saxs = pickle.load(fr)

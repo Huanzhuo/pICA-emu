@@ -4,7 +4,7 @@
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
 # @modify: 2021-07-17
-# @desc. : SimpleCOIN 1.0.0
+# @desc. : SimpleCOIN 1.0.1
 
 
 import socket
@@ -277,7 +277,7 @@ class SimpleCOIN():
                 self.func_params_queues[pid].put(
                     (id, args, kwargs), block=False)
 
-    class IPCStd(IPCComm):
+    class IPC(IPCComm):
 
         def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
             SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
@@ -304,7 +304,7 @@ class SimpleCOIN():
     # The body
     def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
         # SimpleCOIN Settings
-        self.lightweight_mode = lightweight_mode
+        self.lite_mode = lightweight_mode
         # Network Device Settings
         self.CHUNK_GAP = chunk_gap
         self.buffer_size = mtu
@@ -313,7 +313,6 @@ class SimpleCOIN():
             socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
         self.af_socket.bind((ifce_name, 0))
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
         # Network Service and User Defined Packet Processing Program
         self.main_processing = None
         self.func_init_processing = lambda ipc: None
@@ -328,7 +327,6 @@ class SimpleCOIN():
     def main(self):
         def decorator(func: Callable):
             self.main_processing = func
-
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
@@ -350,7 +348,6 @@ class SimpleCOIN():
                 raise ValueError(
                     'The function id with the same name already exists!')
             self.func_map[id] = func
-
             @wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
@@ -369,11 +366,7 @@ class SimpleCOIN():
             time.sleep(max(0, time_packet_sent - time.time()))
             time_packet_sent += self.CHUNK_GAP
             if not send_queue.empty():
-                typ, data, dst_addr = send_queue.get()
-                if typ == 'raw':
-                    self.af_socket.send(data)
-                elif typ == 'udp':
-                    self.client.sendto(data, dst_addr)
+                self.__send(*send_queue.get())
 
     def __recv_loop(self, recv_queue: mp.Queue):
         while True:
@@ -381,7 +374,7 @@ class SimpleCOIN():
             recv_queue.put(self.buf[:frame_len], block=False)
 
     def __main_loop(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
+        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
         while True:
             self.main_processing(ipc, recv_queue.get())
 
@@ -392,7 +385,7 @@ class SimpleCOIN():
             self.main_processing(ipc, self.buf[:frame_len])
 
     def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
-        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
+        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
         self.func_init_processing(ipc)
         while True:
             id, args, kwargs = func_params_queues[pid].get()
@@ -410,7 +403,7 @@ class SimpleCOIN():
     def run(self):
         if self.main_processing is None:
             raise ValueError('The @main function is not defined!')
-        if self.lightweight_mode:
+        if self.lite_mode:
             # User Defined Main Processing Program
             self.process_main_loop = mp.Process(target=self.__main_loop_lite, args=(
                 self.func_map, self.func_params_queues,))
@@ -439,8 +432,8 @@ class SimpleCOIN():
             process_func_loop.start()
         print('\n///////////////////////////////////////////////\n')
 
-        print('*** SimpleCOIN v1.0.0 Framework is running!')
-        print('*** Lightweight mode:', self.lightweight_mode)
+        print('*** SimpleCOIN v1.0.1 Framework is running!')
+        print('*** Lightweight mode:', self.lite_mode)
         print('*** Press <Enter> to exit.')
         print('-----------------------------------------------')
         input()
@@ -448,7 +441,7 @@ class SimpleCOIN():
         self.terminate()
 
     def terminate(self):
-        if not self.lightweight_mode:
+        if not self.lite_mode:
             self.process_recv_loop.terminate()
             self.process_send_loop.terminate()
         for process_func_loop in self.process_func_loops:
