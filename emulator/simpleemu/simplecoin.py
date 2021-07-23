@@ -384,7 +384,7 @@ class SimpleCOIN():
             frame_len = self.af_socket.recv_into(self.buf, self.buffer_size)
             recv_queue.put(self.buf[:frame_len], block=False)
 
-    def __main_loop(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
+    def __main_loop_std(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
         ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         while True:
             self.main_processing(ipc, recv_queue.get())
@@ -395,7 +395,7 @@ class SimpleCOIN():
             frame_len = self.af_socket.recv_into(self.buf, self.buffer_size)
             self.main_processing(ipc, self.buf[:frame_len])
 
-    def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
+    def __func_loop_std(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
         ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         self.func_init_processing(ipc)
         while True:
@@ -430,10 +430,10 @@ class SimpleCOIN():
             self.process_recv_loop = mp.Process(
                 target=self.__recv_loop, args=(self.recv_queue,))
             # User Defined Main Processing Program
-            self.process_main_loop = mp.Process(target=self.__main_loop, args=(
+            self.process_main_loop = mp.Process(target=self.__main_loop_std, args=(
                 self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
             # User Defined Muti-processing Program
-            self.process_func_loops = [mp.Process(target=self.__func_loop, args=(
+            self.process_func_loops = [mp.Process(target=self.__func_loop_std, args=(
                 self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(self.n_func_process)]
             self.process_send_loop.start()
             self.process_recv_loop.start()
