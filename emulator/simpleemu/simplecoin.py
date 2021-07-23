@@ -366,7 +366,7 @@ class SimpleCOIN():
             time.sleep(max(0, time_packet_sent - time.time()))
             time_packet_sent += self.CHUNK_GAP
             if not send_queue.empty():
-                self.__send(send_queue.get())
+                self.__send(*send_queue.get())
 
     def __recv_loop(self, recv_queue: mp.Queue):
         while True:

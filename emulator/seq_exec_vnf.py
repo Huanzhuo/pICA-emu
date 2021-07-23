@@ -3,7 +3,7 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-05-05 20:41:14
-# @modify: 2021-05-16 15:41:14
+# @modify: 2021-07-23 08:41:14
 # @desc. : [description]
 
 
@@ -92,12 +92,11 @@ def write_results(simplecoin,EVAL_MODE,W):
 
 @app.func('clear_cache')
 def clear_cache(simplecoin):
-    global DEF_INIT_SETTINGS, init_settings, EVALS, PKTS, ica_processed
+    global DEF_INIT_SETTINGS, init_settings, EVALS, PKTS
     PKTS = []
     EVALS = []
     ica_buf.init()
     init_settings.update(DEF_INIT_SETTINGS)
-    ica_processed = False
 
 
 @app.func('set_init_settings')
@@ -105,16 +104,16 @@ def set_init_settings(simplecoin, _init_settings, _dst_ip_addr):
     global init_settings, dst_ip_addr
     init_settings.update(_init_settings)
     dst_ip_addr = _dst_ip_addr
+    if(ica_buf.size()>=init_settings['m']):
+        simplecoin.submit_func(pid=-1, id='pica_service')
 
 @app.func('put_ica_buf')
 def ica_buf_put(simplecoin, data, af_packet):
-    global PKTS, ica_processed
+    global PKTS
     ica_buf.put(data)
     PKTS.append(af_packet)
-    if(ica_buf.size()>=init_settings['m'] and ica_processed == False):
-        ica_processed = True
+    if(ica_buf.size()>=init_settings['m'] and init_settings['W'] is not None):
         simplecoin.submit_func(pid=-1, id='pica_service')
-
 # the function app.func('xxx') will create a new thread to run the function
 
 @app.func('pica_service')
@@ -146,15 +145,10 @@ def pica_service(simplecoin):
         else:
             break
         EVALS += ['process_time', time_finish - time_start]
-    
-    simplecoin.sendto(pktutils.serialize_data(
-        HEADER_INIT, init_settings), dst_ip_addr)
     # Measurements begin.
     EVALS += ['matrix_w',
                 measure_arr_to_jsonstr(init_settings['W'])]
     # Measurements end.
-    ica_buf.init()
-    init_settings.update(DEF_INIT_SETTINGS)
     print('*** vnf pica processing finished!')
     print('*** vnf forwarding packets!')
     t = time.time()
@@ -163,7 +157,11 @@ def pica_service(simplecoin):
         time.sleep(max(0, time_packet_sent - time.time()))
         time_packet_sent += 0.003
         simplecoin.forward(af_packet)
+    time.sleep(max(0, time_packet_sent - time.time()))
+    simplecoin.sendto(pktutils.serialize_data(
+        HEADER_INIT, init_settings), dst_ip_addr)
     print('*** vnf forwarding finished!')
-
+    ica_buf.init()
+    init_settings.update(DEF_INIT_SETTINGS)
 if __name__ == "__main__":
     app.run()
