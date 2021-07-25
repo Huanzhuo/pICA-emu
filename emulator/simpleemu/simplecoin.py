@@ -3,14 +3,13 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-07-23
+# @modify: 2021-07-24
 # @desc. : SimpleCOIN 1.0.2
 
-
+import time
 import socket
 import multiprocessing as mp
 from typing import Any, Callable, Tuple
-import time
 from functools import wraps
 from abc import ABC, abstractmethod
 
@@ -313,17 +312,17 @@ class SimpleCOIN():
     IPC.register(IPCLite)
 
     # The body
-    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: float = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
         # SimpleCOIN Settings
         self.lite_mode = lightweight_mode
         # Network Device Settings
-        self.CHUNK_GAP = chunk_gap
+        self.chunk_gap = chunk_gap
         self.buffer_size = mtu
         self.buf = bytearray(self.buffer_size)
         self.af_socket = socket.socket(
             socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
         self.af_socket.bind((ifce_name, 0))
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Network Service and User Defined Packet Processing Program
         self.main_processing = None
         self.func_init_processing = lambda ipc: None
@@ -369,13 +368,13 @@ class SimpleCOIN():
         if typ == 'raw':
             self.af_socket.send(data)
         elif typ == 'udp':
-            self.client.sendto(data, dst_addr)
+            self.udp_client.sendto(data, dst_addr)
 
     def __send_loop(self, send_queue: mp.Queue):
         time_packet_sent = time.time()
         while True:
             time.sleep(max(0, time_packet_sent - time.time()))
-            time_packet_sent += self.CHUNK_GAP
+            time_packet_sent += self.chunk_gap
             if not send_queue.empty():
                 self.__send(*send_queue.get())
 
