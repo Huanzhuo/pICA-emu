@@ -87,7 +87,7 @@ def main(simplecoin: SimpleCOIN.IPC, af_packet: bytes):
 
 
 @app.func('measure@time_start')
-def rec_time_start(simplecoin):
+def rec_time_start(simplecoin: SimpleCOIN.IPC):
     global EVALS
     EVALS += ['time_start', time.time()]
 
