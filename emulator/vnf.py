@@ -65,35 +65,42 @@ def main(simplecoin: SimpleCOIN.IPC, af_packet: bytes):
             else:
                 print('*** vnf transmit init_settings!')
                 simplecoin.forward(af_packet)
+                simplecoin.submit_func(pid=0, id='measure@time_start')
             EVAL_MODE = init_settings['mode']
         elif header == HEADER_DATA or header == HEADER_FINISH:
             # ####################################
             # simplecoin.sendto(chunk,(packet['IP_dst'], packet['Port_dst']))
             simplecoin.forward(af_packet)
-            # ####################################  
+            # ####################################
             simplecoin.submit_func(
                 pid=0, id='put_ica_buf', args=(pickle.loads(chunk[1:]),))
             if header == HEADER_FINISH:
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
         elif header == HEADER_EVAL:
-            simplecoin.submit_func(pid=0, id='measure@write_results', args=(EVAL_MODE,init_settings['W']))
+            simplecoin.submit_func(pid=0, id='measure@write_results', args=(
+                EVAL_MODE, init_settings['W']))
             simplecoin.forward(af_packet)
         else:
             # simplecoin.forward(af_packet)
             pass
 
 
+@app.func('measure@time_start')
+def rec_time_start(simplecoin: SimpleCOIN.IPC):
+    global EVALS
+    EVALS += ['time_start', time.time()]
+
+
 @app.func('measure@write_results')
-def write_results(simplecoin: SimpleCOIN.IPC,EVAL_MODE,W):
+def write_results(simplecoin: SimpleCOIN.IPC, EVAL_MODE, W):
     global EVALS
     # Measurements write.
-    EVALS = ['mode',EVAL_MODE] + EVALS
+    EVALS = ['mode', EVAL_MODE] + EVALS
     print('*** write reults')
     if EVALS[1] == 'cf':
-        if len(EVALS)<=2:
-            EVALS += ['time_start',time.time(),'process_time',0,'matrix_w',
-                        measure_arr_to_jsonstr(W)]
+        if len(EVALS) <= 4:
+            EVALS += ['process_time', 0, 'matrix_w', measure_arr_to_jsonstr(W)]
         measure_write(IFCE_NAME, EVALS)
 
 
@@ -114,6 +121,7 @@ def set_init_settings(simplecoin: SimpleCOIN.IPC, _init_settings, _dst_ip_addr):
     if ica_buf.size() >= init_settings['proc_len'] or ica_buf.size() >= init_settings['m']:
         simplecoin.submit_func(pid=-1, id='pica_service')
 
+
 @app.func('put_ica_buf')
 def ica_buf_put(simplecoin: SimpleCOIN.IPC, data):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
@@ -123,6 +131,7 @@ def ica_buf_put(simplecoin: SimpleCOIN.IPC, data):
             simplecoin.submit_func(pid=-1, id='pica_service')
 
 # the function app.func('xxx') will create a new thread to run the function
+
 
 @app.func('pica_service')
 def pica_service(simplecoin: SimpleCOIN.IPC):
@@ -147,9 +156,10 @@ def pica_service(simplecoin: SimpleCOIN.IPC):
                 time_finish = time.time()
                 # Measurements end.
                 # Measurements begin.
-                EVALS += ['time_start',time_start,'process_time', time_finish - time_start]
+                EVALS += ['time_start', time_start,
+                          'process_time', time_finish - time_start]
                 EVALS += ['matrix_w',
-                            measure_arr_to_jsonstr(init_settings['W'])]
+                          measure_arr_to_jsonstr(init_settings['W'])]
                 # Measurements end.
                 init_settings['node_max_ext_nums'][0] -= 1
             elif ica_buf.size() >= init_settings['m']:
@@ -161,9 +171,10 @@ def pica_service(simplecoin: SimpleCOIN.IPC):
                 time_finish = time.time()
                 # Measurements end.
                 # Measurements begin.
-                EVALS += ['time_start',time_start,'process_time', time_finish - time_start]
+                EVALS += ['time_start', time_start,
+                          'process_time', time_finish - time_start]
                 EVALS += ['matrix_w',
-                            measure_arr_to_jsonstr(init_settings['W'])]
+                          measure_arr_to_jsonstr(init_settings['W'])]
                 # Measurements end.
                 init_settings['node_max_ext_nums'][0] -= 1
                 init_settings['is_finish'] = True
