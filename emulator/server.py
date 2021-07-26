@@ -39,7 +39,7 @@ ica_buf = ICABuffer(max_size=(4, 160000))
 app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1, lightweight_mode=False)
 
 @app.main()
-def main(simplecoin, af_packet: bytes):
+def main(simplecoin: SimpleCOIN.IPC, af_packet: bytes):
     packet = simpleudp.parse_af_packet(af_packet)
     if packet['Protocol'] == 17 and packet['IP_src'] != NODE_IP:
         chunk = packet['Chunk']
@@ -64,7 +64,7 @@ def main(simplecoin, af_packet: bytes):
 
 
 @app.func('clear_cache')
-def clear_cache(simplecoin):
+def clear_cache(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     EVALS = []
     ica_processed = False
@@ -73,49 +73,54 @@ def clear_cache(simplecoin):
 
 
 @app.func('set_init_settings')
-def set_init_settings(simplecoin, _init_settings):
+def set_init_settings(simplecoin: SimpleCOIN.IPC, _init_settings):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     init_settings.update(_init_settings)
     if init_settings['is_finish'] == True:
         print('*** no further ica process on server!')
         simplecoin.sendto(b'### time server ica finish: ', ('10.0.0.12', 1000))
         simplecoin.submit_func(pid=-1, id='measure@write_results')
+    elif ica_buf.size() >= init_settings['m']:
+        simplecoin.submit_func(pid=-1, id='fastica_service')    
 
 
 @app.func('put_ica_buf')
-def ica_buf_put(simplecoin, data):
+def ica_buf_put(simplecoin: SimpleCOIN.IPC, data):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed
     if ica_processed == False:
         ica_buf.put(data)
-        if ica_buf.size() >= init_settings['m']:
+        if ica_buf.size() >= init_settings['m'] and init_settings['W'] is not None:
             simplecoin.submit_func(pid=-1, id='fastica_service')
 
 
 @app.func('fastica_service')
-def fastica_service(simplecoin):
+def fastica_service(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     if (not ica_processed) and ica_buf.size() >= init_settings['m']:
         print('*** server fastica processing!')
         time_start = time.time()
         icanetwork.fastica_nw(init_settings, ica_buf)
+        hat_S = np.dot(init_settings['W'], ica_buf.buffer)
+        check_hat_s = hat_S.shape[0]
         time_finish = time.time()
+        print(check_hat_s)
         init_settings['is_finish'] = True
         print('*** server fastica processing finished!')
         ica_processed = True
         simplecoin.sendto(b'### time fastica finish: ', ('10.0.0.12', 1000))
         # Measurements begin.
-        EVALS += ['process_time',time_finish - time_start]
+        EVALS += ['time_start',time_start,'process_time',time_finish - time_start]
         EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
         # Measurements end.
         simplecoin.submit_func(pid=-1, id='measure@write_results')
 
 
 @app.func('measure@write_results')
-def write_results(simplecoin):
+def write_results(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     # Measurements write.
     if len(EVALS)<1:
-        EVALS += ['process_time',0,'matrix_w',
+        EVALS += ['time_start', time.time(), 'process_time',0,'matrix_w',
                     measure_arr_to_jsonstr(init_settings['W'])]
     print('*** write reults')
     measure_write('server_'+init_settings['mode'], EVALS)
