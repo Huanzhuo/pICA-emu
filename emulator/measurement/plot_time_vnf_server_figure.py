@@ -5,6 +5,7 @@ import scipy.stats as st
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+import seaborn as sns
 
 matplotlib.use('TkAgg')
 
@@ -74,17 +75,33 @@ if __name__ == '__main__':
         print(average_processing_time)
 
         x_axis = [0, 2, 4, 6, 8]
-
+        
         plt.scatter(x_axis, average_processing_time_array, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ls='-')
         plt.plot(x_axis, average_processing_time_array, color=colordict['compute_forward'], marker=markerdict['compute_forward'], ls='-', label="Compute Forward")
 
         plt.scatter(x_axis, average_processing_time_sf_array, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-')
         plt.plot(x_axis, average_processing_time_sf_array, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-', label="Store Forward")
+        
         plt.legend(loc="upper left")
         plt.ylim(1.5, 4.5)
 
         plt.ylabel('Processing time of VNF + server (s)')
         plt.xlabel('Number of nodes ')
 
-        plt.savefig('./emulator/measurement/processing_time_vnf_and_server.pdf', dpi=600, bbox_inches='tight')
+        ci_cf = 0.1 * np.std(average_processing_time_array) / np.mean(average_processing_time_array)
+        plt.fill_between(x_axis, (average_processing_time_array - ci_cf), (average_processing_time_array + ci_cf), color=colordict['compute_forward'], alpha=0.1)
+
+        ci_sf = 0.1 * np.std(average_processing_time_sf_array) / np.mean(average_processing_time_sf_array)
+        plt.fill_between(x_axis, (average_processing_time_sf_array - ci_sf), (average_processing_time_sf_array + ci_sf), color=colordict['store_forward'], alpha=0.1)
+
+
+        plt.savefig('./emulator/measurement/tester.pdf', dpi=600, bbox_inches='tight')
+        
+        """ 
+        plot = sns.regplot(x_axis, average_processing_time_array, ci=0.95, color=colordict['compute_forward'],  marker=markerdict['compute_forward'])
+        #sns.regplot(x_axis, average_processing_time_sf_array, ci=0.95, color=colordict['compute_forward'],  marker=markerdict['compute_forward'])
+        fig = plot.get_figure()
+        fig.savefig('./emulator/measurement/tester.pdf', dpi=600, bbox_inches='tight')
+        """
+    
         
