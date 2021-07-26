@@ -88,20 +88,20 @@ if __name__ == '__main__':
         plt.ylabel('Processing time of VNF + server (s)')
         plt.xlabel('Number of nodes ')
 
-        ci_cf = 0.1 * np.std(average_processing_time_array) / np.mean(average_processing_time_array)
+        ci_cf = 1.96 * np.std(average_processing_time_array) / np.mean(average_processing_time_array)
         plt.fill_between(x_axis, (average_processing_time_array - ci_cf), (average_processing_time_array + ci_cf), color=colordict['compute_forward'], alpha=0.1)
 
-        ci_sf = 0.1 * np.std(average_processing_time_sf_array) / np.mean(average_processing_time_sf_array)
+        ci_sf = 1.96 * np.std(average_processing_time_sf_array) / np.mean(average_processing_time_sf_array)
         plt.fill_between(x_axis, (average_processing_time_sf_array - ci_sf), (average_processing_time_sf_array + ci_sf), color=colordict['store_forward'], alpha=0.1)
 
 
-        plt.savefig('./emulator/measurement/tester.pdf', dpi=600, bbox_inches='tight')
+        plt.savefig('./emulator/measurement/processing_time_vnf_and_server.pdf', dpi=600, bbox_inches='tight')
         
         """ 
-        plot = sns.regplot(x_axis, average_processing_time_array, ci=0.95, color=colordict['compute_forward'],  marker=markerdict['compute_forward'])
-        #sns.regplot(x_axis, average_processing_time_sf_array, ci=0.95, color=colordict['compute_forward'],  marker=markerdict['compute_forward'])
-        fig = plot.get_figure()
-        fig.savefig('./emulator/measurement/tester.pdf', dpi=600, bbox_inches='tight')
+        sns.regplot(x_axis, average_processing_time_array, ci=0.95, color=colordict['compute_forward'],  marker=markerdict['compute_forward'])
+        sns.regplot(x_axis, average_processing_time_sf_array, ci=0.95, color=colordict['store_forward'],  marker=markerdict['store_forward'])
+        #plt.get_figure()
+        plt.savefig('./emulator/measurement/processing_time_vnf_and_server.pdf', dpi=600, bbox_inches='tight')
         """
     
         

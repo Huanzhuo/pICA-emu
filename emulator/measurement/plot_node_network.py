@@ -15,8 +15,8 @@ if __name__ == '__main__':
     nodes_0_cf_excel = "./emulator/measurement/1s/0_nodes/client_cf.csv"
     nodes_0_sf_excel = "./emulator/measurement/1s/0_nodes/client_sf.csv"
 
-    nodes_2_cf_excel = "./emulator/measurement/client_cf.csv"
-    nodes_2_sf_excel = "./emulator/measurement/client_sf.csv"
+    nodes_2_cf_excel = "./emulator/measurement/1s/2_nodes/client_cf.csv"
+    nodes_2_sf_excel = "./emulator/measurement/1s/2_nodes/client_cf.csv"
 
     nodes_4_cf_excel = "./emulator/measurement/1s/4_nodes/client_cf.csv"
     nodes_4_sf_excel = "./emulator/measurement/1s/4_nodes/client_sf.csv"
@@ -28,18 +28,17 @@ if __name__ == '__main__':
     nodes_8_sf_excel = "./emulator/measurement/1s/8_nodes/client_sf.csv"
 
 
-    
-    cf_service_latency_nodes_2 = np.loadtxt(nodes_2_cf_excel, delimiter=',', dtype=None, usecols=[1])
-    cf_service_latency_nodes_2 = np.resize(cf_service_latency_nodes_2, 31)
-
-    sf_service_latency_nodes_2 = np.loadtxt(nodes_2_sf_excel, delimiter=',', dtype=None, usecols=[1])
-    sf_service_latency_nodes_2 = np.resize(sf_service_latency_nodes_2, 31)
-
     cf_service_latency_nodes_0 = np.loadtxt(nodes_0_cf_excel, delimiter=',', dtype=None, usecols=[5])
     cf_service_latency_nodes_0 = np.resize(cf_service_latency_nodes_0, 31)
 
     sf_service_latency_nodes_0 = np.loadtxt(nodes_0_sf_excel, delimiter=',', dtype=None, usecols=[5])
     sf_service_latency_nodes_0 = np.resize(sf_service_latency_nodes_0, 31)    
+
+    cf_service_latency_nodes_2 = np.loadtxt(nodes_2_cf_excel, delimiter=',', dtype=None, usecols=[5])
+    cf_service_latency_nodes_2 = np.resize(cf_service_latency_nodes_2, 31)
+
+    sf_service_latency_nodes_2 = np.loadtxt(nodes_2_sf_excel, delimiter=',', dtype=None, usecols=[5])
+    sf_service_latency_nodes_2 = np.resize(sf_service_latency_nodes_2, 31)    
 
     cf_service_latency_nodes_4 = np.loadtxt(nodes_4_cf_excel, delimiter=',', dtype=None, usecols=[5])
     cf_service_latency_nodes_4 = np.resize(cf_service_latency_nodes_4, 31)
@@ -97,6 +96,13 @@ if __name__ == '__main__':
 
         plt.scatter(x_axis, average_latency_sf_array, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-')
         plt.plot(x_axis, average_latency_sf_array, color=colordict['store_forward'], marker=markerdict['store_forward'], ls='-', label="Store Forward")
+
+        ci_cf = 1.96 * np.std(average_latency_cf_array) / np.mean(average_latency_cf_array)
+        plt.fill_between(x_axis, (average_latency_cf_array - ci_cf), (average_latency_cf_array + ci_cf), color=colordict['compute_forward'], alpha=0.1)
+
+        ci_sf = 1.96 * np.std(average_latency_sf_array) / np.mean(average_latency_sf_array)
+        plt.fill_between(x_axis, (average_latency_sf_array - ci_sf), (average_latency_sf_array + ci_sf), color=colordict['store_forward'], alpha=0.1)
+
 
         plt.legend(loc="upper left")
         plt.ylim(7, 10.5)
