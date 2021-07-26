@@ -23,8 +23,8 @@ from measurement.measure import measure_write, measure_arr_to_jsonstr
 
 
 # settings
-n_vnf = 1
-# W = np.load("MIMII/W.npy")
+n_vnf = 7
+W = np.load("MIMII/W.npy")
 W = np.ones((4,4))*0.25
 
 serverAddressPort = ("10.0.0.15", 9999)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         time_packet_sent = t
         for chunk in chunk_arr:
             time.sleep(max(0, time_packet_sent - time.time()))
-            time_packet_sent += 0.003
+            time_packet_sent += 0.003 
             simpleudp.sendto(chunk, serverAddressPort)
             if i % 500 == 0:
                 print('packet:', i, ', len:', len(chunk))
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         print(simpleudp.recvfrom(1000)[0], time.time()-t)
         service_latency = time.time() - t
         measure_write('client_'+INIT_SETTINGS['mode'],
-                      ['n_vnf', n_vnf, 'transmission_latency', transmission_latency, 'service_latency', service_latency, 'matrix_w', measure_arr_to_jsonstr(INIT_SETTINGS['W']), 'start_sys_time', t])
+                      ['n_vnf', n_vnf, 'time_start', t , 'transmission_latency', transmission_latency, 'service_latency', service_latency, 'matrix_w', measure_arr_to_jsonstr(INIT_SETTINGS['W']), 'start_sys_time', t])
 
         print('*** send write evaluation results command')
         simpleudp.sendto(pktutils.serialize_data(

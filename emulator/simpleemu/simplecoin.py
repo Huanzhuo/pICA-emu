@@ -3,15 +3,15 @@
 # @Author: Shenyunbin
 # @email : yunbin.shen@mailbox.tu-dresden.de / shenyunbin@outlook.com
 # @create: 2021-04-25
-# @modify: 2021-07-17
-# @desc. : SimpleCOIN 1.0.1
+# @modify: 2021-07-24
+# @desc. : SimpleCOIN 1.0.2
 
-
+import time
 import socket
 import multiprocessing as mp
 from typing import Any, Callable, Tuple
-import time
 from functools import wraps
+from abc import ABC, abstractmethod
 
 
 # Simple Computing In Network Framework
@@ -256,7 +256,7 @@ class SimpleCOIN():
     """
 
     # Interprocess communication
-    class IPCComm():
+    class IPC(ABC):
 
         def __init__(self, func_map: dict, func_params_queues: list):
             self.func_params_queues = func_params_queues
@@ -277,10 +277,16 @@ class SimpleCOIN():
                 self.func_params_queues[pid].put(
                     (id, args, kwargs), block=False)
 
-    class IPC(IPCComm):
+        @abstractmethod
+        def forward(self, af_packet: bytes): pass
+
+        @abstractmethod
+        def sendto(self, data: bytes, dst_addr: Tuple[str, int]): pass
+
+    class IPCStd(IPC):
 
         def __init__(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-            SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
+            SimpleCOIN.IPC.__init__(self, func_map, func_params_queues)
             self.send_queue = send_queue
 
         def forward(self, af_packet: bytes):
@@ -289,10 +295,12 @@ class SimpleCOIN():
         def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
             self.send_queue.put(('udp', data, dst_addr), block=False)
 
-    class IPCLite(IPCComm):
+    IPC.register(IPCStd)
+
+    class IPCLite(IPC):
 
         def __init__(self, __send: Callable, func_map: dict, func_params_queues: list):
-            SimpleCOIN.IPCComm.__init__(self, func_map, func_params_queues)
+            SimpleCOIN.IPC.__init__(self, func_map, func_params_queues)
             self.__send = __send
 
         def forward(self, af_packet: bytes):
@@ -300,19 +308,21 @@ class SimpleCOIN():
 
         def sendto(self, data: bytes, dst_addr: Tuple[str, int]):
             self.__send('udp', data, dst_addr)
+    
+    IPC.register(IPCLite)
 
     # The body
-    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: int = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
+    def __init__(self, ifce_name: str, mtu: int = 1500, chunk_gap: float = 0.0015, n_func_process: int = 1, lightweight_mode: bool = False):
         # SimpleCOIN Settings
         self.lite_mode = lightweight_mode
         # Network Device Settings
-        self.CHUNK_GAP = chunk_gap
+        self.chunk_gap = chunk_gap
         self.buffer_size = mtu
         self.buf = bytearray(self.buffer_size)
         self.af_socket = socket.socket(
             socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
         self.af_socket.bind((ifce_name, 0))
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Network Service and User Defined Packet Processing Program
         self.main_processing = None
         self.func_init_processing = lambda ipc: None
@@ -358,13 +368,13 @@ class SimpleCOIN():
         if typ == 'raw':
             self.af_socket.send(data)
         elif typ == 'udp':
-            self.client.sendto(data, dst_addr)
+            self.udp_client.sendto(data, dst_addr)
 
     def __send_loop(self, send_queue: mp.Queue):
         time_packet_sent = time.time()
         while True:
             time.sleep(max(0, time_packet_sent - time.time()))
-            time_packet_sent += self.CHUNK_GAP
+            time_packet_sent += self.chunk_gap
             if not send_queue.empty():
                 self.__send(*send_queue.get())
 
@@ -373,8 +383,8 @@ class SimpleCOIN():
             frame_len = self.af_socket.recv_into(self.buf, self.buffer_size)
             recv_queue.put(self.buf[:frame_len], block=False)
 
-    def __main_loop(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
-        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+    def __main_loop_std(self, recv_queue: mp.Queue, send_queue: mp.Queue, func_map: dict, func_params_queues: list):
+        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         while True:
             self.main_processing(ipc, recv_queue.get())
 
@@ -384,8 +394,8 @@ class SimpleCOIN():
             frame_len = self.af_socket.recv_into(self.buf, self.buffer_size)
             self.main_processing(ipc, self.buf[:frame_len])
 
-    def __func_loop(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
-        ipc = SimpleCOIN.IPC(send_queue, func_map, func_params_queues)
+    def __func_loop_std(self, send_queue: mp.Queue, func_map: dict, func_params_queues: list, pid: int):
+        ipc = SimpleCOIN.IPCStd(send_queue, func_map, func_params_queues)
         self.func_init_processing(ipc)
         while True:
             id, args, kwargs = func_params_queues[pid].get()
@@ -419,10 +429,10 @@ class SimpleCOIN():
             self.process_recv_loop = mp.Process(
                 target=self.__recv_loop, args=(self.recv_queue,))
             # User Defined Main Processing Program
-            self.process_main_loop = mp.Process(target=self.__main_loop, args=(
+            self.process_main_loop = mp.Process(target=self.__main_loop_std, args=(
                 self.recv_queue, self.send_queue, self.func_map, self.func_params_queues,))
             # User Defined Muti-processing Program
-            self.process_func_loops = [mp.Process(target=self.__func_loop, args=(
+            self.process_func_loops = [mp.Process(target=self.__func_loop_std, args=(
                 self.send_queue, self.func_map, self.func_params_queues, pid,)) for pid in range(self.n_func_process)]
             self.process_send_loop.start()
             self.process_recv_loop.start()
@@ -432,7 +442,7 @@ class SimpleCOIN():
             process_func_loop.start()
         print('\n///////////////////////////////////////////////\n')
 
-        print('*** SimpleCOIN v1.0.1 Framework is running!')
+        print('*** SimpleCOIN v1.0.2 Framework is running!')
         print('*** Lightweight mode:', self.lite_mode)
         print('*** Press <Enter> to exit.')
         print('-----------------------------------------------')
