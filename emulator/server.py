@@ -21,7 +21,7 @@ from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simplecoin import SimpleCOIN
 from simpleemu.simpleudp import simpleudp
-from measurement.measure import measure_write,measure_arr_to_jsonstr
+from measurement.measure import measure_write, measure_arr_to_jsonstr
 
 EVAL_TIMES = []
 EVAL_ACC = []
@@ -36,7 +36,8 @@ ica_processed = False
 
 ica_buf = ICABuffer(max_size=(4, 160000))
 
-app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1, lightweight_mode=False)
+app = SimpleCOIN(ifce_name=IFCE_NAME, n_func_process=1, lightweight_mode=True)
+
 
 @app.main()
 def main(simplecoin: SimpleCOIN.IPC, af_packet: bytes):
@@ -81,7 +82,7 @@ def set_init_settings(simplecoin: SimpleCOIN.IPC, _init_settings):
         simplecoin.sendto(b'### time server ica finish: ', ('10.0.0.12', 1000))
         simplecoin.submit_func(pid=-1, id='measure@write_results')
     elif ica_buf.size() >= init_settings['m']:
-        simplecoin.submit_func(pid=-1, id='fastica_service')    
+        simplecoin.submit_func(pid=-1, id='fastica_service')
 
 
 @app.func('put_ica_buf')
@@ -97,6 +98,7 @@ def ica_buf_put(simplecoin: SimpleCOIN.IPC, data):
 def fastica_service(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     if (not ica_processed) and ica_buf.size() >= init_settings['m']:
+        W_pre = init_settings['W']
         print('*** server fastica processing!')
         time_start = time.time()
         icanetwork.fastica_nw(init_settings, ica_buf)
@@ -109,8 +111,9 @@ def fastica_service(simplecoin: SimpleCOIN.IPC):
         ica_processed = True
         simplecoin.sendto(b'### time fastica finish: ', ('10.0.0.12', 1000))
         # Measurements begin.
-        EVALS += ['time_start',time_start,'process_time',time_finish - time_start]
-        EVALS += ['matrix_w',measure_arr_to_jsonstr(init_settings['W'])]
+        EVALS += ['time_start', time_start, 'matrix_w_pre',
+                  measure_arr_to_jsonstr(W_pre), 'process_time', time_finish - time_start]
+        EVALS += ['matrix_w', measure_arr_to_jsonstr(init_settings['W'])]
         # Measurements end.
         simplecoin.submit_func(pid=-1, id='measure@write_results')
 
@@ -119,9 +122,9 @@ def fastica_service(simplecoin: SimpleCOIN.IPC):
 def write_results(simplecoin: SimpleCOIN.IPC):
     global DEF_INIT_SETTINGS, init_settings, dst_ip_addr, ica_processed, EVALS
     # Measurements write.
-    if len(EVALS)<1:
-        EVALS += ['time_start', time.time(), 'process_time',0,'matrix_w',
-                    measure_arr_to_jsonstr(init_settings['W'])]
+    if len(EVALS) < 1:
+        EVALS += ['time_start', time.time(), 'matrix_w_pre', measure_arr_to_jsonstr(init_settings['W']), 'process_time', 0, 'matrix_w',
+                  measure_arr_to_jsonstr(init_settings['W'])]
     print('*** write reults')
     measure_write('server_'+init_settings['mode'], EVALS)
 

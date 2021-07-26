@@ -41,6 +41,8 @@ EVAL_MODE = None
 
 # main function for processing the data
 # af_packet is the raw af_packet from the socket
+
+
 @app.main()
 def main(simplecoin: SimpleCOIN.IPC, af_packet: bytes):
     global EVAL_MODE
@@ -100,8 +102,8 @@ def write_results(simplecoin: SimpleCOIN.IPC, EVAL_MODE, W):
     print('*** write reults')
     if EVALS[1] == 'cf':
         if len(EVALS) <= 4:
-            EVALS += ['process_time', 0, 'matrix_w', measure_arr_to_jsonstr(W)]
-        measure_write(IFCE_NAME, EVALS)
+            EVALS += ['matrix_w_pre', measure_arr_to_jsonstr(W), 'process_time', 0, 'matrix_w', measure_arr_to_jsonstr(W)]
+        measure_write(IFCE_NAME+'_'+init_settings['mode'], EVALS)
 
 
 @app.func('clear_cache')
@@ -149,6 +151,7 @@ def pica_service(simplecoin: SimpleCOIN.IPC):
                 print('*** vnf pica processing finished!')
                 break
             elif ica_buf.size() >= init_settings['proc_len']:
+                W_pre = init_settings['W']
                 print('*** vnf pica processing!')
                 # Measurements begin.
                 time_start = time.time()
@@ -156,7 +159,7 @@ def pica_service(simplecoin: SimpleCOIN.IPC):
                 time_finish = time.time()
                 # Measurements end.
                 # Measurements begin.
-                EVALS += ['time_start', time_start,
+                EVALS += ['time_start', time_start, 'matrix_w_pre', measure_arr_to_jsonstr(W_pre),
                           'process_time', time_finish - time_start]
                 EVALS += ['matrix_w',
                           measure_arr_to_jsonstr(init_settings['W'])]
@@ -164,6 +167,7 @@ def pica_service(simplecoin: SimpleCOIN.IPC):
                 init_settings['node_max_ext_nums'][0] -= 1
             elif ica_buf.size() >= init_settings['m']:
                 # break
+                W_pre = init_settings['W']
                 print('*** vnf pica processing!')
                 # Measurements begin.
                 time_start = time.time()
@@ -171,7 +175,7 @@ def pica_service(simplecoin: SimpleCOIN.IPC):
                 time_finish = time.time()
                 # Measurements end.
                 # Measurements begin.
-                EVALS += ['time_start', time_start,
+                EVALS += ['time_start', time_start, 'matrix_w_pre', measure_arr_to_jsonstr(W_pre),
                           'process_time', time_finish - time_start]
                 EVALS += ['matrix_w',
                           measure_arr_to_jsonstr(init_settings['W'])]

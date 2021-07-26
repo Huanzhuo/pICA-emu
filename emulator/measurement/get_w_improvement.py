@@ -21,7 +21,7 @@ def get_accuracy(s, x, w):
 
 
 if __name__ == '__main__':
-    node_number = [0, 2, 4, 6, 8]
+    node_number = [2]
     dataset_id = 0
     test_mode = '_cf'  # _sf _cf _cf_false
 
@@ -38,48 +38,55 @@ if __name__ == '__main__':
         accuracy = get_accuracy(ss[dataset_id], xx[dataset_id], w)
         timestamp_client = np.loadtxt(
             path_client_cf, delimiter=',', usecols=[3, 5, 7])[dataset_id]
-        timestamp_accuracy = [timestamp_client[0]-timestamp_client[0], accuracy]
+        timestamp_accuracy = [timestamp_client[0] -
+                              timestamp_client[0], accuracy]
         pICA_k = [timestamp_client[0]-timestamp_client[0], accuracy]
         print(timestamp_accuracy)
 
         if test_mode != '_sf':
             for vnf in range(0, node_k):
                 path_vnf_csv = './emulator/measurement/' + \
-                    str(node_k)+'s/vnf' + str(vnf)+'-s' + str(vnf)+'.csv'
+                    str(node_k)+'s/vnf' + str(vnf) + \
+                    '-s' + str(vnf)+test_mode+'.csv'
+                w_pre = np.array(json.loads(measure_read_csv_to_2dlist(
+                    path_vnf_csv)[dataset_id][5].replace('|', ',')))
+                accuracy_pre = get_accuracy(
+                    ss[dataset_id], xx[dataset_id], w_pre)
                 w = np.array(json.loads(measure_read_csv_to_2dlist(
-                    path_vnf_csv)[dataset_id][7].replace('|', ',')))
+                    path_vnf_csv)[dataset_id][9].replace('|', ',')))
                 accuracy = get_accuracy(ss[dataset_id], xx[dataset_id], w)
+
                 timestamp = np.loadtxt(path_vnf_csv, delimiter=',',
-                                    usecols=[3, 5])[dataset_id]
-                timestamp_accuracy = [timestamp[0]-timestamp_client[0], accuracy]
-                pICA_k = np.row_stack((pICA_k, timestamp_accuracy))
-                print(timestamp_accuracy)
+                                       usecols=[3, 7])[dataset_id]
+
+                timestamp_accuracy_pre = [
+                    timestamp[0]-timestamp_client[0], accuracy_pre]
+                pICA_k = np.row_stack((pICA_k, timestamp_accuracy_pre))
+                print(timestamp_accuracy_pre)
+
                 timestamp_accuracy = [pICA_k[-1, 0] + timestamp[1], accuracy]
                 pICA_k = np.row_stack((pICA_k, timestamp_accuracy))
                 print(timestamp_accuracy)
 
         path_server_cf = './emulator/measurement/' + \
             str(node_k)+'s/server'+test_mode+'.csv'
+        w_pre = np.array(json.loads(measure_read_csv_to_2dlist(
+            path_server_cf)[dataset_id][3].replace('|', ',')))
+        accuracy_pre = get_accuracy(ss[dataset_id], xx[dataset_id], w_pre)
         w = np.array(json.loads(measure_read_csv_to_2dlist(
-            path_server_cf)[dataset_id][5].replace('|', ',')))
+            path_server_cf)[dataset_id][7].replace('|', ',')))
         accuracy = get_accuracy(ss[dataset_id], xx[dataset_id], w)
+
         timestamp = np.loadtxt(path_server_cf, delimiter=',',
-                            usecols=[1, 3])[dataset_id]
-        timestamp_accuracy = [timestamp[0]-timestamp_client[0], accuracy]
-        pICA_k = np.row_stack((pICA_k, timestamp_accuracy))
-        print(timestamp_accuracy)
+                               usecols=[1, 5])[dataset_id]
+
+        timestamp_accuracy_pre = [timestamp[0] -
+                                  timestamp_client[0], accuracy_pre]
+        pICA_k = np.row_stack((pICA_k, timestamp_accuracy_pre))
+        print(timestamp_accuracy_pre)
+
         timestamp_accuracy = [pICA_k[-1, 0] + timestamp[1], accuracy]
         pICA_k = np.row_stack((pICA_k, timestamp_accuracy))
         print(timestamp_accuracy)
-
-        # path_client_cf_false = './emulator/measurement/' + \
-        #     str(node_id)+'s/client_cf_false.csv'
-        # path_client_sf = './emulator/measurement/' + \
-        #     str(node_id)+'s/client_sf.csv'
-
-        # path_server_cf_false = './emulator/measurement/' + \
-        #     str(node_id)+'s/server_cf_false.csv'
-        # path_server_sf = './emulator/measurement/' + \
-        #     str(node_id)+'s/server_sf.csv'
 
         measure_write('pICA_'+str(dataset_id)+test_mode, pICA_k)
