@@ -19,11 +19,10 @@ import sys
 from picautils.packetutils import *
 from picautils.pybss_testbed import pybss_tb
 from simpleemu.simpleudp import simpleudp
-from measurement.measure import measure_write, measure_arr_to_jsonstr
-
+from test_settings import *
 
 # settings
-n_vnf = 7
+n_vnf = test_client_settings['n_vnf']
 W = np.load("MIMII/W.npy")
 W = np.ones((4,4))*0.25
 
@@ -35,24 +34,17 @@ INIT_SETTINGS_pICA_disabled = {'is_finish': False, 'm': 160000, 'W': W, 'proc_le
 
 if __name__ == "__main__":
     n_test = 1
-    if len(sys.argv) < 4:
-        print("Invalid argument. The argument must be 'cf n_start n_test [n_vnf]' or 'sf n_start n_test [n_vnf]'.")
-        sys.exit(1)
 
-    if sys.argv[1] == 'cf':
+    if test_client_settings['mode'] == 'cf':
         INIT_SETTINGS = INIT_SETTINGS_pICA_enabled
         print("*** Compute and Forward Mode: pICA enabled")
-    elif sys.argv[1] == 'sf':
+    elif test_client_settings['mode'] == 'sf':
         INIT_SETTINGS = INIT_SETTINGS_pICA_disabled
         print("*** Store and Forward Mode: normal, pICA disabled")
-    else:
-        print("Invalid argument. The argument must be 'cf n_start n_test [n_vnf]' or 'sf n_start n_test [n_vnf]'.")
-        sys.exit(1)
 
-    n_start = int(sys.argv[2])
-    n_test = int(sys.argv[3])
-    if len(sys.argv) > 4:
-        n_vnf = int(sys.argv[4])
+    n_start = test_client_settings['n_start']
+    n_test = test_client_settings['n_test']
+    n_vnf = test_client_settings['n_vnf']
 
     dataset_id = n_start
 

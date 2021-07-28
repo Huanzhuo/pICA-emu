@@ -458,4 +458,4 @@ class SimpleCOIN():
             process_func_loop.terminate()
         self.process_main_loop.terminate()
         self.af_socket.close()
-        self.client.close()
+        self.udp_client.close()
