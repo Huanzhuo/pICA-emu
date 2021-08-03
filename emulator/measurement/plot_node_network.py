@@ -172,13 +172,13 @@ if __name__ == '__main__':
         line2_fill = ax.fill_between(x_index, tp_server_sf_conf[:, 1],
                                      tp_server_sf_conf[:, 3], color=colordict['store_forward'], alpha=0.2)
         ax.set_xlabel(r'Number of nodes $k$')
-        ax.set_ylabel(r'Process latency on the Server ($s$)')
+        ax.set_ylabel(r'Computing latency on the Server ($s$)')
         # ax.set_xlim([-0.2, 4.2])
         ax.set_yticks(np.arange(0, 5.1, 1))
         ax.legend([line1, line2], ['pICA',
                                    'FastICA'], loc='upper right')
         plt.xticks(range(len(number_node)), number_node)
-        plt.savefig('./emulator/measurement/process_latency_server_emu.pdf',
+        plt.savefig('./emulator/measurement/computing_latency_server_emu.pdf',
                     dpi=600, bbox_inches='tight')
 
         fig = plt.figure(figsize=(fig_width, fig_width * 1.2))
@@ -215,7 +215,7 @@ if __name__ == '__main__':
         # ax.set_xlim([-0.2, 4.2])
         ax.set_yticks(np.arange(0, 13.1, 1))
         ax.legend([line1, line2, line3, line4, line5, line6], [r'$t_s$ of pICA', r'$t_s$ of FastICA', r'$t_t$ of pICA',
-                  r'$t_t$ of FastICA', r'Server $t_p$ of pICA', r'Server $t_p$ of FastICA'], loc='upper right', ncol=2)
+                  r'$t_t$ of FastICA', r'$t_c$ on the Server with pICA', r'$t_c$ on the Server with FastICA'], loc='upper right', ncol=2)
         plt.xticks(range(len(number_node)), number_node)
         plt.savefig('./emulator/measurement/all_latency_emu.pdf',
                     dpi=600, bbox_inches='tight')
