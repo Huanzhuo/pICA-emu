@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
         # time.sleep(0.5)
         chunk_arr = pktutils.get_chunks(
-            init_settings=INIT_SETTINGS, X=X, m_substream=80, dtype=np.float32)
+            init_settings=INIT_SETTINGS, X=X, m_substream=160, dtype=np.float16)
         # send clear cache command
         print('*** send clear cache command')
         simpleudp.sendto(pktutils.serialize_data(

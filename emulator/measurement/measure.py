@@ -3,7 +3,7 @@ import json
 import pickle
 
 def measure_write(filename,contents):
-    filename = '2s/' + filename
+    filename = 'tmp/' + filename
     try:
         f = open("measurement/"+filename+".csv","r")
         data = f.read()

@@ -70,24 +70,30 @@ def main(simplecoin, af_packet):
                 t = time.localtime()
                 print('*** last_pkt:', time.strftime("%H:%M:%S", t))
         elif header == HEADER_EVAL:
-            simplecoin.submit_func(pid=0, id='measure@write_results', args=(EVAL_MODE,init_settings['W']))
+            simplecoin.submit_func(pid=0, id='measure@write_results', args=(
+                EVAL_MODE, init_settings['W']))
             simplecoin.forward(af_packet)
         else:
             # simplecoin.forward(af_packet)
             pass
 
 
+@app.func('measure@time_start')
+def rec_time_start(simplecoin: SimpleCOIN.IPC):
+    global EVALS
+    EVALS += ['time_start', time.time()]
+
+
 @app.func('measure@write_results')
-def write_results(simplecoin,EVAL_MODE,W):
+def write_results(simplecoin: SimpleCOIN.IPC, EVAL_MODE, W):
     global EVALS
     # Measurements write.
-    EVALS = ['mode',EVAL_MODE] + EVALS
+    EVALS = ['mode', EVAL_MODE] + EVALS
     print('*** write reults')
     if EVALS[1] == 'cf':
-        if len(EVALS)<=2:
-            EVALS += ['process_time',0,'matrix_w',
-                        measure_arr_to_jsonstr(W)]
-        measure_write(IFCE_NAME, EVALS)
+        if len(EVALS) <= 4:
+            EVALS += ['matrix_w_pre', measure_arr_to_jsonstr(W), 'process_time', 0, 'matrix_w', measure_arr_to_jsonstr(W)]
+        measure_write(IFCE_NAME+'_'+init_settings['mode'], EVALS)
 
 
 @app.func('clear_cache')
@@ -123,39 +129,49 @@ def pica_service(simplecoin):
         time_finish, time_start = 0, 0
         if init_settings['is_finish'] == True or init_settings['node_max_ext_nums'][0] == 0:
             del init_settings['node_max_ext_nums'][0]
+            simplecoin.submit_func(pid=0, id='measure@time_start')
             break
         elif ica_buf.size() >= init_settings['proc_len']:
+            W_pre = init_settings['W']
             print('*** vnf pica processing!')
             # Measurements begin.
             time_start = time.time()
             icanetwork.pica_nw(init_settings, ica_buf)
             time_finish = time.time()
             # Measurements end.
+            # Measurements begin.
+            EVALS += ['time_start', time_start, 'matrix_w_pre', measure_arr_to_jsonstr(W_pre),
+                        'process_time', time_finish - time_start]
+            EVALS += ['matrix_w',
+                        measure_arr_to_jsonstr(init_settings['W'])]
+            # Measurements end.
             init_settings['node_max_ext_nums'][0] -= 1
         elif ica_buf.size() >= init_settings['m']:
-            # break
+            W_pre = init_settings['W']
             print('*** vnf pica processing!')
             # Measurements begin.
             time_start = time.time()
             icanetwork.fastica_nw(init_settings, ica_buf)
             time_finish = time.time()
             # Measurements end.
+            # Measurements begin.
+            EVALS += ['time_start', time_start, 'matrix_w_pre', measure_arr_to_jsonstr(W_pre),
+                        'process_time', time_finish - time_start]
+            EVALS += ['matrix_w',
+                        measure_arr_to_jsonstr(init_settings['W'])]
+            # Measurements end.
             init_settings['node_max_ext_nums'][0] -= 1
             init_settings['is_finish'] = True
         else:
             break
-        EVALS += ['process_time', time_finish - time_start]
-    # Measurements begin.
-    EVALS += ['matrix_w',
-                measure_arr_to_jsonstr(init_settings['W'])]
-    # Measurements end.
+
     print('*** vnf pica processing finished!')
     print('*** vnf forwarding packets!')
     t = time.time()
     time_packet_sent = t
     for af_packet in PKTS:
         time.sleep(max(0, time_packet_sent - time.time()))
-        time_packet_sent += 0.003
+        time_packet_sent += 0.0015
         simplecoin.forward(af_packet)
     time.sleep(max(0, time_packet_sent - time.time()))
     simplecoin.sendto(pktutils.serialize_data(
