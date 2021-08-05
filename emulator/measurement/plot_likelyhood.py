@@ -40,12 +40,12 @@ if __name__ == '__main__':
     service_latency_cf_us = np.zeros(number_test)
     service_latency_sf = np.zeros(number_test)
     for node in number_node:
-        path_client_compute_client = './emulator/measurement/results_v2/' + \
-            str(node)+'s/client_cf.csv'
-        path_client_compute_client_us = './emulator/measurement/results_v2/' + \
-            str(node)+'s/client_cf_us.csv'
-        path_client_store_client = './emulator/measurement/results_v2/' + \
-            str(node)+'s/client_sf.csv'
+        path_client_compute_client = './emulator/measurement/results_v3/' + \
+            str(node)+'s/client_cf_35.csv'
+        path_client_compute_client_us = './emulator/measurement/results_v3/' + \
+            str(node)+'s/client_cf_us_35.csv'
+        path_client_store_client = './emulator/measurement/results_v3/' + \
+            str(node)+'s/client_sf_35.csv'
 
         client_compute_forward = np.loadtxt(
             path_client_compute_client, delimiter=',', usecols=[5, 7])

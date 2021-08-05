@@ -1,0 +1,3 @@
+sf: lightmode=true, client_gap=3ms, data_type=32float,
+cf: lightmode=true, client_gap=3ms, data_type=32float,
+cf: lightmode=true, client_gap=3ms, data_type=32float, user_space
