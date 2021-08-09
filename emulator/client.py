@@ -102,7 +102,6 @@ if __name__ == "__main__":
         service_latency = time.time() - t
         measure_write('client_'+INIT_SETTINGS['mode'],
                       ['n_vnf', n_vnf, 'time_start', t , 'transmission_latency', transmission_latency, 'service_latency', service_latency, 'matrix_w', measure_arr_to_jsonstr(INIT_SETTINGS['W']), 'start_sys_time', t])
-
         print('*** send write evaluation results command')
         simpleudp.sendto(pktutils.serialize_data(
             HEADER_EVAL), serverAddressPort)
