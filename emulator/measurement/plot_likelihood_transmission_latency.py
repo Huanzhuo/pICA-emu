@@ -89,12 +89,13 @@ if __name__ == '__main__':
             'blue': '#3340AD'
         }
         markerdict = {
-            'compute_forward': 'o',
-            'store_forward': 'v',
+            'compute_forward': 'p',
+            'store_forward': 'o',
             'store_forward_ia': 's'
         }
-        colorlist = ['#DDAA33', '#33BBEE', '#009988', '#6699CC', '#0077BB']
-        markerlist = ['s', 'o', 'v', 'p']
+        colorlist = ['#DDAA33', '#7ACFE5', '#3F9ABF',
+                     '#024B7A',  '#0077BB', '#009988']
+        markerlist = ['o', 'v', '^', 'D', 'p', 's']
 
         plt.rcParams.update({'font.size': 10})
 

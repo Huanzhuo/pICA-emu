@@ -63,8 +63,8 @@ if __name__ == '__main__':
             'midblue': '#7ACFE5'
         }
         markerdict = {
-            'compute_forward': 'o',
-            'store_forward': 'v',
+            'compute_forward': 'p',
+            'store_forward': 'o',
             'store_forward_ia': 's'
         }
 

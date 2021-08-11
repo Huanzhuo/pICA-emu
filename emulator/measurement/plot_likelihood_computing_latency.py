@@ -101,7 +101,6 @@ if __name__ == '__main__':
         fig_width = 6.5
         barwidth = 0.4
         bardistance = barwidth * 1.7
-        # bardistance = barwidth * 1.2
         colordict = {
             'compute_forward': '#0077BB',
             'store_forward': '#DDAA33',
@@ -115,29 +114,29 @@ if __name__ == '__main__':
             'store_forward': 'v',
             'store_forward_ia': 's'
         }
-        colorlist = ['#DDAA33', '#33BBEE', '#009988',
-                     '#6699CC', '#0077BB', '#33BBEE']
-        markerlist = ['s', 'o', 'v', 'p', 'x']
+        colorlist = ['#DDAA33', '#7ACFE5', '#3F9ABF',
+                     '#024B7A',  '#0077BB', '#009988']
+        markerlist = ['o', 'v', '^', 'D', 'p', 's']
 
-        plt.rcParams.update({'font.size': 10})
+        plt.rcParams.update({'font.size': 11})
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.5))
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
         # ax = fig.add_subplot(1, 1, 1)
-        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 5])
+        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 6])
         ax_1 = fig.add_subplot(spec[0])
         ax_1.yaxis.grid(True, linestyle='--', which='major',
                         color='lightgrey', alpha=0.5, linewidth=0.2)
-        box = ax_1.boxplot(computing_latency_sf[0, :], positions=np.arange(1), vert=False, widths=barwidth, showfliers=True, showmeans=True, patch_artist=True,
+        box = ax_1.boxplot(computing_latency_sf[0, :], positions=np.arange(1), vert=False, widths=barwidth, showfliers=True, showmeans=False, patch_artist=True,
                            boxprops=dict(
                                color='black', facecolor=colorlist[0], lw=1),
                            medianprops=dict(color='black'),
                            capprops=dict(color='black'),
                            whiskerprops=dict(color='black'),
                            flierprops=dict(
-                               color=colorlist[0], markeredgecolor=colorlist[0]),
+                               color=colorlist[0], markeredgecolor=colorlist[0], ms=4),
                            meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
         for box_id in range(1, len(number_node)):
-            box1 = ax_1.boxplot(computing_latency_cf[box_id, :], positions=np.arange(1) - bardistance*box_id, vert=False, widths=barwidth, showfliers=True, showmeans=True,
+            box1 = ax_1.boxplot(computing_latency_cf[box_id, :], positions=np.arange(1) - bardistance*box_id, vert=False, widths=barwidth, showfliers=True, showmeans=False,
                                 patch_artist=True,
                                 boxprops=dict(
                                     color='black', facecolor=colorlist[box_id], lw=1),
@@ -145,10 +144,10 @@ if __name__ == '__main__':
                                 capprops=dict(color='black'),
                                 whiskerprops=dict(color='black'),
                                 flierprops=dict(
-                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id]),
+                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id], ms=4),
                                 meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
             # box2 = ax_1.boxplot(computing_latency_cf_hbh[box_id, :], positions=np.arange(1) - bardistance*(box_id+len(number_node)-1), vert=False, widths=barwidth,
-            #                     showfliers=False, showmeans=True,
+            #                     showfliers=False, showmeans=False,
             #                     patch_artist=True, boxprops=dict(facecolor=colorlist[box_id], lw=1, hatch='\\'),
             #                     medianprops=dict(color='black'),
             #                     meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[box_id]))
@@ -181,21 +180,21 @@ if __name__ == '__main__':
         plt.savefig('./emulator/measurement/plot/computing_likelihood.pdf',
                     dpi=600, bbox_inches='tight')
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.5))
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
         # ax = fig.add_subplot(1, 1, 1)
-        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 5])
+        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 6])
         ax_1 = fig.add_subplot(spec[0])
         ax_1.yaxis.grid(True, linestyle='--', which='major',
                         color='lightgrey', alpha=0.5, linewidth=0.2)
         box = ax_1.boxplot(computing_server_latency_sf[0, :], positions=np.arange(1), vert=False, widths=barwidth, showfliers=True, showmeans=False, patch_artist=True,
                            boxprops=dict(
-            color='black', facecolor=colorlist[0], lw=1),
-            medianprops=dict(color='black'),
-            capprops=dict(color='black'),
-            whiskerprops=dict(color='black'),
-            flierprops=dict(
-                               color=colorlist[0], markeredgecolor=colorlist[0]),
-            meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
+                               color='black', facecolor=colorlist[0], lw=1),
+                           medianprops=dict(color='black'),
+                           capprops=dict(color='black'),
+                           whiskerprops=dict(color='black'),
+                           flierprops=dict(
+                               color=colorlist[0], markeredgecolor=colorlist[0], ms=4),
+                           meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
         for box_id in range(1, len(number_node)):
             box1 = ax_1.boxplot(computing_server_latency_cf[box_id, :], positions=np.arange(1) - bardistance*box_id, vert=False, widths=barwidth, showfliers=True, showmeans=False, patch_artist=True,
                                 boxprops=dict(
@@ -204,7 +203,7 @@ if __name__ == '__main__':
                                 capprops=dict(color='black'),
                                 whiskerprops=dict(color='black'),
                                 flierprops=dict(
-                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id]),
+                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id], ms=4),
                                 meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
             # box2 = ax_1.boxplot(computing_server_latency_cf_hbh[box_id, :], positions=np.arange(1) - bardistance*(box_id+len(number_node)-1), vert=False, widths=barwidth,
             #                     showfliers=False, showmeans=False,
