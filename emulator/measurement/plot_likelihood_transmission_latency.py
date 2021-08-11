@@ -32,7 +32,7 @@ def get_cdf(data):
 
 
 if __name__ == '__main__':
-    number_node = [0, 2, 5, 8]
+    number_node = [0, 1, 4, 7]
     number_test = 50
 
     transmission_latency_cf = np.zeros(number_test)

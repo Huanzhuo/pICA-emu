@@ -24,7 +24,7 @@ def get_conf_interval(index, data, conf_rate):
 
 
 if __name__ == '__main__':
-    number_node = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    number_node = [0, 1, 2, 3, 4, 5, 6, 7]
     conf_rate = 0.95
     number_test = 50
 
@@ -114,8 +114,8 @@ if __name__ == '__main__':
     # codes for plot figures
     with plt.style.context(['science', 'ieee']):
         fig_width = 6.5
-        barwidth = 0.15
-        bardistance = barwidth * 1.2
+        barwidth = 0.2
+        bardistance = barwidth * 1.1
         colordict = {
             'compute_forward': '#0077BB',
             'store_forward': '#DDAA33',
@@ -189,17 +189,17 @@ if __name__ == '__main__':
                       color='lightgrey', alpha=0.5, linewidth=0.2)
         x_index = np.arange(len(number_node))
         bar1 = ax.bar(x_index - bardistance, tt_cf_conf[:, 2], barwidth,
-                      fill=False, color=colordict['compute_forward'], edgecolor=colordict['compute_forward'], ecolor='#555555', hatch='\\')
-        bar2 = ax.bar(x_index - bardistance, tc_server_cf_conf[:, 2], barwidth, bottom=tt_cf_conf[:, 2], fill=False,
-                      color=colordict['compute_forward'], edgecolor=colordict['compute_forward'], ecolor='#555555', hatch='//')
+                      fill=True, color=colordict['compute_forward'], edgecolor='#FFFFFF', ecolor='#555555', hatch='\\')
+        bar2 = ax.bar(x_index - bardistance, tc_server_cf_conf[:, 2], barwidth, bottom=tt_cf_conf[:, 2], fill=True,
+                      color=colordict['compute_forward'], edgecolor='#FFFFFF', ecolor='#555555', hatch='//')
         bar3 = ax.bar(x_index, tt_sf_conf[:, 2], barwidth,
-                      fill=False, color=colordict['store_forward'], edgecolor=colordict['store_forward'], ecolor='#555555', hatch='\\')
-        bar4 = ax.bar(x_index, tc_server_sf_conf[:, 2], barwidth, bottom=tt_sf_conf[:, 2], fill=False,
-                      color=colordict['store_forward'], edgecolor=colordict['store_forward'], ecolor='#555555', hatch='//')
-        bar5 = ax.bar(x_index + bardistance, tt_cf_hbh_conf[:, 2], barwidth, fill=False,
-                      color=colordict['store_forward_ia'], edgecolor=colordict['store_forward_ia'], ecolor='#555555', hatch='\\')
-        bar6 = ax.bar(x_index + bardistance, tc_server_cf_hbh_conf[:, 2], barwidth, bottom=tt_cf_hbh_conf[:, 2], fill=False,
-                      color=colordict['store_forward_ia'], edgecolor=colordict['store_forward_ia'], ecolor='#555555', hatch='//')
+                      fill=True, color=colordict['store_forward'], edgecolor='#FFFFFF', ecolor='#555555', hatch='/')
+        bar4 = ax.bar(x_index, tc_server_sf_conf[:, 2], barwidth, bottom=tt_sf_conf[:, 2], fill=True,
+                      color=colordict['store_forward'], edgecolor='#FFFFFF', ecolor='#555555', hatch='//')
+        bar5 = ax.bar(x_index + bardistance, tt_cf_hbh_conf[:, 2], barwidth, fill=True,
+                      color=colordict['store_forward_ia'], edgecolor='#FFFFFF', ecolor='#555555', hatch='\\')
+        bar6 = ax.bar(x_index + bardistance, tc_server_cf_hbh_conf[:, 2], barwidth, bottom=tt_cf_hbh_conf[:, 2], fill=True,
+                      color=colordict['store_forward_ia'], edgecolor='#FFFFFF', ecolor='#555555', hatch='//')
         line1 = ax.errorbar(
             x_index - bardistance, ts_cf_conf[:, 2], color=colordict['compute_forward'], lw=1, ls='-', marker=markerdict['compute_forward'], ms=5)
         line1_fill = ax.fill_between(x_index - bardistance, ts_cf_conf[:, 1],
@@ -215,6 +215,8 @@ if __name__ == '__main__':
         ax.set_xlabel(r'Number of nodes $k$')
         ax.set_ylabel(r'Latency ($s$)')
         ax.set_yticks(np.arange(0, 18.1, 3))
+        ax.legend([line1, line2, line3, bar1, bar2, bar3, bar4, bar5, bar6], [r'$t_s$ of pICA', r'$t_s$ of FastICA', r'$t_t$ of pICA hbh',
+                  r'$t_t$ of pICA', r'$t_c$ of pICA on the Server', r'$t_t$ of FastICA',  r'$t_c$ of pICA on the Server', r'$t_t$ of pICA hbh', r'$t_c$ of pICA hbh on the Server'], loc='upper left', ncol=2)
         plt.xticks(range(len(number_node)), number_node)
-        plt.savefig('./emulator/measurement/plot/latency_emu.pdf',
+        plt.savefig('./emulator/measurement/plot/all_latency_emu_bar.pdf',
                     dpi=600, bbox_inches='tight')

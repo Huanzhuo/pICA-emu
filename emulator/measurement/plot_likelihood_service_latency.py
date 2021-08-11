@@ -32,7 +32,7 @@ def get_cdf(data):
 
 
 if __name__ == '__main__':
-    number_node = [0, 2, 5, 8]
+    number_node = [0, 1, 4, 7]
     number_test = 50
 
     service_latency_cf = np.zeros(number_test)
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     with plt.style.context(['science', 'ieee']):
         fig_width = 6.5
         barwidth = 0.4
-        bardistance = barwidth * 1.5
+        bardistance = barwidth * 1.7
         # bardistance = barwidth * 1.2
         colordict = {
             'compute_forward': '#0077BB',
@@ -83,34 +83,44 @@ if __name__ == '__main__':
             'store_forward': 'v',
             'store_forward_ia': 's'
         }
-        colorlist = ['#DDAA33', '#33BBEE', '#009988', '#6699CC', '#0077BB', '#33BBEE']
+        colorlist = ['#DDAA33', '#33BBEE', '#009988',
+                     '#6699CC', '#0077BB', '#33BBEE']
         markerlist = ['s', 'o', 'v', 'p', 'x']
 
         plt.rcParams.update({'font.size': 10})
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.3))
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.5))
         # ax = fig.add_subplot(1, 1, 1)
-        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 4])
+        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 5])
         ax_1 = fig.add_subplot(spec[0])
         ax_1.yaxis.grid(True, linestyle='--', which='major',
                         color='lightgrey', alpha=0.5, linewidth=0.2)
-        box = ax_1.boxplot(service_latency_sf[0, :], positions=np.arange(1), vert=False, widths=barwidth,
-                           showfliers=False, showmeans=False,
-                           patch_artist=True, boxprops=dict(facecolor=colorlist[0], lw=1),
+        box = ax_1.boxplot(service_latency_sf[0, :], positions=np.arange(1), vert=False, widths=barwidth, showfliers=True, showmeans=False, patch_artist=True,
+                           boxprops=dict(
+                               color='black', facecolor=colorlist[0], lw=1),
                            medianprops=dict(color='black'),
-                           meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[0]))
+                           capprops=dict(color='black'),
+                           whiskerprops=dict(color='black'),
+                           flierprops=dict(
+                               color=colorlist[0], markeredgecolor=colorlist[0]),
+                           meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
         for box_id in range(1, len(number_node)):
             box1 = ax_1.boxplot(service_latency_cf[box_id, :], positions=np.arange(1) - bardistance*box_id, vert=False, widths=barwidth,
-                                showfliers=False, showmeans=False,
-                                patch_artist=True, boxprops=dict(facecolor=colorlist[box_id], lw=1),
+                                showfliers=True, showmeans=False, patch_artist=True,
+                                boxprops=dict(
+                                    color='black', facecolor=colorlist[box_id], lw=1),
                                 medianprops=dict(color='black'),
-                                meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[box_id]))
-            box2 = ax_1.boxplot(service_latency_cf_hbh[box_id, :], positions=np.arange(1) - bardistance*(box_id+len(number_node)-1), vert=False, widths=barwidth,
-                                showfliers=False, showmeans=False,
-                                patch_artist=True, boxprops=dict(facecolor=colorlist[box_id], lw=1, hatch='\\'),
-                                medianprops=dict(color='black'),
-                                meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[box_id]))
-        ax_1.set_xticks(np.arange(5, 21, 3))
+                                capprops=dict(color='black'),
+                                whiskerprops=dict(color='black'),
+                                flierprops=dict(
+                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id]),
+                                meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
+            # box2 = ax_1.boxplot(service_latency_cf_hbh[box_id, :], positions=np.arange(1) - bardistance*(box_id+len(number_node)-1), vert=False, widths=barwidth,
+            #                     showfliers=False, showmeans=False,
+            #                     patch_artist=True, boxprops=dict(facecolor=colorlist[box_id], lw=1, hatch='\\'),
+            #                     medianprops=dict(color='black'),
+            #                     meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[box_id]))
+        ax_1.set_xticks(np.arange(5, 11.1, 1))
         ax_1.axes.xaxis.set_visible(False)
         ax_1.axes.yaxis.set_visible(False)
 
@@ -119,18 +129,18 @@ if __name__ == '__main__':
                         color='lightgrey', alpha=0.5, linewidth=0.2)
         bin_store, cdf_store = get_cdf(service_latency_sf[0, :])
         line = ax_2.plot(
-            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=3, label=r'$k=0$')
+            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA $k=0$')
         for line_id in range(1, len(number_node)):
             bin_compute, cdf_compute = get_cdf(service_latency_cf[line_id, :])
             bin_compute_hbh, cdf_compute_us = get_cdf(
                 service_latency_cf_hbh[line_id, :])
             line1 = ax_2.plot(bin_compute, cdf_compute, color=colorlist[line_id], lw=1.2, ls='-',
-                              marker=markerlist[line_id], ms=3, label=r'$k=$ '+str(number_node[line_id]))
-            line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
-                              marker=markerlist[line_id], ms=3)
+                              marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA $k=$ '+str(number_node[line_id]))
+            # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
+            #                   marker=markerlist[line_id], ms=3)
         ax_2.set_xlabel(r'Service Latency ($s$)')
         ax_2.set_ylabel(r'Likelihood of occurrence')
-        ax_2.set_xticks(np.arange(5, 21, 3))
+        ax_2.set_xticks(np.arange(5, 11.1, 1))
         ax_2.set_yticks(np.arange(0, 1.1, 0.2))
 
         plt.legend(loc='lower right', ncol=1)

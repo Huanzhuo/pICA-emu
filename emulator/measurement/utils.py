@@ -28,6 +28,9 @@ def measure_read_csv_to_2dlist(filename):
     lines = f.readlines()
     return [line.split(',') for line in lines]
 
+def measure_write_table(filename,contents_list):
+    for contents in contents_list:
+        measure_write(filename,contents)
 
 def measure_read_cols_from_2dlist(_2dlist,_col_name=None,position=-1):
     if position == -1:

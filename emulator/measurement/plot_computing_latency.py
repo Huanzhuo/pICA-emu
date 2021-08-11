@@ -24,7 +24,7 @@ def get_conf_interval(index, data, conf_rate):
 
 
 if __name__ == '__main__':
-    number_node = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    number_node = [0, 1, 2, 3, 4, 5, 6, 7]
     conf_rate = 0.95
     number_test = 50
 
@@ -107,8 +107,8 @@ if __name__ == '__main__':
     # codes for plot figures
     with plt.style.context(['science', 'ieee']):
         fig_width = 6.5
-        barwidth = 0.3
-        # bardistance = barwidth * 1.2
+        barwidth = 0.2
+        bardistance = barwidth * 1
         colordict = {
             'compute_forward': '#0077BB',
             'store_forward': '#DDAA33',
@@ -157,6 +157,27 @@ if __name__ == '__main__':
         ax.yaxis.grid(True, linestyle='--', which='major',
                       color='lightgrey', alpha=0.5, linewidth=0.2)
         x_index = np.arange(len(number_node))
+        bar1 = ax.bar(x_index - bardistance, tc_server_cf_conf[:, 2], barwidth, yerr=tc_server_cf_conf[:, 2] - tc_server_cf_conf[:, 1],
+                      error_kw=dict(lw=1, capsize=1, capthick=1), fill=True, color=colordict['compute_forward'], edgecolor='#FFFFFF', ecolor='#555555', alpha=1, hatch='\\')
+        bar2 = ax.bar(x_index, tc_server_sf_conf[:, 2], barwidth, yerr=tc_server_sf_conf[:, 2] - tc_server_sf_conf[:, 1],
+                      error_kw=dict(lw=1, capsize=1, capthick=1), fill=True, color=colordict['store_forward'], edgecolor='#FFFFFF', ecolor='#555555', alpha=1, hatch='/')
+        bar3 = ax.bar(x_index + bardistance, tc_server_cf_hbh_conf[:, 2], barwidth, yerr=tc_server_cf_hbh_conf[:, 2] - tc_server_cf_hbh_conf[:, 1],
+                      error_kw=dict(lw=1, capsize=1, capthick=1), fill=True, color=colordict['store_forward_ia'], edgecolor='#FFFFFF', ecolor='#555555', alpha=1, hatch='//')
+        ax.set_xlabel(r'Number of nodes $k$')
+        ax.set_ylabel(r'Computing latency ($s$)')
+        # ax.set_xlim([-0.2, 4.2])
+        ax.set_yticks(np.arange(0, 7, 1))
+        ax.legend([bar1, bar2, bar3], ['pICA',
+                                       'FastICA', 'pICA hbh'], loc='upper right')
+        plt.xticks(range(len(number_node)), number_node)
+        plt.savefig('./emulator/measurement/plot/computing_latency_server_emu_bar.pdf',
+                    dpi=600, bbox_inches='tight')
+
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.yaxis.grid(True, linestyle='--', which='major',
+                      color='lightgrey', alpha=0.5, linewidth=0.2)
+        x_index = np.arange(len(number_node))
         line1 = ax.errorbar(
             x_index, tc_cf_conf[:, 2], color=colordict['compute_forward'], lw=1, ls='-', marker=markerdict['compute_forward'], ms=5)
         line1_fill = ax.fill_between(x_index, tc_cf_conf[:, 1],
@@ -177,4 +198,25 @@ if __name__ == '__main__':
                                           'FastICA', 'pICA hbh'], loc='upper right')
         plt.xticks(range(len(number_node)), number_node)
         plt.savefig('./emulator/measurement/plot/computing_latency_emu.pdf',
+                    dpi=600, bbox_inches='tight')
+
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.yaxis.grid(True, linestyle='--', which='major',
+                      color='lightgrey', alpha=0.5, linewidth=0.2)
+        x_index = np.arange(len(number_node))
+        bar1 = ax.bar(x_index - bardistance, tc_cf_conf[:, 2], barwidth, yerr=tc_cf_conf[:, 2] - tc_cf_conf[:, 1],
+                      error_kw=dict(lw=1, capsize=1, capthick=1), fill=True, color=colordict['compute_forward'], edgecolor='#FFFFFF', ecolor='#555555', alpha=1, hatch='\\')
+        bar2 = ax.bar(x_index, tc_sf_conf[:, 2], barwidth, yerr=tc_sf_conf[:, 2] - tc_sf_conf[:, 1],
+                      error_kw=dict(lw=1, capsize=1, capthick=1), fill=True, color=colordict['store_forward'], edgecolor='#FFFFFF', ecolor='#555555', alpha=1, hatch='/')
+        bar3 = ax.bar(x_index + bardistance, tc_cf_hbh_conf[:, 2], barwidth, yerr=tc_cf_hbh_conf[:, 2] - tc_cf_hbh_conf[:, 1],
+                      error_kw=dict(lw=1, capsize=1, capthick=1), fill=True, color=colordict['store_forward_ia'], edgecolor='#FFFFFF', ecolor='#555555', alpha=1, hatch='//')
+        ax.set_xlabel(r'Number of nodes $k$')
+        ax.set_ylabel(r'Computing latency ($s$)')
+        # ax.set_xlim([-0.2, 4.2])
+        ax.set_yticks(np.arange(0, 7, 1))
+        ax.legend([bar1, bar2, bar3], ['pICA',
+                                       'FastICA', 'pICA hbh'], loc='upper right')
+        plt.xticks(range(len(number_node)), number_node)
+        plt.savefig('./emulator/measurement/plot/computing_latency_emu_bar.pdf',
                     dpi=600, bbox_inches='tight')
