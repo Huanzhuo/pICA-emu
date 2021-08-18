@@ -79,19 +79,19 @@ if __name__ == '__main__':
             'blue': '#3340AD'
         }
         markerdict = {
-            'compute_forward': 'o',
-            'store_forward': 'v',
+            'compute_forward': 'v',
+            'store_forward': 'o',
             'store_forward_ia': 's'
         }
-        colorlist = ['#DDAA33', '#33BBEE', '#009988',
-                     '#6699CC', '#0077BB', '#33BBEE']
-        markerlist = ['s', 'o', 'v', 'p', 'x']
+        colorlist = ['#DDAA33', '#7ACFE5', '#3F9ABF',
+                     '#024B7A',  '#0077BB', '#009988']
+        markerlist = ['o', 'v', '^', '>', 'p', 's']
 
-        plt.rcParams.update({'font.size': 10})
+        plt.rcParams.update({'font.size': 11})
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.5))
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
         # ax = fig.add_subplot(1, 1, 1)
-        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 5])
+        spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 6])
         ax_1 = fig.add_subplot(spec[0])
         ax_1.yaxis.grid(True, linestyle='--', which='major',
                         color='lightgrey', alpha=0.5, linewidth=0.2)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                            capprops=dict(color='black'),
                            whiskerprops=dict(color='black'),
                            flierprops=dict(
-                               color=colorlist[0], markeredgecolor=colorlist[0]),
+                               color=colorlist[0], markeredgecolor=colorlist[0], ms=4),
                            meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
         for box_id in range(1, len(number_node)):
             box1 = ax_1.boxplot(service_latency_cf[box_id, :], positions=np.arange(1) - bardistance*box_id, vert=False, widths=barwidth,
@@ -113,7 +113,7 @@ if __name__ == '__main__':
                                 capprops=dict(color='black'),
                                 whiskerprops=dict(color='black'),
                                 flierprops=dict(
-                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id]),
+                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id], ms=4),
                                 meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
             # box2 = ax_1.boxplot(service_latency_cf_hbh[box_id, :], positions=np.arange(1) - bardistance*(box_id+len(number_node)-1), vert=False, widths=barwidth,
             #                     showfliers=False, showmeans=False,
@@ -121,7 +121,8 @@ if __name__ == '__main__':
             #                     medianprops=dict(color='black'),
             #                     meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[box_id]))
         ax_1.set_xticks(np.arange(5, 11.1, 1))
-        ax_1.axes.xaxis.set_visible(False)
+        ax_1.set_xlim([4.75, 11.25])
+        ax_1.axes.xaxis.set_visible(True)
         ax_1.axes.yaxis.set_visible(False)
 
         ax_2 = fig.add_subplot(spec[1])
@@ -138,9 +139,10 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA $k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=3)
-        ax_2.set_xlabel(r'Service Latency ($s$)')
+        ax_2.set_xlabel(r'Service latency $t_s$ ($s$)')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(5, 11.1, 1))
+        ax_2.set_xlim([4.75, 11.25])
         ax_2.set_yticks(np.arange(0, 1.1, 0.2))
 
         plt.legend(loc='lower right', ncol=1)

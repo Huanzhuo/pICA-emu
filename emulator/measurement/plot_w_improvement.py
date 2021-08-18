@@ -45,8 +45,8 @@ if __name__ == '__main__':
             'midblue': '#7ACFE5'
         }
         markerdict = {
-            '_cf': 'o',
-            '_sf': 'v',
+            '_cf': 'd',
+            '_sf': 'o',
             '_cf_hbh': 's'
         }
         legenddict = {
@@ -55,9 +55,9 @@ if __name__ == '__main__':
             '_cf_hbh': 'pICA hbh'
         }
 
-        plt.rcParams.update({'font.size': 10})
+        plt.rcParams.update({'font.size': 11})
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 2))
+        fig = plt.figure(figsize=(fig_width, fig_width / 2.5))
         spec = gridspec.GridSpec(
             ncols=len(node_number), nrows=2, height_ratios=[1, 1])
         i = 0
@@ -82,17 +82,15 @@ if __name__ == '__main__':
                 compute_accuracy_conf = get_conf_interval(
                     compute_accuracy[:, 0], compute_accuracy[:, 1:], conf_rate)
 
-                line_1 = ax_1.errorbar(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 2]/np.max(
-                    compute_accuracy_conf[:, 2])*100, color=colordict[mode_id], lw=1.2, ls='-', marker=markerdict[mode_id], ms=4, markerfacecolor='none', label=legenddict[mode_id])
-                line_1_fill = ax_1.fill_between(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 1]/np.max(
-                    compute_accuracy_conf[:, 1])*100, compute_accuracy_conf[:, 3]/np.max(compute_accuracy_conf[:, 3])*100, color=colordict[mode_id], alpha=0.2)
+                line_1 = ax_1.errorbar(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 2], color=colordict[mode_id], lw=1.2, ls='-', marker=markerdict[mode_id], ms=4, markerfacecolor='none', label=legenddict[mode_id])
+                line_1_fill = ax_1.fill_between(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 1], compute_accuracy_conf[:, 3], color=colordict[mode_id], alpha=0.2)
 
                 # ax_1.set_xlabel(r'Time ($ms$)')
                 ax_1.set_xticks(np.arange(0, 19, 3))
-                ax_1.set_ylabel(r'Accruracy improvement ($\%$)')
+                ax_1.set_ylabel(r'SDR ($dB$)')
                 # if i == 0:
-                #     ax_1.set_ylabel(r'Accruracy improvement ($\%$)')
-                ax_1.set_yticks(np.arange(0, 101, 20))
+                #     ax_1.set_ylabel(r'SDR ($dB$)')
+                ax_1.set_yticks(np.arange(0, 31, 5))
                 ax_1.legend(loc='lower right')
             j = i + len(node_number)
             for mode_id in ['_sf', '_cf']:
@@ -115,21 +113,19 @@ if __name__ == '__main__':
                 compute_accuracy_conf = get_conf_interval(
                     compute_accuracy[:, 0], compute_accuracy[:, 1:], conf_rate)
 
-                line_2 = ax_2.errorbar(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 2]/np.max(
-                    compute_accuracy_conf[:, 2])*100, color=colordict[mode_id], lw=1.2, ls='-', marker=markerdict[mode_id], ms=4, markerfacecolor='none', label=legenddict[mode_id])
-                line_2_fill = ax_2.fill_between(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 1]/np.max(
-                    compute_accuracy_conf[:, 1])*100, compute_accuracy_conf[:, 3]/np.max(compute_accuracy_conf[:, 3])*100, color=colordict[mode_id], alpha=0.2)
+                line_2 = ax_2.errorbar(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 2], color=colordict[mode_id], lw=1.2, ls='-', marker=markerdict[mode_id], ms=4, markerfacecolor='none', label=legenddict[mode_id])
+                line_2_fill = ax_2.fill_between(compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 1], compute_accuracy_conf[:, 3], color=colordict[mode_id], alpha=0.2)
 
                 ax_2.set_xlabel(r'Service latency $t_s$ ($s$), $k = ' +
                                 str(str(node_id)) + r'$')
                 ax_2.set_xticks(np.arange(0, 19, 3))
-                ax_2.set_ylabel(r'Accruracy improvement ($\%$)')
+                ax_2.set_ylabel(r'SDR ($dB$)')
                 # if i == 0:
                 #     ax_2.set_ylabel(r'Accruracy improvement ($\%$)')
-                ax_2.set_yticks(np.arange(0, 101, 20))
+                ax_2.set_yticks(np.arange(0, 31, 5))
                 ax_2.legend(loc='lower right')
             i = i + 1
         # plt.legend(loc='lower right')
-        fig.subplots_adjust(hspace=0.08, wspace=0.40)
+        fig.subplots_adjust(hspace=0.10, wspace=0.20)
         plt.savefig('./emulator/measurement/plot/w_improvement.pdf',
                     dpi=600, bbox_inches='tight')

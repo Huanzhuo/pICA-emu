@@ -12,6 +12,7 @@
     - [Option1: Install in a Vagrant managed VM (Highly Recommended)](#option1-install-in-a-vagrant-managed-vm-highly-recommended)
     - [Option2: Install on user's custom VM or directly on host OS (Ubuntu20.04)](#option2-install-on-users-custom-vm-or-directly-on-host-os-ubuntu2004)
   - [Run pICA in the Emulator](#run-pica-in-the-emulator)
+  - [Citation](#citation)
   - [About Us](#about-us)
   - [License](#license)
 
@@ -133,6 +134,24 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     # in the client terminal
     sudo python3 ./client.py cf data_id n_test
     ```
+
+
+## Citation
+
+If you like our repository, please cite our papers.
+
+    ``` 
+    @INPROCEEDINGS{Wu2112:Network,
+    AUTHOR="Huanzhuo Wu and Yunbin Shen and Xun Xiao and Artur Hecker and Frank H.P. Fitzek",
+    TITLE="{In-Network} Processing Acoustic Data for Anomaly Detection in Smart Factory",
+    BOOKTITLE="2021 IEEE Global Communications Conference: IoT and Sensor Networks (Globecom2021 IoTSN)",
+    ADDRESS="Madrid, Spain",
+    DAYS=6,
+    MONTH=dec,
+    YEAR=2021
+    }
+    ```
+    
 ## About Us
 
 We are researchers at the Deutsche Telekom Chair of Communication Networks (ComNets) at TU Dresden, Germany. Our focus is on in-network computing.
