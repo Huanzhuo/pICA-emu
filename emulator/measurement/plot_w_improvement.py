@@ -45,7 +45,7 @@ if __name__ == '__main__':
             'midblue': '#7ACFE5'
         }
         markerdict = {
-            '_cf': 'p',
+            '_cf': 'd',
             '_sf': 'o',
             '_cf_hbh': 's'
         }
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
         plt.rcParams.update({'font.size': 11})
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.8))
+        fig = plt.figure(figsize=(fig_width, fig_width / 2.5))
         spec = gridspec.GridSpec(
             ncols=len(node_number), nrows=2, height_ratios=[1, 1])
         i = 0
@@ -126,6 +126,6 @@ if __name__ == '__main__':
                 ax_2.legend(loc='lower right')
             i = i + 1
         # plt.legend(loc='lower right')
-        fig.subplots_adjust(hspace=0.08, wspace=0.20)
+        fig.subplots_adjust(hspace=0.10, wspace=0.20)
         plt.savefig('./emulator/measurement/plot/w_improvement.pdf',
                     dpi=600, bbox_inches='tight')

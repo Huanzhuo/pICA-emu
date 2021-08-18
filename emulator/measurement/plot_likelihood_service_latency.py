@@ -85,7 +85,7 @@ if __name__ == '__main__':
         }
         colorlist = ['#DDAA33', '#7ACFE5', '#3F9ABF',
                      '#024B7A',  '#0077BB', '#009988']
-        markerlist = ['o', 'v', '^', 'D', 'p', 's']
+        markerlist = ['o', 'v', '^', '>', 'p', 's']
 
         plt.rcParams.update({'font.size': 11})
 
@@ -121,7 +121,8 @@ if __name__ == '__main__':
             #                     medianprops=dict(color='black'),
             #                     meanprops=dict(markerfacecolor='black', markeredgecolor='black', markersize=3, marker=markerlist[box_id]))
         ax_1.set_xticks(np.arange(5, 11.1, 1))
-        ax_1.axes.xaxis.set_visible(False)
+        ax_1.set_xlim([4.75, 11.25])
+        ax_1.axes.xaxis.set_visible(True)
         ax_1.axes.yaxis.set_visible(False)
 
         ax_2 = fig.add_subplot(spec[1])
@@ -138,9 +139,10 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA $k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=3)
-        ax_2.set_xlabel(r'Service Latency ($s$)')
+        ax_2.set_xlabel(r'Service latency $t_s$ ($s$)')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(5, 11.1, 1))
+        ax_2.set_xlim([4.75, 11.25])
         ax_2.set_yticks(np.arange(0, 1.1, 0.2))
 
         plt.legend(loc='lower right', ncol=1)
