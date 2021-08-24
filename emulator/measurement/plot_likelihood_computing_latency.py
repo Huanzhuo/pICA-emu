@@ -161,7 +161,7 @@ if __name__ == '__main__':
                         color='lightgrey', alpha=0.5, linewidth=0.2)
         bin_store, cdf_store = get_cdf(computing_latency_sf[0, :])
         line = ax_2.plot(
-            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA $k=0$')
+            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'pICA $k=0$')
         for line_id in range(1, len(number_node)):
             bin_compute, cdf_compute = get_cdf(
                 computing_latency_cf[line_id, :])
@@ -171,7 +171,7 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA $k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA HbH $k=$ '+str(number_node[line_id]))
-        ax_2.set_xlabel(r'Computing loads $t_c$ of the network ($s$)')
+        ax_2.set_xlabel(r'Computing time $T_c$ of the network ($s$)')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(1, 8, 1))
         ax_2.set_xlim([0.75, 7.25])
@@ -222,7 +222,7 @@ if __name__ == '__main__':
                         color='lightgrey', alpha=0.5, linewidth=0.2)
         bin_store, cdf_store = get_cdf(computing_server_latency_sf[0, :])
         line = ax_2.plot(
-            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA $k=0$')
+            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'pICA $k=0$')
         for line_id in range(1, len(number_node)):
             bin_compute, cdf_compute = get_cdf(
                 computing_server_latency_cf[line_id, :])
@@ -232,7 +232,7 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA $k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=3, label=r'pICA HbH $k=$ '+str(number_node[line_id]))
-        ax_2.set_xlabel(r'Residual computing loads $t_c$ on RA ($s$)')
+        ax_2.set_xlabel(r'Residual computing loads $t_c$ ($s$) on RA')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(0, 8, 1))
         ax_2.set_xlim([-0.25, 7.25])

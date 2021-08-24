@@ -130,7 +130,7 @@ if __name__ == '__main__':
                         color='lightgrey', alpha=0.5, linewidth=0.2)
         bin_store, cdf_store = get_cdf(service_latency_sf[0, :])
         line = ax_2.plot(
-            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA $k=0$')
+            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'pICA $k=0$')
         for line_id in range(1, len(number_node)):
             bin_compute, cdf_compute = get_cdf(service_latency_cf[line_id, :])
             bin_compute_hbh, cdf_compute_us = get_cdf(
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA $k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=3)
-        ax_2.set_xlabel(r'Service latency $t_s$ ($s$)')
+        ax_2.set_xlabel(r'Service time $T_s$ ($s$)')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(5, 11.1, 1))
         ax_2.set_xlim([4.75, 11.25])
