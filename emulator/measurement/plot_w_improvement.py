@@ -51,9 +51,10 @@ if __name__ == '__main__':
         }
         legenddict = {
             '_sf': 'FastICA',
-            '_cf': 'Joint-pICA',
-            '_cf_hbh': 'Egoistic-pICA'
+            '_cf': r'pICA$+$',
+            '_cf_hbh': r'pICA$-$'
         }
+        subfig_id = ['a.', 'b.', 'c.', 'd.', 'e.', 'f.']
 
         plt.rcParams.update({'font.size': 11})
 
@@ -63,11 +64,11 @@ if __name__ == '__main__':
         i = 0
         for node_id in node_number:
             ax_1 = fig.add_subplot(spec[i])
+            ax_1.xaxis.grid(True, linestyle='--', which='major',
+                                color='lightgrey', alpha=0.5, linewidth=0.2)
             ax_1.yaxis.grid(True, linestyle='--', which='major',
                                 color='lightgrey', alpha=0.5, linewidth=0.2)
             for mode_id in ['_sf', '_cf_hbh']:
-                
-
                 path_compute_accuracy = './emulator/measurement/results_v4/' + \
                     str(node_id)+'s/pICA_accuracy'+mode_id+'.csv'
                 path_compute_timestamp = './emulator/measurement/results_v4/' + \
@@ -88,15 +89,20 @@ if __name__ == '__main__':
                 line_1_fill = ax_1.fill_between(
                     compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 1], compute_accuracy_conf[:, 3], color=colordict[mode_id], alpha=0.2)
 
-            ax_1.set_xlabel(r'$' + str(i*2+1) + r'$) Service time $T_s$ ($s$) with $k = ' +
+            # ax_1.set_xlabel(r'$' + str(i*2+1) + r'$) Service time $T_s$ ($s$) with $k = ' +
+            #                 str(str(node_id)) + r'$')
+            ax_1.set_xlabel(subfig_id[i] + r' Service time $T_s$ ($s$), $k = ' +
                             str(str(node_id)) + r'$')
-            ax_1.set_xticks(np.arange(0, 19, 3))
+            # ax_1.xaxis.set_ticklabels([])
+            ax_1.set_xticks(np.arange(0, 17, 4))
             ax_1.set_ylabel(r'SDR ($dB$)')
-            ax_1.set_yticks(np.arange(0, 31, 5))
+            ax_1.set_yticks(np.arange(0, 31, 10))
             ax_1.legend(loc='lower right')
 
             j = i + len(node_number)
             ax_2 = fig.add_subplot(spec[j])
+            ax_2.xaxis.grid(True, linestyle='--', which='major',
+                                color='lightgrey', alpha=0.5, linewidth=0.2)
             ax_2.yaxis.grid(True, linestyle='--', which='major',
                                 color='lightgrey', alpha=0.5, linewidth=0.2)
             for mode_id in ['_sf', '_cf']:
@@ -120,11 +126,13 @@ if __name__ == '__main__':
                 line_2_fill = ax_2.fill_between(
                     compute_timestamp_conf[:, 2], compute_accuracy_conf[:, 1], compute_accuracy_conf[:, 3], color=colordict[mode_id], alpha=0.2)
 
-            ax_2.set_xlabel(r'$' + str(i*2+2) + r'$) Service time $T_s$ ($s$) with $k = ' +
+            # ax_2.set_xlabel(r'$' + str(i*2+2) + r'$) Service time $T_s$ ($s$) with $k = ' +
+            #                 str(str(node_id)) + r'$')
+            ax_2.set_xlabel(subfig_id[j] + r' Service time $T_s$ ($s$), $k = ' +
                             str(str(node_id)) + r'$')
-            ax_2.set_xticks(np.arange(0, 19, 3))
+            ax_2.set_xticks(np.arange(0, 17, 4))
             ax_2.set_ylabel(r'SDR ($dB$)')
-            ax_2.set_yticks(np.arange(0, 31, 5))
+            ax_2.set_yticks(np.arange(0, 31, 10))
             ax_2.legend(loc='lower right')
             i = i + 1
         fig.subplots_adjust(hspace=0.30, wspace=0.30)
