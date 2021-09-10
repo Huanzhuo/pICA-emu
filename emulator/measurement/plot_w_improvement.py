@@ -65,9 +65,9 @@ if __name__ == '__main__':
         for node_id in node_number:
             ax_1 = fig.add_subplot(spec[i])
             ax_1.xaxis.grid(True, linestyle='--', which='major',
-                                color='lightgrey', alpha=0.5, linewidth=0.2)
+                                color='lightgrey', alpha=1, linewidth=0.2)
             ax_1.yaxis.grid(True, linestyle='--', which='major',
-                                color='lightgrey', alpha=0.5, linewidth=0.2)
+                                color='lightgrey', alpha=1, linewidth=0.2)
             for mode_id in ['_sf', '_cf_hbh']:
                 path_compute_accuracy = './emulator/measurement/results_v4/' + \
                     str(node_id)+'s/pICA_accuracy'+mode_id+'.csv'
@@ -102,9 +102,9 @@ if __name__ == '__main__':
             j = i + len(node_number)
             ax_2 = fig.add_subplot(spec[j])
             ax_2.xaxis.grid(True, linestyle='--', which='major',
-                                color='lightgrey', alpha=0.5, linewidth=0.2)
+                                color='lightgrey', alpha=1, linewidth=0.2)
             ax_2.yaxis.grid(True, linestyle='--', which='major',
-                                color='lightgrey', alpha=0.5, linewidth=0.2)
+                                color='lightgrey', alpha=1, linewidth=0.2)
             for mode_id in ['_sf', '_cf']:
                 path_compute_accuracy = './emulator/measurement/results_v4/' + \
                     str(node_id)+'s/pICA_accuracy'+mode_id+'.csv'

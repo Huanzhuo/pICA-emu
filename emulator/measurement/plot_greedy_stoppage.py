@@ -36,11 +36,11 @@ if __name__ == '__main__':
                         [5, 230, 68, 298],
                         [6, 256, 89, 345],
                         [7, 273, 96, 369]])
-    stoppage_k = np.array([ [50, 50, 50, 43, 37, 26, 14,  0],
-                            [0,  0,  0,  7,  13, 24, 32, 24]])
+    stoppage_k = np.array([[50, 50, 50, 43, 37, 26, 14,  0],
+                           [0,  0,  0,  7,  13, 24, 32, 24]])
     with plt.style.context(['science', 'ieee']):
         fig_width = 6.5
-        barwidth = 0.3
+        barwidth = 0.25
         bardistance = barwidth * 0.6
         colordict = {
             'compute_forward': '#0077BB',
@@ -60,8 +60,10 @@ if __name__ == '__main__':
 
         fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
         ax = fig.add_subplot(1, 1, 1)
-        ax.yaxis.grid(True, linestyle='--', which='major',
-                      color='lightgrey', alpha=0.5, linewidth=0.2)
+        ax.xaxis.grid(True, linestyle='--', which='major',
+                      color='lightgrey', alpha=1, linewidth=0.2)
+        ax.yaxis.grid(True, linestyle='--', which='both',
+                      color='lightgrey', alpha=1, linewidth=0.2)
         # ax_twin = ax.twinx()
         x_index = stoppage[:, 0]
         bar1 = ax.bar(x_index-bardistance, stoppage[:, 1], barwidth, fill=True,
@@ -71,7 +73,8 @@ if __name__ == '__main__':
         # line, = ax_twin.plot(x_index, stoppage[:, 1]/stoppage[:, 3]*100, color=colordict['compute_forward'],
         #                      lw=1.2, ls='-', marker=markerdict['compute_forward'], ms=4, markerfacecolor='none', label='Greedy Stoppage')
         for i in x_index:
-            ax.text(i-bardistance*3, max(stoppage[i, 1], stoppage[i, 2])+5, r'$'+str(round(stoppage[i, 1]/stoppage[i, 3], 4)*100)+r'\%$', rotation=25)
+            ax.text(i-bardistance*3, max(stoppage[i, 1], stoppage[i, 2])+5, r'$'+str(
+                round(stoppage[i, 1]/stoppage[i, 3], 4)*100)+r'\%$', rotation=25)
             # ax.text(i+bardistance*0, stoppage[i, 2]+5, r'$'+str(round(stoppage[i, 2]/stoppage[i, 3], 3)*100)+r'\%$', rotation=45)
         ax.set_xlabel(r'Number of nodes $k$')
         ax.set_ylabel(r'Number of triggered stoppage')
@@ -93,19 +96,21 @@ if __name__ == '__main__':
         fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
         ax = fig.add_subplot(1, 1, 1)
         ax.xaxis.grid(True, linestyle='--', which='major',
-                      color='lightgrey', alpha=0.5, linewidth=0.2)
+                      color='lightgrey', alpha=1, linewidth=0.2)
         ax.yaxis.grid(True, linestyle='--', which='major',
-                      color='lightgrey', alpha=0.5, linewidth=0.2)
+                      color='lightgrey', alpha=1, linewidth=0.2)
         x_index = np.arange(0, len(stoppage_k[0, :]))
         bar1 = ax.bar(x_index, stoppage_k[0, :], barwidth, fill=True,
-                      color=colordict['compute_forward'], edgecolor='#000000', ecolor='#555555', hatch='\\', label='Greedy Stoppage')
-        bar2 = ax.bar(x_index, stoppage_k[1, :], barwidth, bottom = stoppage_k[0, :], fill=True,
-                      color=colordict['store_forward'], edgecolor='#000000', ecolor='#555555', hatch='//', label='Normal Stoppage')
+                      color=colordict['compute_forward'], edgecolor='#000000', ecolor='#555555', lw=0.8, hatch='\\', label='Greedy Stoppage')
+        bar2 = ax.bar(x_index, stoppage_k[1, :], barwidth, bottom=stoppage_k[0, :], fill=True,
+                      color=colordict['store_forward'], edgecolor='#000000', ecolor='#555555', lw=0.8, hatch='//', label='Normal Stoppage')
         for i in x_index:
-            if stoppage_k[0, i] !=0:
-                ax.text(i-bardistance*2, stoppage_k[0, i]/2-5, r'$'+str("{:.2f}".format(stoppage_k[0, i]/50*100))+r'\%$', rotation=90)
-            if stoppage_k[1, i] !=0:
-                ax.text(i-bardistance*2, stoppage_k[1, i]/2+stoppage_k[0, i]-5, r'$'+str("{:.2f}".format(stoppage_k[1, i]/50*100))+r'\%$', rotation=90)
+            if stoppage_k[0, i] != 0:
+                ax.text(i-bardistance*2.5, stoppage_k[0, i]/2-3, r'$'+str(
+                    "{:.0f}".format(stoppage_k[0, i]/50*100))+r'\%$', rotation=90)
+            if stoppage_k[1, i] != 0:
+                ax.text(i-bardistance*2.5, stoppage_k[1, i]/2+stoppage_k[0, i]-2, r'$'+str(
+                    "{:.0f}".format(stoppage_k[1, i]/50*100))+r'\%$', rotation=90)
         ax.set_xlabel(r'Index of network nodes')
         ax.set_ylabel(r'Number of triggered stoppage')
         ax.set_xlim([-0.7, 7.5])

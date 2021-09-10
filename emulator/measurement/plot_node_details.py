@@ -109,15 +109,15 @@ if __name__ == '__main__':
         fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
         ax = fig.add_subplot(1, 1, 1)
         ax.xaxis.grid(True, linestyle='--', which='major',
-                      color='lightgrey', alpha=0.5, linewidth=0.2)
+                      color='lightgrey', alpha=1, linewidth=0.2)
         ax.yaxis.grid(True, linestyle='--', which='major',
-                      color='lightgrey', alpha=0.5, linewidth=0.2)
+                      color='lightgrey', alpha=1, linewidth=0.2)
         x_index = np.arange(1, nodes + 2)
         for i in range(1, node_lens.shape[1]-1):
-            sct1 = ax.scatter(x_index-barwidth, node_lens[:, i], color=colordict['lightblue'], marker='X', s=40, facecolors='none')
+            sct1 = ax.scatter(x_index-barwidth, node_lens[:, i], color=colordict['lightblue'], marker='^', s=40, facecolors='none')
             sct2 = ax.scatter(x_index+barwidth, node_time[:, i], color=colordict['midblue'], marker='o', s=35, facecolors='none')
             for j in np.arange(node_lens.shape[0]):
-                ax.annotate('', xytext=(x_index[j]-barwidth, node_lens[j, i]), xy=(x_index[j]+barwidth, node_time[j, i]), arrowprops=dict(arrowstyle="->"))
+                ax.annotate('', xytext=(x_index[j]-barwidth, node_lens[j, i]), xy=(x_index[j]+barwidth, node_time[j, i]), arrowprops=dict(arrowstyle="-", alpha=0.5, linewidth=0.2))
         line1 = ax.errorbar(
             x_index, node_accuracy_conf[:, 2], color=colordict['darkblue'], marker='s', ms=6, markerfacecolor='none')
         ax.fill_between(
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         # ax.legend([box1["boxes"][0], sct2, line1], [
         #     r'Subset data size $l_k$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1)
         ax.legend([sct1, sct2, line1], [
-            r'Subset data size $l_k$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1)
+            r'Cached data size $\beta_k$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1)
         plt.xticks(x_index, ['1', '2', '3', '4', '5', '6', '7', 'RA'])
         plt.savefig('./emulator/measurement/plot/nodes_performance_details.pdf',
                     dpi=600, bbox_inches='tight')

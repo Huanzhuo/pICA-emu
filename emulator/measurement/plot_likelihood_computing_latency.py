@@ -191,9 +191,9 @@ if __name__ == '__main__':
         spec = gridspec.GridSpec(ncols=1, nrows=2, height_ratios=[1, 6])
         ax_1 = fig.add_subplot(spec[0])
         ax_1.xaxis.grid(True, linestyle='--', which='major',
-                        color='lightgrey', alpha=0.5, linewidth=0.2)
+                        color='lightgrey', alpha=1, linewidth=0.2)
         ax_1.yaxis.grid(True, linestyle='--', which='major',
-                        color='lightgrey', alpha=0.5, linewidth=0.2)
+                        color='lightgrey', alpha=1, linewidth=0.2)
         box = ax_1.boxplot(computing_server_latency_sf[0, :], positions=np.arange(1), vert=False, widths=barwidth, showfliers=True, showmeans=False, patch_artist=True,
                            boxprops=dict(
                                color='black', facecolor=colorlist[0], lw=1),
@@ -201,7 +201,7 @@ if __name__ == '__main__':
                            capprops=dict(color='black'),
                            whiskerprops=dict(color='black'),
                            flierprops=dict(
-                               color=colorlist[0], markeredgecolor=colorlist[0], ms=4),
+                               color=colorlist[0], markeredgecolor=colorlist[0], marker=markerlist[0], ms=4),
                            meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
         for box_id in range(1, len(number_node)):
             box1 = ax_1.boxplot(computing_server_latency_cf[box_id, :], positions=np.arange(1) - bardistance*box_id, vert=False, widths=barwidth, showfliers=True, showmeans=False, patch_artist=True,
@@ -211,7 +211,7 @@ if __name__ == '__main__':
                                 capprops=dict(color='black'),
                                 whiskerprops=dict(color='black'),
                                 flierprops=dict(
-                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id], ms=4),
+                                    color=colorlist[box_id], markeredgecolor=colorlist[box_id], marker=markerlist[box_id], ms=4),
                                 meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
             # box2 = ax_1.boxplot(computing_server_latency_cf_hbh[box_id, :], positions=np.arange(1) - bardistance*(box_id+len(number_node)-1), vert=False, widths=barwidth,
             #                     showfliers=False, showmeans=False,
@@ -225,9 +225,9 @@ if __name__ == '__main__':
 
         ax_2 = fig.add_subplot(spec[1])
         ax_2.xaxis.grid(True, linestyle='--', which='major',
-                        color='lightgrey', alpha=0.5, linewidth=0.2)
+                        color='lightgrey', alpha=1, linewidth=0.2)
         ax_2.yaxis.grid(True, linestyle='--', which='major',
-                        color='lightgrey', alpha=0.5, linewidth=0.2)
+                        color='lightgrey', alpha=1, linewidth=0.2)
         bin_store, cdf_store = get_cdf(computing_server_latency_sf[0, :])
         line = ax_2.plot(
             bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA')
