@@ -175,13 +175,13 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA$+, k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA HbH $k=$ '+str(number_node[line_id]))
-        ax_2.set_xlabel(r'Computing time $T_c$ of the network ($s$)')
+        ax_2.set_xlabel(r'Computing time $T_c$ of the network [$s$]')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(1, 8, 1))
         ax_2.set_xlim([0.75, 7.25])
         ax_2.set_yticks(np.arange(0, 1.1, 0.2))
 
-        plt.legend(loc='lower right', ncol=1)
+        plt.legend(loc='lower right', ncol=1, frameon=True)
         fig.subplots_adjust(hspace=0.02)
         plt.savefig('./emulator/measurement/plot/computing_likelihood.pdf',
                     dpi=600, bbox_inches='tight')
@@ -240,13 +240,13 @@ if __name__ == '__main__':
                               marker=markerlist[line_id], ms=4, markerfacecolor='none', label=r'pICA$+, k=$ '+str(number_node[line_id]))
             # line1 = ax_2.plot(bin_compute_hbh, cdf_compute_us, color=colorlist[line_id], lw=1.2, ls=':',
             #                   marker=markerlist[line_id], ms=3, label=r'pICA HbH $k=$ '+str(number_node[line_id]))
-        ax_2.set_xlabel(r'Residual computing loads $t_c$ ($s$) on RA')
+        ax_2.set_xlabel(r'Residual computing loads $t_c^{RA}$ on RA [$s$]')
         ax_2.set_ylabel(r'Likelihood of occurrence')
         ax_2.set_xticks(np.arange(0, 8, 1))
         ax_2.set_xlim([-0.25, 7.25])
         ax_2.set_yticks(np.arange(0, 1.1, 0.2))
 
-        plt.legend(loc='lower right', ncol=1)
+        plt.legend(loc='lower right', ncol=1, frameon=True)
         fig.subplots_adjust(hspace=0.02)
         plt.savefig('./emulator/measurement/plot/computing_server_likelihood.pdf',
                     dpi=600, bbox_inches='tight')

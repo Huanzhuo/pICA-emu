@@ -95,9 +95,9 @@ if __name__ == '__main__':
         }
         colorlist = ['r', 'b', 'y', 'g', 'm', 'c', 'k', 'gold']
 
-        plt.rcParams.update({'font.size': 11})
+        plt.rcParams.update({'font.size': 12})
 
-        fig = plt.figure(figsize=(fig_width, fig_width / 1.618))
+        fig = plt.figure(figsize=(fig_width, fig_width / 1.45))
         ax = fig.add_subplot(1, 1, 1)
         ax.xaxis.grid(True, linestyle='--', which='major',
                       color='lightgrey', alpha=1, linewidth=0.2)
@@ -144,7 +144,7 @@ if __name__ == '__main__':
             # ax.text(i-0.2, max(element[1:])*1.2, r'$'+str(len(element[1:]))+r'$', rotation=0)
             i += 1
         ax.set_xlabel(r'Size $\beta_k$ of cached data ${}_{\beta_k}X$ in percentage')
-        ax.set_ylabel(r'Time of unit iteration ($ms$)')
+        ax.set_ylabel(r'Time of unit iteration [$ms$]')
         ax_twin.set_ylabel(r'Number of unit iteration')
         # ax.set_xticks(np.arange(0, 9, 4))
         # ax.set_xlim([-0.2, 4.2])
@@ -158,7 +158,7 @@ if __name__ == '__main__':
         ax_twin.set_yscale('log')
         # ax.legend([box_1["boxes"][0], box_2["boxes"][0]], ['Time', 'Number'], loc='upper left', ncol = 2)
         ax.legend([sct_1, sct_2], ['Time of unit iteration', 'Number of unit iteration'],
-                  loc='upper left', ncol=1)
+                  loc='upper left', ncol=1, frameon=True)
         # plt.xticks(np.arange(8), lk[0, :]/max(lk[0, :])*100)
         plt.xticks(np.arange(8), ['0.8\%', '1.6\%', '3.2\%',
                    '6.4\%', '12.8\%', '25.6\%', '51.2\%', '100\%'])

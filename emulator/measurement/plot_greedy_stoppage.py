@@ -89,7 +89,7 @@ if __name__ == '__main__':
         # ax.legend([line1, line2, line3], ['pICA',
         #                                   'FastICA', 'pICA hbh'], loc='upper right')
         # plt.xticks(range(len(number_node)), number_node)
-        ax.legend(handles=[bar1, bar2], loc='upper left')
+        ax.legend(handles=[bar1, bar2], loc='upper left', frameon=True)
         plt.savefig('./emulator/measurement/plot/greedy_stoppage.pdf',
                     dpi=600, bbox_inches='tight')
 
@@ -99,11 +99,12 @@ if __name__ == '__main__':
                       color='lightgrey', alpha=1, linewidth=0.2)
         ax.yaxis.grid(True, linestyle='--', which='major',
                       color='lightgrey', alpha=1, linewidth=0.2)
+        ax.grid(zorder=0)
         x_index = np.arange(0, len(stoppage_k[0, :]))
         bar1 = ax.bar(x_index, stoppage_k[0, :], barwidth, fill=True,
-                      color=colordict['compute_forward'], edgecolor='#000000', ecolor='#555555', lw=0.8, hatch='\\', label='Greedy Stoppage')
+                      color=colordict['compute_forward'], edgecolor='#000000', ecolor='#555555', lw=0.8, hatch='\\', label='Greedy Stoppage', zorder=3)
         bar2 = ax.bar(x_index, stoppage_k[1, :], barwidth, bottom=stoppage_k[0, :], fill=True,
-                      color=colordict['store_forward'], edgecolor='#000000', ecolor='#555555', lw=0.8, hatch='//', label='Normal Stoppage')
+                      color=colordict['store_forward'], edgecolor='#000000', ecolor='#555555', lw=0.8, hatch='//', label='Normal Stoppage', zorder=3)
         for i in x_index:
             if stoppage_k[0, i] != 0:
                 ax.text(i-bardistance*2.5, stoppage_k[0, i]/2-3, r'$'+str(
@@ -118,6 +119,6 @@ if __name__ == '__main__':
         ax.set_xticks(range(len(number_node)))
         ax.set_yticks(np.arange(0, 61, 10))
         plt.xticks(x_index, ['1', '2', '3', '4', '5', '6', '7', 'RA'])
-        ax.legend(handles=[bar1, bar2], loc='upper right')
+        ax.legend(handles=[bar1, bar2], loc='upper right', frameon=True)
         plt.savefig('./emulator/measurement/plot/greedy_stoppage_7.pdf',
                     dpi=600, bbox_inches='tight')

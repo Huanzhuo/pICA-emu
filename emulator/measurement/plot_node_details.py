@@ -141,12 +141,12 @@ if __name__ == '__main__':
         #     color=colordict['midblue'], markeredgecolor=colordict['midblue'], ms=4),
         #     meanprops=dict(markerfacecolor='black', markeredgecolor='black'))
         ax.set_xlabel(r'Index of network nodes')
-        ax.set_ylabel(r'Percent in total cost ($\%$)')
+        ax.set_ylabel(r'Percentage in total cost [$\%$]')
         # ax.set_yticks(np.arange(0, 101, 20))
         # ax.legend([box1["boxes"][0], sct2, line1], [
         #     r'Subset data size $l_k$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1)
         ax.legend([sct1, sct2, line1], [
-            r'Cached data size $\beta_k$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1)
+            r'Cached data size $\beta_k$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1, frameon=True)
         plt.xticks(x_index, ['1', '2', '3', '4', '5', '6', '7', 'RA'])
         plt.savefig('./emulator/measurement/plot/nodes_performance_details.pdf',
                     dpi=600, bbox_inches='tight')
@@ -186,10 +186,10 @@ if __name__ == '__main__':
         #                  separation_accuracy[-1]*100, color=colordict['midblue'], lw=1.2, ls='-.', marker='p', ms=4, markerfacecolor='none')
 
         ax.set_xlabel(r'Index of network nodes')
-        ax.set_ylabel(r'Percent in total cost ($\%$)')
+        ax.set_ylabel(r'Percentage in total cost [$\%$]')
         # ax.set_yticks(np.arange(0, 101, 20))
         ax.legend([sct1, sct2, line1], [
-            r'Subset data size $lX$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1)
+            r'Subset data size $lX$', r'Computing time $t_c$', r'Separation precision SDR'], loc='upper left', ncol=1, frameon=True)
         plt.xticks(x_index, ['1', '2', '3', '4', '5', '6', '7', 'RA'])
         # plt.savefig('./emulator/measurement/plot/nodes_performance_details.pdf',
         #             dpi=600, bbox_inches='tight')
@@ -216,7 +216,7 @@ if __name__ == '__main__':
         # ax_2.set_xticks(range(len(number_node)))
         ax_2.set_yticks(np.arange(0, 61, 10))
         plt.xticks(x_index, ['1', '2', '3', '4', '5', '6', '7', 'RA'])
-        ax_2.legend(handles=[bar1, bar2], loc='upper right')
+        ax_2.legend(handles=[bar1, bar2], loc='upper right', frameon=True)
         plt.savefig('./emulator/measurement/plot/node_details_greedy_stoppage.pdf',
                     dpi=600, bbox_inches='tight')
 

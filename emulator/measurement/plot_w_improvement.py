@@ -91,13 +91,13 @@ if __name__ == '__main__':
 
             # ax_1.set_xlabel(r'$' + str(i*2+1) + r'$) Service time $T_s$ ($s$) with $k = ' +
             #                 str(str(node_id)) + r'$')
-            ax_1.set_xlabel(subfig_id[i] + r' Service time $T_s$ ($s$), $k = ' +
+            ax_1.set_xlabel(subfig_id[i] + r' Service time $T_s$ [$s$], $k = ' +
                             str(str(node_id)) + r'$')
             # ax_1.xaxis.set_ticklabels([])
             ax_1.set_xticks(np.arange(0, 17, 4))
-            ax_1.set_ylabel(r'SDR ($dB$)')
+            ax_1.set_ylabel(r'SDR [$dB$]')
             ax_1.set_yticks(np.arange(0, 31, 10))
-            ax_1.legend(loc='lower right')
+            ax_1.legend(loc='lower right', frameon=True)
 
             j = i + len(node_number)
             ax_2 = fig.add_subplot(spec[j])
@@ -128,12 +128,12 @@ if __name__ == '__main__':
 
             # ax_2.set_xlabel(r'$' + str(i*2+2) + r'$) Service time $T_s$ ($s$) with $k = ' +
             #                 str(str(node_id)) + r'$')
-            ax_2.set_xlabel(subfig_id[j] + r' Service time $T_s$ ($s$), $k = ' +
+            ax_2.set_xlabel(subfig_id[j] + r' Service time $T_s$ [$s$], $k = ' +
                             str(str(node_id)) + r'$')
             ax_2.set_xticks(np.arange(0, 17, 4))
-            ax_2.set_ylabel(r'SDR ($dB$)')
+            ax_2.set_ylabel(r'SDR [$dB$]')
             ax_2.set_yticks(np.arange(0, 31, 10))
-            ax_2.legend(loc='lower right')
+            ax_2.legend(loc='lower right', frameon=True)
             i = i + 1
         fig.subplots_adjust(hspace=0.30, wspace=0.30)
         plt.savefig('./emulator/measurement/plot/w_improvement.pdf',
