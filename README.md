@@ -20,6 +20,7 @@
 ## Description
 
 This application emulate the progressive ICA in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
+A pICA demonstrator can be accessed on [pICA-Demo](https://huanzhuo.github.io/pICA-demo/).
 
 ## Requirements
 
@@ -89,8 +90,14 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     cd ~/pICA-emu/emu-installer || exit
     bash ./install.sh
     ```
+2. Run test to make sure the `ComNetsEmu` is installed correctly (optional).
+    ```bash
+    cd ~/comnetsemu
+    sudo make test
+    ```
+    Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
 
-2. Install the docker image for pICA.
+<!-- 2. Install the docker image for pICA.
     ```bash
     cd ~/pICA-emu || exit
     sudo bash ./build_docker_images.sh
@@ -101,7 +108,7 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     cd ~/pICA-emu/emulator
     sudo python3 ./topo.py
     ```
-    Then, the next steps are the same as below
+    Then, the next steps are the same as below -->
 
 ## Run pICA in the Emulator
 
