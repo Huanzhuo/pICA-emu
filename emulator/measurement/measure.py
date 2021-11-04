@@ -10,9 +10,9 @@ def measure_write(filename,contents):
     except Exception:
         data = ''
     data = data + ','.join(map(str,contents)) + ',\n'
-    with open("measurement/"+filename+".csv",'w') as f:
-        f.write(data)
-    f.close()
+    # with open("measurement/"+filename+".csv",'w') as f:
+    #     f.write(data)
+    # f.close()
 
 def measure_write_table(filename,contents_list):
     for contents in contents_list:
