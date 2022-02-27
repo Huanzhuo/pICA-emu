@@ -165,7 +165,7 @@ if __name__ == '__main__':
                         color='lightgrey', alpha=0.5, linewidth=0.2)
         bin_store, cdf_store = get_cdf(computing_latency_sf[0, :])
         line = ax_2.plot(
-            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA')
+            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'cICA')
         for line_id in range(1, len(number_node)):
             bin_compute, cdf_compute = get_cdf(
                 computing_latency_cf[line_id, :])
@@ -230,7 +230,7 @@ if __name__ == '__main__':
                         color='lightgrey', alpha=1, linewidth=0.2)
         bin_store, cdf_store = get_cdf(computing_server_latency_sf[0, :])
         line = ax_2.plot(
-            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'FastICA')
+            bin_store, cdf_store, color=colorlist[0], lw=1.2, ls='-.', marker=markerlist[0], ms=4, markerfacecolor='none', label=r'cICA')
         for line_id in range(1, len(number_node)):
             bin_compute, cdf_compute = get_cdf(
                 computing_server_latency_cf[line_id, :])
