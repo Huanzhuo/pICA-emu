@@ -20,7 +20,7 @@
 
 ## 1.2. Description
 
-This application emulate the Progressice Independent Component Analysis (pICA) in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
+This application emulate the Progressive Independent Component Analysis (pICA) in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
 A pICA demonstrator can be accessed on [pICA-Demo](https://huanzhuo.github.io/pICA-demo/).
 
 ## 1.3. Requirements
