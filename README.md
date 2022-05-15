@@ -1,10 +1,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# 1. Progressice Independent Component Analysis (pICA) Emulator
+# 1. pICA Emulator
 ![](image/logo.png)
 
 ## 1.1. Table of Contents
-- [1. Progressice Independent Component Analysis (pICA) Emulator](#1-progressice-independent-component-analysis-pica-emulator)
+- [1. pICA Emulator](#1-pica-emulator)
   - [1.1. Table of Contents](#11-table-of-contents)
   - [1.2. Description](#12-description)
   - [1.3. Requirements](#13-requirements)
@@ -20,7 +20,7 @@
 
 ## 1.2. Description
 
-This application emulate the progressive ICA in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
+This application emulate the Progressice Independent Component Analysis (pICA) in the network, it is **based on the [comnetsemu](https://git.comnets.net/public-repo/comnetsemu)**.
 A pICA demonstrator can be accessed on [pICA-Demo](https://huanzhuo.github.io/pICA-demo/).
 
 ## 1.3. Requirements
