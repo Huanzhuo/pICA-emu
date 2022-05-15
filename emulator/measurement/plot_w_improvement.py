@@ -50,7 +50,7 @@ if __name__ == '__main__':
             '_cf_hbh': 's'
         }
         legenddict = {
-            '_sf': 'FastICA',
+            '_sf': 'cICA',
             '_cf': r'pICA$+$',
             '_cf_hbh': r'pICA$-$'
         }
@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
             # ax_1.set_xlabel(r'$' + str(i*2+1) + r'$) Service time $T_s$ ($s$) with $k = ' +
             #                 str(str(node_id)) + r'$')
-            ax_1.set_xlabel(subfig_id[i] + r' Service time $T_s$ [$s$], $k = ' +
+            ax_1.set_xlabel(subfig_id[i] + r' Total separation time $T_s$ [$s$], $k = ' +
                             str(str(node_id)) + r'$')
             # ax_1.xaxis.set_ticklabels([])
             ax_1.set_xticks(np.arange(0, 17, 4))
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
             # ax_2.set_xlabel(r'$' + str(i*2+2) + r'$) Service time $T_s$ ($s$) with $k = ' +
             #                 str(str(node_id)) + r'$')
-            ax_2.set_xlabel(subfig_id[j] + r' Service time $T_s$ [$s$], $k = ' +
+            ax_2.set_xlabel(subfig_id[j] + r' Total separation time $T_s$ [$s$], $k = ' +
                             str(str(node_id)) + r'$')
             ax_2.set_xticks(np.arange(0, 17, 4))
             ax_2.set_ylabel(r'SDR [$dB$]')
