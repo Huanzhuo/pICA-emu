@@ -149,13 +149,14 @@ If you like our repository, please cite our papers.
 
     ``` 
     @Article{wu2022picaextension,
-    author  = {Huanzhuo Wu and Yunbin Shen and Xun Xiao and Giang T. Nguyen and Artur Hecker and Frank H. P. Fitzek},
-    date    = {2022},
-    title   = {Accelerating Industrial IoT Acoustic Data Separation with In-Network Computing},
-    note    = {(accepted for publication, 2022)},
-    pages   = {1--16},
-    journal = {IEEE Internet of Things Journal},
-    }
+        author  = {Wu, Huanzhuo and Shen, Yunbin and Xiao, Xun and Nguyen, Giang T. and Hecker, Artur and Fitzek, Frank H.-P.},
+        title   = {Accelerating Industrial IoT Acoustic Data Separation with In-Network Computing},
+        doi     = {10.1109/JIOT.2022.3176974},
+        pages   = {1--15},
+        groups  = {my_paper},
+        journal = {IEEE Internet of Things Journal},
+        year    = {2022},
+        }
     ```
     
 ## 1.8. About Us
