@@ -57,7 +57,7 @@ if __name__ == "__main__":
     dataset_id = n_start
 
     # Set input data S, A, X, W_0
-    fr = open('MIMII/saxsNew.pkl', 'rb')
+    fr = open('MIMII/saxs10.pkl', 'rb')
     saxs = pickle.load(fr)
     ss, aa, xx = saxs
     fr.close()
