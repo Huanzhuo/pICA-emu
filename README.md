@@ -98,24 +98,16 @@ Please run follow steps to setup the emulator. Assume the source directory of `p
     ```
     Only run following steps when all tests passed without any errors. Otherwise, please create issues on [Github](https://github.com/stevelorenz/comnetsemu/issues) from Zuo Xiang.
 
-<!-- 2. Install the docker image for pICA.
-    ```bash
-    cd ~/pICA-emu || exit
-    sudo bash ./build_docker_images.sh
-    ```
-
-3. Run the topology in the folder ```~/pICA-emu/emulator```:
-    ```bash
-    cd ~/pICA-emu/emulator
-    sudo python3 ./topo.py
-    ```
-    Then, the next steps are the same as below -->
-
 ## 1.5. Install docker image of pICA
 1. Build the docker image of pICA.
     ```bash
     cd /vagrant
     sudo bash ./build_docker_images.sh
+    ```
+    For ARM64 users, please run
+    ```bash
+    cd /vagrant
+    sudo bash ./build_docker_images_arm64.sh
     ```
     After this step, you should see the image with name ```pica_dev``` when running ```docker image ls```. You should change your work path inside the VM for following steps.
 
